@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TimelineUI, YEARS } from './timeline-ui.js';
 import { PeriodManager } from './period-manager.js';
+import { AudioManager } from './audio-manager.js';
 import { build2025Era, PERIOD_2025_META } from './period2025.js';
 import { build1985Era, PERIOD_1985_META } from './period1985.js';
 
@@ -231,6 +232,17 @@ periodManager.registerEra(1985, build1985Era, PERIOD_1985_META);
 periodManager.start(timeline.currentYear);
 
 // ---------------------------------------------------------------------------
+// AudioManager — period music + ambient SFX (Web Audio API).
+// The AudioContext is created lazily on the first user gesture to satisfy
+// browser autoplay policies. The ambient bed starts immediately on unlock;
+// music cross-fades automatically whenever the timeline dispatches
+// `period-change`.
+// ---------------------------------------------------------------------------
+const audioManager = new AudioManager();
+audioManager.unlockOnGesture();
+audioManager.start(timeline.currentYear);
+
+// ---------------------------------------------------------------------------
 // Responsive resize handling
 // ---------------------------------------------------------------------------
 
@@ -272,6 +284,7 @@ window.Cafe = Object.assign(window.Cafe || {}, {
   cafeShell,
   timeline,
   periodManager,
+  audioManager,
   YEARS,
   CAFE_DIMENSIONS,
   CAMERA_CONFIG,
