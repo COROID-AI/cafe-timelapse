@@ -8,6 +8,7 @@ import { CafeShell } from "./cafe-shell.js";
 import { PeriodManager } from "./period-manager.js";
 import { TimelineUI } from "./timeline-ui.js";
 import { YEARS, DEFAULT_YEAR_INDEX } from "./config.js";
+import { setupPeriod1965, teardownPeriod1965 } from "./period1965.js";
 
 function init() {
   const container = document.getElementById("scene-container");
@@ -46,8 +47,9 @@ function init() {
   // ---- Activate the default period immediately ----
   const defaultYear = YEARS[DEFAULT_YEAR_INDEX];
 
-  // If no periods are registered yet (they will be by downstream tasks),
-  // we still want the shell visible. registerPeriod is called by period modules.
+  // Register all available period modules before activation.
+  periodManager.registerPeriod(1965, setupPeriod1965, teardownPeriod1965);
+
   periodManager.activateImmediately(defaultYear);
 
   // ---- Hide loader ----
