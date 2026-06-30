@@ -11,6 +11,7 @@
  */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { TimelineUI, YEARS } from './timeline-ui.js';
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -197,6 +198,14 @@ function buildCafeShell() {
 const cafeShell = buildCafeShell();
 
 // ---------------------------------------------------------------------------
+// Timeline slider UI — single source of truth for the active period.
+// Dispatches a `period-change` CustomEvent on `window` that the PeriodManager
+// subscribes to.
+// ---------------------------------------------------------------------------
+
+const timeline = new TimelineUI(YEARS, 0);
+
+// ---------------------------------------------------------------------------
 // Responsive resize handling
 // ---------------------------------------------------------------------------
 
@@ -235,6 +244,8 @@ window.Cafe = Object.assign(window.Cafe || {}, {
   controls,
   lights,
   cafeShell,
+  timeline,
+  YEARS,
   CAFE_DIMENSIONS,
   CAMERA_CONFIG,
   clock,
