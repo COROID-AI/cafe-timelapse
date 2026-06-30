@@ -10,6 +10,7 @@ import { TimelineUI } from "./timeline-ui.js";
 import { YEARS, DEFAULT_YEAR_INDEX } from "./config.js";
 import { setupPeriod1945, teardownPeriod1945 } from "./period1945.js";
 import { setupPeriod2025, teardownPeriod2025 } from "./period2025.js";
+import { audioManager } from "./audio-manager.js";
 
 function init() {
   const container = document.getElementById("scene-container");
@@ -29,6 +30,8 @@ function init() {
   const periodManager = new PeriodManager(sceneManager.scene, {
     onTransitionStart: (fromYear, toYear) => {
       console.log(`Transitioning from ${fromYear} → ${toYear}`);
+      // Crossfade the music layer to the new era's motif.
+      audioManager.playMusicForPeriod(toYear);
     },
     onTransitionEnd: (year) => {
       console.log(`Now viewing ${year}`);
@@ -54,6 +57,22 @@ function init() {
 
   periodManager.activateImmediately(defaultYear);
 
+  // ---- Audio: initialise on first user gesture (autoplay-policy compliant) ----
+  // The AudioContext cannot start until the user interacts with the page.
+  const startAudio = () => {
+    if (audioManager.init()) {
+      audioManager.playAmbient();
+      audioManager.playMusicForPeriod(defaultYear);
+    }
+    // Remove the one-shot listeners once audio has started.
+    window.removeEventListener("click", startAudio);
+    window.removeEventListener("touchstart", startAudio);
+    window.removeEventListener("keydown", startAudio);
+  };
+  window.addEventListener("click", startAudio, { once: false });
+  window.addEventListener("touchstart", startAudio, { once: false });
+  window.addEventListener("keydown", startAudio, { once: false });
+
   // ---- Hide loader ----
   const loader = document.getElementById("loader");
   if (loader) {
@@ -61,7 +80,7 @@ function init() {
   }
 
   // Expose key instances on window for debugging and downstream module access.
-  window.__cafe = { sceneManager, cafeShell, periodManager, timeline, defaultYear };
+  window.__cafe = { sceneManager, cafeShell, periodManager, timeline, defaultYear, audioManager };
 
   console.log("Café Timelapse initialised. Shell + period system ready.");
   console.log(`Active period: ${defaultYear}`);
