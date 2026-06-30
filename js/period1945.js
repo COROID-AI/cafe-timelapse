@@ -16,10 +16,11 @@
  * Exported functions are registered via PeriodManager.registerPeriod().
  */
 
-const { CAFE_DIMENSIONS } = window.Cafe;
+(function () {
+  const { CAFE_DIMENSIONS } = window.Cafe;
 
-// ── Shared material palette (1945 warm/wood tones) ──────────────────────
-const MAT = {
+  // ── Shared material palette (1945 warm/wood tones) ──────────────────────
+  const MAT = {
   woodDark: new THREE.MeshStandardMaterial({ color: 0x4a3522, roughness: 0.8, metalness: 0.05 }),
   woodMed: new THREE.MeshStandardMaterial({ color: 0x6b4e34, roughness: 0.75, metalness: 0.05 }),
   woodLight: new THREE.MeshStandardMaterial({ color: 0x8b6f4e, roughness: 0.7, metalness: 0.05 }),
@@ -1118,6 +1119,7 @@ function disposeMaterial(material) {
   material.dispose();
 }
 
-window.Cafe = window.Cafe || {};
-window.Cafe.setupPeriod1945 = setupPeriod1945;
-window.Cafe.teardownPeriod1945 = teardownPeriod1945;
+  window.Cafe = window.Cafe || {};
+  window.Cafe.setupPeriod1945 = setupPeriod1945;
+  window.Cafe.teardownPeriod1945 = teardownPeriod1945;
+})();

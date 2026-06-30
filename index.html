@@ -4,6 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Café Time Period Timelapse</title>
+    <!-- Inline favicon to avoid a benign 404 for the default /favicon.ico request. -->
+    <link rel="icon" href="data:," />
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
@@ -56,8 +58,10 @@
     <script type="module">
       import * as THREE from "three";
       import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-      window.THREE = THREE;
-      window.THREE.OrbitControls = OrbitControls;
+      // Spread the module namespace into a plain object so we can attach
+      // OrbitControls as a property. The raw `import * as THREE` namespace
+      // is frozen and cannot have new properties assigned to it.
+      window.THREE = Object.assign({}, THREE, { OrbitControls });
       window.dispatchEvent(new Event("three-ready"));
     </script>
 
@@ -66,15 +70,21 @@
       Each attaches its exports to the global `window.Cafe` namespace.
       main.js waits for the "three-ready" event before booting.
     -->
-    <script src="./js/config.js"></script>
-    <script src="./js/instancing-utils.js"></script>
-    <script src="./js/scene-manager.js"></script>
-    <script src="./js/cafe-shell.js"></script>
-    <script src="./js/audio-manager.js"></script>
-    <script src="./js/period-manager.js"></script>
-    <script src="./js/timeline-ui.js"></script>
-    <script src="./js/period1945.js"></script>
-    <script src="./js/period2025.js"></script>
-    <script src="./js/main.js"></script>
+    <!--
+      `defer` ensures these classic scripts execute AFTER the inline module
+      script above has finished importing THREE and assigned window.THREE.
+      Both deferred classic scripts and module scripts run in document order
+      once parsing completes, so the module (which appears first) runs first.
+    -->
+    <script defer src="./js/config.js"></script>
+    <script defer src="./js/instancing-utils.js"></script>
+    <script defer src="./js/scene-manager.js"></script>
+    <script defer src="./js/cafe-shell.js"></script>
+    <script defer src="./js/audio-manager.js"></script>
+    <script defer src="./js/period-manager.js"></script>
+    <script defer src="./js/timeline-ui.js"></script>
+    <script defer src="./js/period1945.js"></script>
+    <script defer src="./js/period2025.js"></script>
+    <script defer src="./js/main.js"></script>
   </body>
 </html>

@@ -16,10 +16,11 @@
  * Exported functions are registered via PeriodManager.registerPeriod().
  */
 
-const { CAFE_DIMENSIONS } = window.Cafe;
+(function () {
+  const { CAFE_DIMENSIONS } = window.Cafe;
 
-// ── Shared material palette (2025 modern/cooler tones) ──────────────────
-const MAT = {
+  // ── Shared material palette (2025 modern/cooler tones) ──────────────────
+  const MAT = {
   matteWhite: new THREE.MeshStandardMaterial({ color: 0xf2f2f0, roughness: 0.5, metalness: 0.1 }),
   matteBlack: new THREE.MeshStandardMaterial({ color: 0x1a1a1c, roughness: 0.5, metalness: 0.2 }),
   aluminum: new THREE.MeshStandardMaterial({ color: 0xc8ccd0, roughness: 0.3, metalness: 0.85 }),
@@ -1220,6 +1221,7 @@ function disposeMaterial(material) {
   material.dispose();
 }
 
-window.Cafe = window.Cafe || {};
-window.Cafe.setupPeriod2025 = setupPeriod2025;
-window.Cafe.teardownPeriod2025 = teardownPeriod2025;
+  window.Cafe = window.Cafe || {};
+  window.Cafe.setupPeriod2025 = setupPeriod2025;
+  window.Cafe.teardownPeriod2025 = teardownPeriod2025;
+})();
