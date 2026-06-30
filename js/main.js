@@ -9,6 +9,7 @@ import { PeriodManager } from "./period-manager.js";
 import { TimelineUI } from "./timeline-ui.js";
 import { YEARS, DEFAULT_YEAR_INDEX } from "./config.js";
 import { setupPeriod1945, teardownPeriod1945 } from "./period1945.js";
+import { setupPeriod2025, teardownPeriod2025 } from "./period2025.js";
 
 function init() {
   const container = document.getElementById("scene-container");
@@ -49,6 +50,7 @@ function init() {
 
   // Register period modules.
   periodManager.registerPeriod(1945, setupPeriod1945, teardownPeriod1945);
+  periodManager.registerPeriod(2025, setupPeriod2025, teardownPeriod2025);
 
   periodManager.activateImmediately(defaultYear);
 
