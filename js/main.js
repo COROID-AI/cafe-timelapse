@@ -61,9 +61,10 @@ function init() {
   }
 
   // Expose key instances on window for debugging and downstream module access.
-  window.__cafe = { sceneManager, cafeShell, periodManager, timeline };
+  window.__cafe = { sceneManager, cafeShell, periodManager, timeline, defaultYear };
 
   console.log("Café Timelapse initialised. Shell + period system ready.");
+  console.log(`Active period: ${defaultYear}`);
 }
 
 // Boot once DOM is ready.
@@ -72,3 +73,6 @@ if (document.readyState === "loading") {
 } else {
   init();
 }
+
+// Re-export init for module-level testing and external bootstrapping.
+export { init };
