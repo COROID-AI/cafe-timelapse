@@ -1,22 +1,29 @@
 /**
  * Global configuration constants shared across the café application.
+ *
+ * Exposed on the global `window.Cafe` namespace so that classic
+ * (non-module) scripts can consume them. This avoids ES-module CORS
+ * restrictions when the page is opened directly from the filesystem
+ * (file:// protocol).
  */
 
+window.Cafe = window.Cafe || {};
+
 /** The five selectable years on the timeline, in chronological order. */
-export const YEARS = [1945, 1965, 1985, 2005, 2025];
+const YEARS = [1945, 1965, 1985, 2005, 2025];
 
 /** Default year index (0 = 1945). */
-export const DEFAULT_YEAR_INDEX = 0;
+const DEFAULT_YEAR_INDEX = 0;
 
 /** Café interior dimensions in Three.js world units (meters). */
-export const CAFE_DIMENSIONS = {
+const CAFE_DIMENSIONS = {
   width: 12, // X axis — left/right
   depth: 16, // Z axis — front/back
   height: 4, // Y axis — floor to ceiling
 };
 
 /** OrbitControls constraints for indoor navigation. */
-export const CAMERA_CONFIG = {
+const CAMERA_CONFIG = {
   fieldOfView: 55,
   nearPlane: 0.1,
   farPlane: 100,
@@ -37,7 +44,7 @@ export const CAMERA_CONFIG = {
  * Transition timing for period fade/swap (milliseconds).
  * Total crossfade = fadeOut + fadeIn ≈ 1.5s per the acceptance criteria.
  */
-export const TRANSITION_CONFIG = {
+const TRANSITION_CONFIG = {
   fadeOutDuration: 750,
   fadeInDuration: 750,
 };
@@ -46,7 +53,16 @@ export const TRANSITION_CONFIG = {
  * Audio crossfade timing (milliseconds). Kept in sync with the visual
  * transition so the audio and opacity fades resolve together.
  */
-export const AUDIO_CONFIG = {
+const AUDIO_CONFIG = {
   crossfadeDuration: 1500,
   defaultVolume: 0.5,
 };
+
+Object.assign(window.Cafe, {
+  YEARS,
+  DEFAULT_YEAR_INDEX,
+  CAFE_DIMENSIONS,
+  CAMERA_CONFIG,
+  TRANSITION_CONFIG,
+  AUDIO_CONFIG,
+});

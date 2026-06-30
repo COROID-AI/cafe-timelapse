@@ -11,7 +11,7 @@
  * from a period teardown function.
  */
 
-import * as THREE from "three";
+/* THREE is provided globally via the importmap CDN script. */
 
 /**
  * Build an InstancedMesh from a list of per-instance transforms.
@@ -26,7 +26,7 @@ import * as THREE from "three";
  * @param {string}  [opts.name]
  * @returns {{ mesh: THREE.InstancedMesh, dispose: () => void }}
  */
-export function createInstancedMesh({
+function createInstancedMesh({
   geometry,
   material,
   transforms,
@@ -96,7 +96,7 @@ export function createInstancedMesh({
  *
  * @param {THREE.Object3D} root
  */
-export function disposeGroupResources(root) {
+function disposeGroupResources(root) {
   root.traverse((child) => {
     if (child.isInstancedMesh) {
       child.dispose(); // releases instanceMatrix / instanceColor
@@ -115,7 +115,7 @@ export function disposeGroupResources(root) {
  * Dispose a material and its associated textures.
  * @param {THREE.Material} material
  */
-export function disposeMaterial(material) {
+function disposeMaterial(material) {
   for (const key of ["map", "normalMap", "roughnessMap", "metalnessMap", "emissiveMap"]) {
     if (material[key] && material[key].dispose) {
       material[key].dispose();
@@ -123,3 +123,8 @@ export function disposeMaterial(material) {
   }
   material.dispose();
 }
+
+window.Cafe = window.Cafe || {};
+window.Cafe.createInstancedMesh = createInstancedMesh;
+window.Cafe.disposeGroupResources = disposeGroupResources;
+window.Cafe.disposeMaterial = disposeMaterial;

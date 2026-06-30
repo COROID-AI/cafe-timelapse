@@ -9,10 +9,10 @@
  * Both fades run over ~1.5s and are synchronized through a promise/async flow.
  */
 
-import * as THREE from "three";
-import { TRANSITION_CONFIG } from "./config.js";
+/* THREE is provided globally via the importmap CDN script. */
+const { TRANSITION_CONFIG } = window.Cafe;
 
-export class PeriodManager {
+class PeriodManager {
   /**
    * @param {THREE.Scene} scene       — the shared Three.js scene.
    * @param {object}      options     — optional config:
@@ -267,3 +267,6 @@ export class PeriodManager {
     /* no-op: transitions now use per-group opacity lerp */
   }
 }
+
+window.Cafe = window.Cafe || {};
+window.Cafe.PeriodManager = PeriodManager;

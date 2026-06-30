@@ -3,9 +3,9 @@
  * Emits a callback when the user selects a new year.
  */
 
-import { YEARS } from "./config.js";
+const { YEARS } = window.Cafe;
 
-export class TimelineUI {
+class TimelineUI {
   /**
    * @param {function} onYearChange — (year: number) => void
    */
@@ -81,3 +81,6 @@ export class TimelineUI {
     this._updateActiveTick(index);
   }
 }
+
+window.Cafe = window.Cafe || {};
+window.Cafe.TimelineUI = TimelineUI;

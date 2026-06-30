@@ -4,10 +4,10 @@
  * Every period module decorates on top of this base shell.
  */
 
-import * as THREE from "three";
-import { CAFE_DIMENSIONS } from "./config.js";
+/* THREE is provided globally via the importmap CDN script. */
+const { CAFE_DIMENSIONS } = window.Cafe;
 
-export class CafeShell {
+class CafeShell {
   constructor(scene) {
     this.scene = scene;
     this.group = new THREE.Group();
@@ -213,3 +213,6 @@ export class CafeShell {
     this.group.add(lintel);
   }
 }
+
+window.Cafe = window.Cafe || {};
+window.Cafe.CafeShell = CafeShell;

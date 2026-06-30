@@ -15,7 +15,7 @@
  * bed. The crossfade duration is synchronized with the visual transition.
  */
 
-import { AUDIO_CONFIG } from "./config.js";
+const { AUDIO_CONFIG } = window.Cafe;
 
 /** Per-period oscillator/voice definitions. */
 const PERIOD_VOICES = {
@@ -26,7 +26,7 @@ const PERIOD_VOICES = {
   2025: { type: "sine", freqs: [174.61, 261.63, 349.23], gain: 0.15, lfo: 2.8 },
 };
 
-export class AudioManager {
+class AudioManager {
   constructor() {
     /** @type {AudioContext|null} */
     this.ctx = null;
@@ -187,3 +187,6 @@ export class AudioManager {
     this._unlocked = false;
   }
 }
+
+window.Cafe = window.Cafe || {};
+window.Cafe.AudioManager = AudioManager;

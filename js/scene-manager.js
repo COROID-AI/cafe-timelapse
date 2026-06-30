@@ -4,11 +4,10 @@
  * that period modules and the café shell attach to.
  */
 
-import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { CAMERA_CONFIG } from "./config.js";
+/* THREE and OrbitControls are provided globally via the importmap CDN scripts. */
+const { CAMERA_CONFIG } = window.Cafe;
 
-export class SceneManager {
+class SceneManager {
   constructor(container) {
     this.container = container;
 
@@ -44,7 +43,7 @@ export class SceneManager {
     this.container.appendChild(this.renderer.domElement);
 
     // ---- Controls ----
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = CAMERA_CONFIG.enableDamping;
     this.controls.dampingFactor = CAMERA_CONFIG.dampingFactor;
     this.controls.enablePan = CAMERA_CONFIG.enablePan;
@@ -135,3 +134,6 @@ export class SceneManager {
     }
   }
 }
+
+window.Cafe = window.Cafe || {};
+window.Cafe.SceneManager = SceneManager;
