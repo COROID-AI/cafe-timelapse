@@ -12,6 +12,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TimelineUI, YEARS } from './timeline-ui.js';
+import { PeriodManager } from './period-manager.js';
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -206,6 +207,15 @@ const cafeShell = buildCafeShell();
 const timeline = new TimelineUI(YEARS, 0);
 
 // ---------------------------------------------------------------------------
+// PeriodManager — swaps era asset groups on the café shell and cross-fades
+// them whenever the timeline dispatches a `period-change` event. Downstream
+// era-asset tasks register their builders via `periodManager.registerEra()`.
+// ---------------------------------------------------------------------------
+
+const periodManager = new PeriodManager(scene, cafeShell, { duration: 1500 });
+periodManager.start(timeline.currentYear);
+
+// ---------------------------------------------------------------------------
 // Responsive resize handling
 // ---------------------------------------------------------------------------
 
@@ -226,8 +236,9 @@ const clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
-  clock.getDelta(); // keep clock primed for downstream consumers
+  const delta = clock.getDelta(); // keep clock primed for downstream consumers
   controls.update();
+  periodManager.update(delta); // drive era cross-fade transitions
   renderer.render(scene, camera);
 }
 animate();
@@ -245,6 +256,7 @@ window.Cafe = Object.assign(window.Cafe || {}, {
   lights,
   cafeShell,
   timeline,
+  periodManager,
   YEARS,
   CAFE_DIMENSIONS,
   CAMERA_CONFIG,
