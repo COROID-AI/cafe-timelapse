@@ -1,0 +1,14 @@
+{
+  "name": "cafe-timelapse",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Café Time Period Timelapse — a 3D café interior that transforms across 1945–2025.",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
