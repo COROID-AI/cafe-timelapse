@@ -14,6 +14,12 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TimelineUI, YEARS } from './timeline-ui.js';
 import { PeriodManager } from './period-manager.js';
 
+// Era asset builders (side-effect imports: each registers its era on import
+// via the `cafe:ready` event / PeriodManager.registerEra). ES module imports
+// are hoisted and executed before this module's body runs, so the listeners
+// are in place before the `cafe:ready` event is dispatched below.
+import './period1945.js';
+
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
