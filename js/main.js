@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TimelineUI, YEARS } from './timeline-ui.js';
 import { PeriodManager } from './period-manager.js';
+import { build2025Era, PERIOD_2025_META } from './period2025.js';
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -213,6 +214,11 @@ const timeline = new TimelineUI(YEARS, 0);
 // ---------------------------------------------------------------------------
 
 const periodManager = new PeriodManager(scene, cafeShell, { duration: 1500 });
+
+// Register era asset builders. Each builder returns a THREE.Group; the
+// PeriodManager mounts/cross-fades/disposes it as the timeline changes.
+periodManager.registerEra(2025, build2025Era, PERIOD_2025_META);
+
 periodManager.start(timeline.currentYear);
 
 // ---------------------------------------------------------------------------
