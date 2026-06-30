@@ -20,6 +20,7 @@ import { build2025Era, PERIOD_2025_META } from './period2025.js';
 // are hoisted and executed before this module's body runs, so the listeners
 // are in place before the `cafe:ready` event is dispatched below.
 import './period1945.js';
+import './period1965.js';
 
 // ---------------------------------------------------------------------------
 // Configuration
