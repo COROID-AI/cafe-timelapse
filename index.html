@@ -4,11 +4,46 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Café Time Period Timelapse</title>
+    <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <!--
-      Build the 3D café-interior scene here, following README.md.
-      This is the project entry point.
-    -->
+    <!-- 3D render canvas mount point -->
+    <div id="scene-container"></div>
+
+    <!-- Timeline slider UI -->
+    <header id="timeline" class="timeline">
+      <div class="timeline__label">Café Through Time</div>
+      <div class="timeline__track">
+        <input
+          id="year-slider"
+          class="timeline__slider"
+          type="range"
+          min="0"
+          max="4"
+          step="1"
+          value="0"
+          aria-label="Select year"
+        />
+        <div id="year-ticks" class="timeline__ticks"></div>
+      </div>
+      <div id="year-display" class="timeline__year">1945</div>
+    </header>
+
+    <!-- Loading overlay -->
+    <div id="loader" class="loader">
+      <div class="loader__spinner"></div>
+      <div class="loader__text">Preparing the café…</div>
+    </div>
+
+    <!-- Three.js core (r160+) via CDN -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="./js/main.js"></script>
   </body>
 </html>
