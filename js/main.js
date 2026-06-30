@@ -16,6 +16,7 @@ import { PeriodManager } from './period-manager.js';
 import { AudioManager } from './audio-manager.js';
 import { build2025Era, PERIOD_2025_META } from './period2025.js';
 import { build1985Era, PERIOD_1985_META } from './period1985.js';
+import { build2005Era, PERIOD_2005_META } from './period2005.js';
 
 // Era asset builders (side-effect imports: each registers its era on import
 // via the `cafe:ready` event / PeriodManager.registerEra). ES module imports
@@ -80,8 +81,12 @@ controls.target.copy(CAMERA_CONFIG.target);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.minDistance = 2;
-controls.maxDistance = 18;
+controls.maxDistance = 12; // matches café width — keeps camera inside the interior
 controls.maxPolarAngle = Math.PI * 0.495; // keep camera above the floor
+// Constrain the orbit to a wide front-facing arc so the camera can never
+// swing behind the back wall or clip through the side walls.
+controls.minAzimuthAngle = -Math.PI * 0.65;
+controls.maxAzimuthAngle = Math.PI * 0.65;
 controls.update();
 
 // ---------------------------------------------------------------------------
@@ -228,6 +233,7 @@ const periodManager = new PeriodManager(scene, cafeShell, { duration: 1500 });
 // PeriodManager mounts/cross-fades/disposes it as the timeline changes.
 periodManager.registerEra(2025, build2025Era, PERIOD_2025_META);
 periodManager.registerEra(1985, build1985Era, PERIOD_1985_META);
+periodManager.registerEra(2005, build2005Era, PERIOD_2005_META);
 
 periodManager.start(timeline.currentYear);
 
