@@ -16,8 +16,7 @@
  * Exported functions are registered via PeriodManager.registerPeriod().
  */
 
-import * as THREE from "three";
-import { CAFE_DIMENSIONS } from "./config.js";
+const { CAFE_DIMENSIONS } = window.Cafe;
 
 // ── Shared material palette (2025 modern/cooler tones) ──────────────────
 const MAT = {
@@ -995,7 +994,7 @@ const _state = {
  * @param {THREE.Scene} scene
  * @param {THREE.Group} group
  */
-export function setupPeriod2025(scene, group) {
+function setupPeriod2025(scene, group) {
   const { width, depth, height } = CAFE_DIMENSIONS;
   const hw = width / 2;
   const hd = depth / 2;
@@ -1165,7 +1164,7 @@ export function setupPeriod2025(scene, group) {
  * @param {THREE.Scene} scene
  * @param {THREE.Group} group
  */
-export function teardownPeriod2025(scene, group) {
+function teardownPeriod2025(scene, group) {
   // Restore shared lighting to original values.
   const ambient = scene.getObjectByProperty("type", "AmbientLight");
   const hemi = scene.getObjectByProperty("type", "HemisphereLight");
@@ -1220,3 +1219,7 @@ function disposeMaterial(material) {
   }
   material.dispose();
 }
+
+window.Cafe = window.Cafe || {};
+window.Cafe.setupPeriod2025 = setupPeriod2025;
+window.Cafe.teardownPeriod2025 = teardownPeriod2025;
