@@ -2,8 +2,11 @@
  * PeriodManager — registry and transition controller for time periods.
  *
  * Each period registers via `registerPeriod(year, setupFn, teardownFn)`.
- * `transitionTo(year)` performs a fade-out → swap → fade-in transition
- * between the current period and the target.
+ * `transitionTo(year)` performs a polished crossfade transition:
+ *   - The outgoing period group fades OUT (opacity lerp → 0)
+ *   - The incoming period group fades IN (opacity lerp → 1)
+ *   - Audio crossfades in parallel via AudioManager.playMusicForPeriod()
+ * Both fades run over ~1.5s and are synchronized through a promise/async flow.
  */
 
 import * as THREE from "three";
@@ -11,12 +14,15 @@ import { TRANSITION_CONFIG } from "./config.js";
 
 export class PeriodManager {
   /**
-   * @param {THREE.Scene} scene  — the shared Three.js scene.
-   * @param {object}      hooks  — optional callbacks: { onTransitionStart, onTransitionEnd }
+   * @param {THREE.Scene} scene       — the shared Three.js scene.
+   * @param {object}      options     — optional config:
+   *   { audioManager, onTransitionStart, onTransitionEnd }
    */
-  constructor(scene, hooks = {}) {
+  constructor(scene, options = {}) {
     this.scene = scene;
-    this.hooks = hooks;
+    this.hooks = options;
+    /** @type {import('./audio-manager.js').AudioManager|null} */
+    this.audioManager = options.audioManager || null;
 
     /** Map<year, { setup, teardown, group }> */
     this.periods = new Map();
@@ -30,29 +36,8 @@ export class PeriodManager {
     /** Whether a transition is in progress. */
     this.isTransitioning = false;
 
-    /** Fade overlay mesh used for crossfade transitions. */
-    this._fadeOverlay = this._createFadeOverlay();
-    this.scene.add(this._fadeOverlay);
-  }
-
-  /**
-   * Create a full-screen black plane positioned just in front of the camera
-   * for fade transitions. Starts fully transparent.
-   */
-  _createFadeOverlay() {
-    const geo = new THREE.PlaneGeometry(2, 2);
-    const mat = new THREE.MeshBasicMaterial({
-      color: 0x000000,
-      transparent: true,
-      opacity: 0,
-      depthTest: false,
-      depthWrite: false,
-    });
-    const overlay = new THREE.Mesh(geo, mat);
-    overlay.name = "fade-overlay";
-    overlay.renderOrder = 9999;
-    overlay.frustumCulled = false;
-    return overlay;
+    /** Cached original material opacity/transparent state for fade restore. */
+    this._materialCache = new WeakMap();
   }
 
   /**
@@ -70,7 +55,7 @@ export class PeriodManager {
   }
 
   /**
-   * Immediately activate a period without a fade transition (used for initial load).
+   * Immediately activate a period without a fade transition (initial load).
    * @param {number} year
    */
   activateImmediately(year) {
@@ -85,6 +70,7 @@ export class PeriodManager {
       const oldPeriod = this.periods.get(this.currentYear);
       if (oldPeriod) {
         oldPeriod.teardown(this.scene, this.currentGroup);
+        this.scene.remove(this.currentGroup);
       }
     }
 
@@ -97,10 +83,22 @@ export class PeriodManager {
 
     this.currentYear = year;
     this.currentGroup = group;
+
+    // Start audio for the initial period (no crossfade on first load).
+    if (this.audioManager) {
+      this.audioManager.playMusicForPeriod(year).catch(() => {});
+    }
   }
 
   /**
-   * Transition to a target year with a fade-out → swap → fade-in sequence.
+   * Transition to a target year with a synchronized visual + audio crossfade.
+   *
+   * Flow (all driven by async/await + promises):
+   *   1. Invoke audioManager.playMusicForPeriod(toYear) — starts audio crossfade.
+   *   2. Build the incoming group (off-screen at opacity 0).
+   *   3. Lerp the outgoing group opacity 1 → 0 AND incoming 0 → 1 in parallel.
+   *   4. Tear down + dispose the outgoing group once it is fully faded.
+   *
    * @param {number} year
    * @returns {Promise<void>}
    */
@@ -115,6 +113,8 @@ export class PeriodManager {
     // Queue if a transition is already running.
     if (this.isTransitioning) {
       await this._waitForIdle();
+      // Re-check after waiting — the queued target may have changed.
+      if (year === this.currentYear) return;
     }
 
     this.isTransitioning = true;
@@ -122,14 +122,44 @@ export class PeriodManager {
       this.hooks.onTransitionStart(this.currentYear, year);
     }
 
-    // Phase 1: Fade out.
-    await this._fade(0, 1, TRANSITION_CONFIG.fadeOutDuration);
+    const outgoingGroup = this.currentGroup;
+    const outgoingYear = this.currentYear;
 
-    // Phase 2: Swap content.
-    this._swapPeriods(year);
+    // ── 1. Kick off the audio crossfade (runs in parallel with visuals). ──
+    const audioPromise = this.audioManager
+      ? this.audioManager.playMusicForPeriod(year)
+      : Promise.resolve();
 
-    // Phase 3: Fade in.
-    await this._fade(1, 0, TRANSITION_CONFIG.fadeInDuration);
+    // ── 2. Build the incoming group and start it fully transparent. ──
+    const incomingGroup = new THREE.Group();
+    incomingGroup.name = `period-${year}`;
+    period.setup(this.scene, incomingGroup);
+    period.group = incomingGroup;
+    this._setGroupOpacity(incomingGroup, 0);
+    this.scene.add(incomingGroup);
+
+    // ── 3. Parallel opacity lerp: outgoing 1→0, incoming 0→1. ──
+    const totalDuration =
+      TRANSITION_CONFIG.fadeOutDuration + TRANSITION_CONFIG.fadeInDuration;
+    await this._crossfadeGroups(outgoingGroup, incomingGroup, totalDuration);
+
+    // ── 4. Tear down + dispose the outgoing group. ──
+    if (outgoingGroup && outgoingYear !== null) {
+      const oldPeriod = this.periods.get(outgoingYear);
+      if (oldPeriod) {
+        oldPeriod.teardown(this.scene, outgoingGroup);
+      }
+      this.scene.remove(outgoingGroup);
+    }
+
+    // Ensure the incoming group is fully opaque (restore material flags).
+    this._setGroupOpacity(incomingGroup, 1);
+
+    this.currentYear = year;
+    this.currentGroup = incomingGroup;
+
+    // Await the audio crossfade so the promise flow stays synchronized.
+    await audioPromise;
 
     this.isTransitioning = false;
     if (this.hooks.onTransitionEnd) {
@@ -138,43 +168,26 @@ export class PeriodManager {
   }
 
   /**
-   * Tear down the old period group and set up the new one.
-   */
-  _swapPeriods(year) {
-    // Remove old.
-    if (this.currentGroup && this.currentYear !== null) {
-      const oldPeriod = this.periods.get(this.currentYear);
-      if (oldPeriod) {
-        oldPeriod.teardown(this.scene, this.currentGroup);
-        this.scene.remove(this.currentGroup);
-      }
-    }
-
-    // Add new.
-    const period = this.periods.get(year);
-    const group = new THREE.Group();
-    group.name = `period-${year}`;
-    period.setup(this.scene, group);
-    period.group = group;
-    this.scene.add(group);
-
-    this.currentYear = year;
-    this.currentGroup = group;
-  }
-
-  /**
-   * Animate the fade overlay opacity from `from` to `to` over `duration` ms.
+   * Crossfade two groups by lerping their opacity over `duration` ms.
+   * Both groups are animated simultaneously for a smooth blend.
+   *
+   * @param {THREE.Group} outgoing
+   * @param {THREE.Group} incoming
+   * @param {number} duration — milliseconds
    * @returns {Promise<void>}
    */
-  _fade(from, to, duration) {
+  _crossfadeGroups(outgoing, incoming, duration) {
     return new Promise((resolve) => {
       const start = performance.now();
-      const mat = this._fadeOverlay.material;
 
       const step = (now) => {
         const elapsed = now - start;
         const t = Math.min(elapsed / duration, 1);
-        mat.opacity = from + (to - from) * t;
+        // Ease-in-out for a more polished feel.
+        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+        if (outgoing) this._setGroupOpacity(outgoing, 1 - eased);
+        this._setGroupOpacity(incoming, eased);
 
         if (t < 1) {
           requestAnimationFrame(step);
@@ -183,6 +196,53 @@ export class PeriodManager {
         }
       };
       requestAnimationFrame(step);
+    });
+  }
+
+  /**
+   * Set the opacity of every mesh material in a group (and its children).
+   * Caches the original transparent/opacity state so it can be restored.
+   *
+   * @param {THREE.Group} group
+   * @param {number} opacity — target opacity (0..1)
+   */
+  _setGroupOpacity(group, opacity) {
+    if (!group) return;
+    group.traverse((child) => {
+      if (!child.isMesh || !child.material) return;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach((mat) => {
+        // Cache original state once.
+        if (!this._materialCache.has(mat)) {
+          this._materialCache.set(mat, {
+            opacity: mat.opacity,
+            transparent: mat.transparent,
+          });
+        }
+        mat.transparent = opacity < 1 || mat.transparent;
+        mat.opacity = opacity;
+        mat.needsUpdate = true;
+      });
+    });
+  }
+
+  /**
+   * Restore a group's materials to their cached (pre-fade) state.
+   * @param {THREE.Group} group
+   */
+  _restoreGroupOpacity(group) {
+    if (!group) return;
+    group.traverse((child) => {
+      if (!child.isMesh || !child.material) return;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach((mat) => {
+        const cached = this._materialCache.get(mat);
+        if (cached) {
+          mat.opacity = cached.opacity;
+          mat.transparent = cached.transparent;
+          mat.needsUpdate = true;
+        }
+      });
     });
   }
 
@@ -200,16 +260,10 @@ export class PeriodManager {
   }
 
   /**
-   * Called every frame by SceneManager to keep the fade overlay in front
-   * of the camera.
-   * @param {THREE.Camera} camera
+   * Called every frame by SceneManager. Kept for backwards compatibility —
+   * the opacity-lerp transition no longer needs a camera-facing overlay.
    */
-  updateOverlay(camera) {
-    // Position overlay directly in front of the camera.
-    const dist = 0.5;
-    const dir = new THREE.Vector3();
-    camera.getWorldDirection(dir);
-    this._fadeOverlay.position.copy(camera.position).add(dir.multiplyScalar(dist));
-    this._fadeOverlay.quaternion.copy(camera.quaternion);
+  updateOverlay(_camera) {
+    /* no-op: transitions now use per-group opacity lerp */
   }
 }

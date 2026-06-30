@@ -33,8 +33,20 @@ export const CAMERA_CONFIG = {
   enablePan: true,
 };
 
-/** Transition timing for period fade/swap (milliseconds). */
+/**
+ * Transition timing for period fade/swap (milliseconds).
+ * Total crossfade = fadeOut + fadeIn ≈ 1.5s per the acceptance criteria.
+ */
 export const TRANSITION_CONFIG = {
-  fadeOutDuration: 600,
-  fadeInDuration: 600,
+  fadeOutDuration: 750,
+  fadeInDuration: 750,
+};
+
+/**
+ * Audio crossfade timing (milliseconds). Kept in sync with the visual
+ * transition so the audio and opacity fades resolve together.
+ */
+export const AUDIO_CONFIG = {
+  crossfadeDuration: 1500,
+  defaultVolume: 0.5,
 };

@@ -1,10 +1,12 @@
 /**
  * main.js — Application entry point.
- * Wires together SceneManager, CafeShell, PeriodManager, and TimelineUI.
+ * Wires together SceneManager, CafeShell, AudioManager, PeriodManager,
+ * and TimelineUI.
  */
 
 import { SceneManager } from "./scene-manager.js";
 import { CafeShell } from "./cafe-shell.js";
+import { AudioManager } from "./audio-manager.js";
 import { PeriodManager } from "./period-manager.js";
 import { TimelineUI } from "./timeline-ui.js";
 import { YEARS, DEFAULT_YEAR_INDEX } from "./config.js";
@@ -25,8 +27,12 @@ function init() {
   // eslint-disable-next-line no-unused-vars
   const cafeShell = new CafeShell(sceneManager.scene);
 
-  // ---- Period system ----
+  // ---- Audio manager (period-appropriate ambience + crossfade) ----
+  const audioManager = new AudioManager();
+
+  // ---- Period system (wired to audio for synchronized transitions) ----
   const periodManager = new PeriodManager(sceneManager.scene, {
+    audioManager,
     onTransitionStart: (fromYear, toYear) => {
       console.log(`Transitioning from ${fromYear} → ${toYear}`);
     },
@@ -37,6 +43,8 @@ function init() {
 
   // ---- Timeline UI ----
   const timeline = new TimelineUI((year) => {
+    // Unlock audio on the first user gesture (browser autoplay policy).
+    audioManager.unlock();
     periodManager.transitionTo(year);
   });
 
@@ -61,7 +69,14 @@ function init() {
   }
 
   // Expose key instances on window for debugging and downstream module access.
-  window.__cafe = { sceneManager, cafeShell, periodManager, timeline, defaultYear };
+  window.__cafe = {
+    sceneManager,
+    cafeShell,
+    audioManager,
+    periodManager,
+    timeline,
+    defaultYear,
+  };
 
   console.log("Café Timelapse initialised. Shell + period system ready.");
   console.log(`Active period: ${defaultYear}`);
