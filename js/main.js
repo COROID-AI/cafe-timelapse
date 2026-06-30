@@ -11,17 +11,17 @@
  */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import {
+  createCafeShell,
+  CAFE_DIMENSIONS,
+  getCounterAnchor,
+} from './cafe-shell.js';
 
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
 
-/** Dimensions of the café interior (metres). X = width, Y = height, Z = depth. */
-const CAFE_DIMENSIONS = {
-  width: 12,
-  depth: 10,
-  height: 3.5,
-};
+// CAFE_DIMENSIONS is now imported from ./cafe-shell.js (single source of truth).
 
 const CAMERA_CONFIG = {
   fov: 55,
@@ -107,94 +107,18 @@ function buildLighting() {
 const lights = buildLighting();
 
 // ---------------------------------------------------------------------------
-// Basic café room shell
-// (floor, back + side walls, counter zone, window panes).
-// The detailed architecture shell is built by a downstream task; this is a
-// functional placeholder that renders without errors.
+// Café architecture shell
+// Floor, ceiling, back + side walls (with window openings & a door), and the
+// counter base. Built in ./cafe-shell.js as the fixed era-agnostic room that
+// every period configuration decorates.
 // ---------------------------------------------------------------------------
 
-function buildCafeShell() {
-  const group = new THREE.Group();
-  group.name = 'CafeShell';
-
-  const { width, depth, height } = CAFE_DIMENSIONS;
-
-  const floorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x6b4a2b,
-    roughness: 0.85,
-    metalness: 0.0,
-  });
-  const wallMaterial = new THREE.MeshStandardMaterial({
-    color: 0xcfc6b8,
-    roughness: 0.95,
-    metalness: 0.0,
-  });
-  const counterMaterial = new THREE.MeshStandardMaterial({
-    color: 0x3a2a1a,
-    roughness: 0.6,
-    metalness: 0.05,
-  });
-  const windowMaterial = new THREE.MeshStandardMaterial({
-    color: 0xbfe3ff,
-    emissive: 0x88bbff,
-    emissiveIntensity: 0.35,
-    roughness: 0.2,
-    metalness: 0.1,
-  });
-
-  // Floor
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), floorMaterial);
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  floor.name = 'floor';
-  group.add(floor);
-
-  // Back wall
-  const backWall = new THREE.Mesh(new THREE.BoxGeometry(width, height, 0.2), wallMaterial);
-  backWall.position.set(0, height / 2, -depth / 2);
-  backWall.receiveShadow = true;
-  backWall.name = 'backWall';
-  group.add(backWall);
-
-  // Left wall
-  const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, height, depth), wallMaterial);
-  leftWall.position.set(-width / 2, height / 2, 0);
-  leftWall.receiveShadow = true;
-  leftWall.name = 'leftWall';
-  group.add(leftWall);
-
-  // Right wall
-  const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.2, height, depth), wallMaterial);
-  rightWall.position.set(width / 2, height / 2, 0);
-  rightWall.receiveShadow = true;
-  rightWall.name = 'rightWall';
-  group.add(rightWall);
-
-  // Counter zone (placeholder)
-  const counter = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.1, 0.9), counterMaterial);
-  counter.position.set(0, 0.55, -depth / 2 + 0.7);
-  counter.castShadow = true;
-  counter.receiveShadow = true;
-  counter.name = 'counter';
-  group.add(counter);
-
-  // Window panes on the side walls (glowing placeholders)
-  const windowGeometry = new THREE.BoxGeometry(0.06, 1.4, 2.2);
-  const leftWindow = new THREE.Mesh(windowGeometry, windowMaterial);
-  leftWindow.position.set(-width / 2 - 0.02, 1.7, 1.5);
-  leftWindow.name = 'leftWindow';
-  group.add(leftWindow);
-
-  const rightWindow = leftWindow.clone();
-  rightWindow.position.x = width / 2 + 0.02;
-  rightWindow.name = 'rightWindow';
-  group.add(rightWindow);
-
-  scene.add(group);
-  return group;
-}
-
-const cafeShell = buildCafeShell();
+// The detailed architecture shell (floor, ceiling, walls with window openings
+// and a door, counter base) is provided by ./cafe-shell.js so that era swaps
+// only change period prop groups, not the room itself.
+const cafeShell = createCafeShell();
+const counterAnchor = getCounterAnchor();
+scene.add(cafeShell);
 
 // ---------------------------------------------------------------------------
 // Responsive resize handling
