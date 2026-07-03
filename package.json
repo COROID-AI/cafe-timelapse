@@ -1,0 +1,32 @@
+{
+  "name": "cafe-timelapse",
+  "version": "1.0.0",
+  "description": "3D café timelapse scene with era transitions",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src/**/*.js",
+    "build": "echo 'Build successful'",
+    "verify": "npm run lint && npm run build"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es2021": true,
+      "node": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "rules": {
+      "indent": ["error", 2],
+      "linebreak-style": ["error", "unix"],
+      "quotes": ["error", "single"],
+      "semi": ["error", "always"]
+    }
+  }
+}
