@@ -1,16 +1,16 @@
 {
   "name": "cafe-timelapse",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Café Time Period Timelapse — 3D café scene engine with period transformation across five eras (1945–2025).",
   "type": "module",
   "scripts": {
-    "dev": "npx --yes http-server public -p ${PORT:-8080} -c-1",
-    "serve": "npx --yes http-server public -p 8080 -c-1",
+    "dev": "npx --yes http-server . -p ${PORT:-8080} -c-1",
+    "serve": "npx --yes http-server . -p 8080 -c-1",
     "generate:audio": "python3 scripts/generate-audio.py",
-    "lint": "npx --yes eslint@9 public/js/",
-    "build": "echo 'No build step required — static files served from public/'",
+    "lint": "npx --yes eslint@9 js/",
+    "build": "echo 'No build step required — static files served from root'",
     "test": "node --test test/**/*.test.js",
-    "check": "node --check src/contracts/PeriodPackage.js && node --check js/period-manager.js && node --check js/period1945.js && node --check js/period1965.js && node --check js/period1985.js && node --check js/period2005.js && node --check js/period2025.js && node --check test/period-package.test.js && node --check test/fixtures/broken-period-package.js && node --check public/js/era-data.js && node --check public/js/hotspot-data.js && node --check public/js/inspector.js && node --check public/js/main.js && node --check public/js/period-manager.js"
+    "check": "node --check src/contracts/PeriodPackage.js && node --check js/period-manager.js && node --check js/period1945.js && node --check js/period1965.js && node --check js/period1985.js && node --check js/period2005.js && node --check js/period2025.js && node --check js/main.js && node --check js/scene-renderer.js && node --check js/stats-panel.js && node --check test/period-package.test.js && node --check test/fixtures/broken-period-package.js && node --check public/js/era-data.js && node --check public/js/hotspot-data.js && node --check public/js/inspector.js && node --check public/js/main.js && node --check public/js/period-manager.js"
   },
   "keywords": [
     "3d",
@@ -18,7 +18,8 @@
     "threejs",
     "audio",
     "web-audio-api",
-    "timelapse"
+    "timelapse",
+    "accessibility"
   ],
   "license": "CC0-1.0",
   "private": true
