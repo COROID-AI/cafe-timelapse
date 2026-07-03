@@ -1,15 +1,22 @@
 /**
- * PeriodManager - Loads and manages era-specific period data.
+ * PeriodManager - Era state manager for café timelapse scene
  * Handles era transitions and provides access to period packages.
  */
 
-import { Period1945 } from '../periods/period1945.js';
-import { Period1965 } from '../periods/period1965.js';
-import { Period1985 } from '../periods/period1985.js';
-import { Period2005 } from '../periods/period2005.js';
-import { Period2025 } from '../periods/period2025.js';
+import { Period1945 } from './periods/period1945.js';
+import { Period1965 } from './periods/period1965.js';
+import { Period1985 } from './periods/period1985.js';
+import { Period2005 } from './periods/period2005.js';
+import { Period2025 } from './periods/period2025.js';
 
-/** @type {Record<number, import('../contracts/PeriodPackage.js').PeriodPackage>} */
+/** @typedef {Object} EraState
+ * @property {number} year
+ * @property {string} name
+ * @property {string} theme
+ * @property {import('./contracts/PeriodPackage.js').PeriodPackage} data
+ */
+
+/** @type {Record<number, import('./contracts/PeriodPackage.js').PeriodPackage>} */
 const periodRegistry = {
   1945: Period1945,
   1965: Period1965,
@@ -18,14 +25,17 @@ const periodRegistry = {
   2025: Period2025,
 };
 
-/** @typedef {{ year: number, name: string, theme: string, data: import('../contracts/PeriodPackage.js').PeriodPackage }} EraState */
-
 export class PeriodManager {
   constructor() {
     /** @type {number} */
     this.currentYear = 1945;
     /** @type {EraState} */
-    this.currentEra = { year: 1945, name: '', theme: '', data: Period1945 };
+    this.currentEra = {
+      year: 1945,
+      name: '',
+      theme: '',
+      data: Period1945
+    };
     /** @type {Array<function(EraState): void>} */
     this._listeners = [];
     /** @type {number} */
@@ -44,7 +54,7 @@ export class PeriodManager {
 
   /**
    * Get the current period package.
-   * @returns {import('../contracts/PeriodPackage.js').PeriodPackage}
+   * @returns {import('./contracts/PeriodPackage.js').PeriodPackage}
    */
   getCurrentPeriod() {
     return this.currentEra.data;
@@ -53,7 +63,7 @@ export class PeriodManager {
   /**
    * Get a period by year.
    * @param {number} year
-   * @returns {import('../contracts/PeriodPackage.js').PeriodPackage | undefined}
+   * @returns {import('./contracts/PeriodPackage.js').PeriodPackage | undefined}
    */
   getPeriod(year) {
     return periodRegistry[year];
@@ -68,7 +78,7 @@ export class PeriodManager {
   }
 
   /**
-   * Update the UI slider position.
+   * Update the UI slider position based on year selection.
    * @param {number} year
    */
   updateSliderPosition(year) {
@@ -87,6 +97,7 @@ export class PeriodManager {
 
   /**
    * Emit era change event to all subscribers.
+   * @private
    * @param {EraState} era
    */
   _emitEraChange(era) {
@@ -101,6 +112,7 @@ export class PeriodManager {
 
   /**
    * Trigger transition animation.
+   * @private
    */
   _triggerTransitionAnimation() {
     this.transitioning = true;
@@ -112,7 +124,7 @@ export class PeriodManager {
   }
 
   /**
-   * Transition to a new era.
+   * Transition to a new era by year.
    * @param {number} year
    */
   selectEra(year) {
@@ -131,11 +143,12 @@ export class PeriodManager {
 
     // Update state
     this.currentYear = year;
+    const periodData = periodRegistry[year];
     this.currentEra = {
-      year: period.year,
-      name: period.name,
-      theme: period.theme,
-      data: period
+      year: periodData.year,
+      name: periodData.name,
+      theme: periodData.theme,
+      data: periodData
     };
 
     // Update slider position
