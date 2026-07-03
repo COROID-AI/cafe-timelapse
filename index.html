@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Café Timelapse — 1945 to 2025</title>
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene-canvas"></canvas>
+  </div>
+
+  <!-- ═══════════════ Timeline Slider (top) ═══════════════ -->
+  <nav id="timeline" class="timeline" aria-label="Time period selector">
+    <div class="timeline-label">Era</div>
+    <div class="timeline-track" role="radiogroup" aria-label="Select year">
+      <button class="timeline-stop" data-year="1945" role="radio" aria-checked="false" tabindex="0">
+        <span class="timeline-year">1945</span>
+        <span class="timeline-desc">Post-War</span>
+      </button>
+      <button class="timeline-stop" data-year="1965" role="radio" aria-checked="false" tabindex="0">
+        <span class="timeline-year">1965</span>
+        <span class="timeline-desc">Mod</span>
+      </button>
+      <button class="timeline-stop" data-year="1985" role="radio" aria-checked="false" tabindex="0">
+        <span class="timeline-year">1985</span>
+        <span class="timeline-desc">Synthwave</span>
+      </button>
+      <button class="timeline-stop" data-year="2005" role="radio" aria-checked="false" tabindex="0">
+        <span class="timeline-year">2005</span>
+        <span class="timeline-desc">Third-Wave</span>
+      </button>
+      <button class="timeline-stop" data-year="2025" role="radio" aria-checked="false" tabindex="0">
+        <span class="timeline-year">2025</span>
+        <span class="timeline-desc">Modern</span>
+      </button>
+    </div>
+    <div class="timeline-indicator" id="timeline-indicator"></div>
+  </nav>
+
+  <!-- ═══════════════ HUD ═══════════════ -->
+  <aside id="hud" class="hud">
+    <div class="hud-panel hud-panel--period">
+      <span class="hud-label">Era</span>
+      <span class="hud-value" id="hud-year">2025</span>
+      <span class="hud-sub" id="hud-era-name">Modern Specialty Café</span>
+    </div>
+    <div class="hud-panel hud-panel--nav">
+      <span class="hud-label">Navigation</span>
+      <span class="hud-value" id="hud-nav-mode">Orbit</span>
+      <span class="hud-sub">Press F to toggle</span>
+    </div>
+    <div class="hud-panel hud-panel--help">
+      <div class="hud-help-row"><kbd>Drag</kbd> Orbit camera</div>
+      <div class="hud-help-row"><kbd>Scroll</kbd> Zoom in / out</div>
+      <div class="hud-help-row"><kbd>F</kbd> Toggle first-person / orbit</div>
+      <div class="hud-help-row" id="fp-help" style="display:none"><kbd>W A S D</kbd> Walk &nbsp; <kbd>Mouse</kbd> Look &nbsp; <kbd>Esc</kbd> Release</div>
+    </div>
+  </aside>
+
+  <!-- Pointer lock overlay (shown in first-person mode) -->
+  <div id="pointer-lock-overlay" class="pointer-lock-overlay" style="display:none">
+    <div class="pointer-lock-content">
+      <h2>First-Person Mode</h2>
+      <p>Click to look around</p>
+      <p class="small"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to walk · <kbd>Esc</kbd> to release · <kbd>F</kbd> to switch back to orbit</p>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

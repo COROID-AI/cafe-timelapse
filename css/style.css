@@ -1,0 +1,303 @@
+/* ═══════════════════════════════════════════════════════════════
+   Café Timelapse — Global Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --hud-bg: rgba(20, 18, 16, 0.82);
+  --hud-border: rgba(255, 255, 255, 0.08);
+  --hud-text: #f5f0e8;
+  --hud-accent: #d4a574;
+  --hud-muted: rgba(245, 240, 232, 0.55);
+  --timeline-bg: rgba(15, 14, 12, 0.9);
+  --timeline-active: #e8c084;
+  --timeline-inactive: rgba(245, 240, 232, 0.5);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #000;
+  color: var(--hud-text);
+  user-select: none;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+#scene-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* ═══════════════ Timeline Slider ═══════════════ */
+
+.timeline {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--timeline-bg);
+  border-bottom: 1px solid var(--hud-border);
+  border-radius: 0 0 1rem 1rem;
+  backdrop-filter: blur(12px);
+  z-index: 100;
+  max-width: 95vw;
+}
+
+.timeline-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--hud-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.timeline-track {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.timeline-stop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.5rem 1.1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  transition: background 0.2s, transform 0.15s;
+  position: relative;
+}
+
+.timeline-stop::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--timeline-inactive);
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.timeline-stop:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(1px);
+}
+
+.timeline-stop.active {
+  background: rgba(232, 192, 132, 0.12);
+}
+
+.timeline-stop.active::before {
+  background: var(--timeline-active);
+  transform: translateX(-50%) scale(1.5);
+  box-shadow: 0 0 8px rgba(232, 192, 132, 0.6);
+}
+
+.timeline-stop.active .timeline-year {
+  color: var(--timeline-active);
+}
+
+.timeline-year {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--hud-text);
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.timeline-desc {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--hud-muted);
+}
+
+/* Connecting line between dots */
+.timeline-track::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2rem;
+  right: 2rem;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--hud-border), transparent);
+  z-index: -1;
+}
+
+/* ═══════════════ HUD ═══════════════ */
+
+.hud {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.hud-panel {
+  background: var(--hud-bg);
+  border: 1px solid var(--hud-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  backdrop-filter: blur(12px);
+  min-width: 200px;
+}
+
+.hud-panel--help {
+  min-width: 240px;
+}
+
+.hud-label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--hud-muted);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.hud-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--hud-accent);
+  line-height: 1.1;
+}
+
+.hud-sub {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--hud-muted);
+  margin-top: 0.15rem;
+}
+
+.hud-help-row {
+  font-size: 0.75rem;
+  color: var(--hud-muted);
+  margin: 0.2rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hud-help-row kbd {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--hud-border);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.7rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  color: var(--hud-text);
+}
+
+/* ═══════════════ Pointer Lock Overlay ═══════════════ */
+
+.pointer-lock-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  cursor: pointer;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pointer-lock-content {
+  text-align: center;
+}
+
+.pointer-lock-content h2 {
+  font-size: 1.5rem;
+  color: var(--hud-accent);
+  margin-bottom: 0.5rem;
+}
+
+.pointer-lock-content p {
+  color: var(--hud-text);
+  margin: 0.3rem 0;
+}
+
+.pointer-lock-content p.small {
+  font-size: 0.8rem;
+  color: var(--hud-muted);
+}
+
+.pointer-lock-content kbd {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--hud-border);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.35rem;
+  margin: 0 0.1rem;
+  font-size: 0.75rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* ═══════════════ Responsive ═══════════════ */
+
+@media (max-width: 768px) {
+  .timeline {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  .timeline-stop {
+    padding: 0.4rem 0.6rem;
+  }
+  .timeline-year {
+    font-size: 0.95rem;
+  }
+  .timeline-desc {
+    display: none;
+  }
+  .hud {
+    bottom: 0.5rem;
+    left: 0.5rem;
+  }
+  .hud-panel {
+    min-width: 160px;
+    padding: 0.5rem 0.75rem;
+  }
+  .hud-panel--help {
+    display: none;
+  }
+}
