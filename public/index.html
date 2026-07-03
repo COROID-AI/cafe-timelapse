@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+  <title>Café Timelapse</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1410;
+      color: #e8ddd0;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* --- 3D viewport (placeholder for future Three.js scene) --- */
+    #viewport {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center, #2a1f18 0%, #0d0a08 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #viewport .placeholder {
+      text-align: center;
+      opacity: 0.5;
+    }
+
+    #viewport .placeholder h2 {
+      font-size: 1.4rem;
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    #viewport .placeholder p {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    /* --- Timeline slider --- */
+    #timeline {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10, 8, 6, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(200, 170, 130, 0.15);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #timeline label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #a08866;
+      white-space: nowrap;
+    }
+
+    /* Custom range slider */
+    .slider-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 600px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right, #5a4a36, #8a7050, #5a4a36);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #c8a874;
+      border: 2px solid #e8ddd0;
+      cursor: grab;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      transition: transform 0.15s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #c8a874;
+      border: 2px solid #e8ddd0;
+      cursor: grab;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    /* Year tick marks */
+    .ticks {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      padding: 0 2px;
+    }
+
+    .tick {
+      font-size: 0.7rem;
+      color: #7a6648;
+      cursor: pointer;
+      transition: color 0.2s;
+      user-select: none;
+    }
+
+    .tick:hover { color: #c8a874; }
+    .tick.active { color: #e8ddd0; font-weight: 600; }
+
+    /* --- Audio controls --- */
+    #audio-controls {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(10, 8, 6, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(200, 170, 130, 0.15);
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    #audio-controls .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #a08866;
+    }
+
+    #mute-btn {
+      background: none;
+      border: 1px solid rgba(200, 170, 130, 0.3);
+      border-radius: 8px;
+      color: #e8ddd0;
+      font-size: 1.1rem;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    #mute-btn:hover {
+      background: rgba(200, 170, 130, 0.15);
+      border-color: rgba(200, 170, 130, 0.5);
+    }
+
+    #volume-slider {
+      width: 80px;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: #3a2e22;
+      outline: none;
+    }
+
+    #volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #c8a874;
+      cursor: pointer;
+    }
+
+    #volume-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #c8a874;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* --- SFX test buttons --- */
+    #sfx-panel {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(10, 8, 6, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(200, 170, 130, 0.15);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    #sfx-panel .label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #a08866;
+      margin-bottom: 4px;
+    }
+
+    .sfx-btn {
+      background: none;
+      border: 1px solid rgba(200, 170, 130, 0.2);
+      border-radius: 6px;
+      color: #c8a874;
+      font-size: 0.72rem;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .sfx-btn:hover {
+      background: rgba(200, 170, 130, 0.1);
+      border-color: rgba(200, 170, 130, 0.4);
+      color: #e8ddd0;
+    }
+
+    /* --- Start overlay --- */
+    #start-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(10, 8, 6, 0.95);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.5s;
+    }
+
+    #start-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #start-overlay .content {
+      text-align: center;
+    }
+
+    #start-overlay h1 {
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      color: #e8ddd0;
+    }
+
+    #start-overlay p {
+      font-size: 0.9rem;
+      color: #a08866;
+      margin-bottom: 2rem;
+    }
+
+    #start-overlay .enter-btn {
+      display: inline-block;
+      padding: 14px 36px;
+      background: #c8a874;
+      color: #1a1410;
+      border: none;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    #start-overlay .enter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(200, 170, 130, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3D viewport placeholder -->
+  <div id="viewport">
+    <div class="placeholder">
+      <h2>☕ Café Timelapse</h2>
+      <p>3D scene will render here</p>
+    </div>
+  </div>
+
+  <!-- Timeline slider -->
+  <div id="timeline">
+    <label>Year</label>
+    <div class="slider-container">
+      <input type="range" id="year-slider" min="0" max="4" step="1" value="0">
+    </div>
+    <div class="ticks" id="year-ticks">
+      <span class="tick active" data-year="1945">1945</span>
+      <span class="tick" data-year="1965">1965</span>
+      <span class="tick" data-year="1985">1985</span>
+      <span class="tick" data-year="2005">2005</span>
+      <span class="tick" data-year="2025">2025</span>
+    </div>
+  </div>
+
+  <!-- Audio controls -->
+  <div id="audio-controls">
+    <button id="mute-btn" title="Toggle mute (M key)">🔊</button>
+    <span class="label">Vol</span>
+    <input type="range" id="volume-slider" min="0" max="100" value="80">
+  </div>
+
+  <!-- SFX test panel -->
+  <div id="sfx-panel">
+    <span class="label">Sound Effects</span>
+    <button class="sfx-btn" data-sfx="murmur">🗣️ Murmur</button>
+    <button class="sfx-btn" data-sfx="espresso-hiss">☕ Espresso Hiss</button>
+    <button class="sfx-btn" data-sfx="cup-clatter">🍽️ Cup Clatter</button>
+    <button class="sfx-btn" data-sfx="register-ding">🔔 Register Ding</button>
+    <button class="sfx-btn" data-sfx="jukebox-clack">📀 Jukebox Clack</button>
+  </div>
+
+  <!-- Start overlay (required for audio autoplay policy) -->
+  <div id="start-overlay">
+    <div class="content">
+      <h1>☕ Café Timelapse</h1>
+      <p>Click to enter and enable audio</p>
+      <button class="enter-btn">Enter Café</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
