@@ -9,8 +9,8 @@
     "generate:audio": "python3 scripts/generate-audio.py",
     "lint": "npx --yes eslint@9 js/",
     "build": "echo 'No build step required — static files served from root'",
-    "test": "node --test test/**/*.test.js",
-    "check": "node --check src/contracts/PeriodPackage.js && node --check js/period-manager.js && node --check js/period1945.js && node --check js/period1965.js && node --check js/period1985.js && node --check js/period2005.js && node --check js/period2025.js && node --check js/main.js && node --check js/scene-renderer.js && node --check js/stats-panel.js && node --check test/period-package.test.js && node --check test/fixtures/broken-period-package.js && node --check public/js/era-data.js && node --check public/js/hotspot-data.js && node --check public/js/inspector.js && node --check public/js/main.js && node --check public/js/period-manager.js"
+    "test": "node --test test/**/*.test.js\n",
+      "check": "node --check src/contracts/PeriodPackage.js && node --check js/period-manager.js && node --check js/period1945.js && node --check js/period1965.js && node --check js/period1985.js && node --check js/period2005.js && node --check js/period2025.js && node --check js/main.js && node --check js/scene-renderer.js && node --check js/stats-panel.js && node --check test/period-package.test.js && node --check test/fixtures/broken-period-package.js && node --check public/js/era-data.js && node --check public/js/hotspot-data.js && node --check public/js/inspector.js && node --check public/js/main.js && node --check public/js/period-manager.js && node --check test/visual-regression.test.js"
   },
   "keywords": [
     "3d",
@@ -21,6 +21,8 @@
     "timelapse",
     "accessibility"
   ],
-  "license": "CC0-1.0",
-  "private": true
-}
+  "license": "CC0-1.0",    "private": true,
+    "devDependencies": {
+      "playwright": "^1.46.0"
+    }
+  }
