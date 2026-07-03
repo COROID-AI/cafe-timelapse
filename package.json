@@ -1,0 +1,11 @@
+{
+  "name": "cafe-timelapse",
+  "version": "0.1.0",
+  "description": "Café Time Period Timelapse — 3D scene engine with period transformation",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/**/*.test.js",
+    "check": "node --check src/contracts/PeriodPackage.js && node --check js/period-manager.js && node --check js/period1945.js && node --check js/period1965.js && node --check js/period1985.js && node --check js/period2005.js && node --check js/period2025.js && node --check test/period-package.test.js && node --check test/fixtures/broken-period-package.js"
+  }
+}
