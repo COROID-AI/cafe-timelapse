@@ -43,28 +43,29 @@ export const PeriodPackageSchema = {
   counterTech: ''
 };
 
-// Export the TypeScript-like type for consumption in TypeScript files
-export type PeriodPackage = {
-  year: number;
-  name: string;
-  theme: string;
-  furniture: string[];
-  decor: string[];
+// JavaScript runtime representation of PeriodPackage
+// TypeScript types are available via JSDoc annotations above
+export const PeriodPackage = {
+  year: 0,
+  name: '',
+  theme: '',
+  furniture: [],
+  decor: [],
   menu: {
-    items: { name: string; price: number; description: string }[];
-    board: Record<string, unknown>;
-  };
+    items: [{ name: '', price: 0, description: '' }],
+    board: {}
+  },
   audio: {
-    music: { id: string; type: string; volume: number };
-    sfx: { type: string; id: string }[];
-    ambientNoise: string;
-  };
-  lighting: { color: string; intensity: number; fixtureType: string };
+    music: { id: '', type: '', volume: 0 },
+    sfx: [{ type: '', id: '' }],
+    ambientNoise: ''
+  },
+  lighting: { color: '', intensity: 0, fixtureType: '' },
   signage: {
-    posters: string[];
-    menuBoard: Record<string, unknown>;
-    windowDisplays: string[];
-  };
-  patrons: { outfits: string[]; hairstyles: string[]; gadgets: string[] };
-  counterTech: string;
+    posters: [],
+    menuBoard: {},
+    windowDisplays: []
+  },
+  patrons: { outfits: [], hairstyles: [], gadgets: [] },
+  counterTech: ''
 };

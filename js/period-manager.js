@@ -3,11 +3,11 @@
  * Handles era transitions and provides access to period packages.
  */
 
-import { Period1945 } from './periods/period1945.js';
-import { Period1965 } from './periods/period1965.js';
-import { Period1985 } from './periods/period1985.js';
-import { Period2005 } from './periods/period2005.js';
-import { Period2025 } from './periods/period2025.js';
+import { Period1945 } from '../src/periods/period1945.js';
+import { Period1965 } from '../src/periods/period1965.js';
+import { Period1985 } from '../src/periods/period1985.js';
+import { Period2005 } from '../src/periods/period2005.js';
+import { Period2025 } from '../src/periods/period2025.js';
 
 /** @typedef {Object} EraState
  * @property {number} year
