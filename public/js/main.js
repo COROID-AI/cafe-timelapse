@@ -7,6 +7,7 @@
 
 import audioManager from './audio-manager.js';
 import periodManager from './period-manager.js';
+import { Inspector } from './inspector.js';
 
 const YEARS = [1945, 1965, 1985, 2005, 2025];
 
@@ -97,8 +98,15 @@ sfxButtons.forEach((btn) => {
 });
 
 // ---------------------------------------------------------------------------
+// Inspector — close-inspection mode + era-comparison HUD
+// ---------------------------------------------------------------------------
+const viewport = document.getElementById('viewport');
+const inspector = new Inspector({ viewport, periodManager });
+inspector.init();
+
+// ---------------------------------------------------------------------------
 // Expose singletons globally for debugging
 // ---------------------------------------------------------------------------
-window.__cafe = { audioManager, periodManager };
+window.__cafe = { audioManager, periodManager, inspector };
 
 console.log('[Main] Café Timelapse loaded. Click "Enter Café" to start.');

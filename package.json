@@ -10,7 +10,7 @@
     "lint": "npx --yes eslint@9 public/js/",
     "build": "echo 'No build step required — static files served from public/'",
     "test": "node --test test/**/*.test.js",
-    "check": "node --check src/contracts/PeriodPackage.js && node --check js/period-manager.js && node --check js/period1945.js && node --check js/period1965.js && node --check js/period1985.js && node --check js/period2005.js && node --check js/period2025.js && node --check test/period-package.test.js && node --check test/fixtures/broken-period-package.js"
+    "check": "node --check src/contracts/PeriodPackage.js && node --check js/period-manager.js && node --check js/period1945.js && node --check js/period1965.js && node --check js/period1985.js && node --check js/period2005.js && node --check js/period2025.js && node --check test/period-package.test.js && node --check test/fixtures/broken-period-package.js && node --check public/js/era-data.js && node --check public/js/hotspot-data.js && node --check public/js/inspector.js && node --check public/js/main.js && node --check public/js/period-manager.js"
   },
   "keywords": [
     "3d",
