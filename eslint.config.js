@@ -1,0 +1,40 @@
+export default [
+  {
+    files: ['public/js/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        window: 'readonly',
+        document: 'readonly',
+        console: 'readonly',
+        fetch: 'readonly',
+        AudioContext: 'readonly',
+        webkitAudioContext: 'readonly',
+        setTimeout: 'readonly',
+        navigator: 'readonly',
+        HTMLElement: 'readonly',
+        HTMLInputElement: 'readonly',
+        HTMLButtonElement: 'readonly',
+        NodeListOf: 'readonly',
+        Event: 'readonly',
+        KeyboardEvent: 'readonly',
+        MouseEvent: 'readonly',
+        AbortController: 'readonly',
+      },
+    },
+    rules: {
+      'no-undef': 'error',
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+      'no-console': 'off',
+      'semi': ['error', 'always'],
+      'indent': ['error', 2],
+      'quotes': ['error', 'single'],
+      'no-trailing-spaces': 'error',
+      'eol-last': 'error',
+    },
+  },
+  {
+    ignores: ['node_modules/', 'public/assets/', '.coroid-runtime/', '.coroid-cache/'],
+  },
+];

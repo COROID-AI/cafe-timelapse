@@ -1,0 +1,23 @@
+{
+  "name": "cafe-timelapse",
+  "version": "0.1.0",
+  "description": "A 3D café interior that transforms across five time periods (1945–2025).",
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes http-server public -p ${PORT:-8080} -c-1",
+    "serve": "npx --yes http-server public -p 8080 -c-1",
+    "generate:audio": "python3 scripts/generate-audio.py",
+    "lint": "npx --yes eslint@9 public/js/",
+    "build": "echo 'No build step required — static files served from public/'"
+  },
+  "keywords": [
+    "3d",
+    "webgl",
+    "threejs",
+    "audio",
+    "web-audio-api",
+    "timelapse"
+  ],
+  "license": "CC0-1.0",
+  "private": true
+}
