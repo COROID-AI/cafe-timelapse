@@ -124,6 +124,15 @@ export class PeriodManager {
   }
 
   /**
+   * Replace the adapter at runtime. Used by main.js to inject the Three.js
+   * SceneRenderer adapter after it initialises.
+   * @param {PeriodManagerAdapter} adapter
+   */
+  setAdapter(adapter) {
+    this._adapter = adapter;
+  }
+
+  /**
    * The currently active PeriodPackage, or null.
    * @returns {PeriodPackage|null}
    */
