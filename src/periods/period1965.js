@@ -5,9 +5,24 @@ export const Period1965 = {
   year: 1965,
   name: '1960s Mod',
   theme: 'Swinging London meets American diners',
-  furniture: [    'Teardrop-shaped plastic laminate tables',    'Retro chrome-and-plastic bar stools',    'Vinyl booth with chrome trim',    'Shag rug'
+  furniture: [
+    'Teardrop-shaped plastic laminate tables',
+    'Retro chrome-and-plastic bar stools',
+    'Vinyl booth with chrome trim',
+    'Shag rug'
   ],
-  decor: [    'Psychedelic wall murals',    'Wood-paneled accent walls',    'Lava lamp displays',    'Atomic Age starburst wall clock',    'Floor-standing jukebox (Wurlitzer style)',    'Colorful 1960s dinnerware (orange, turquoise, avocado) on tables',    'Neon accent lighting',    'Early 1960s electric drip coffee maker',    'Chrome espresso machine with chrome drip trays',    'Percolator on display',    'Pop Art posters'
+  decor: [
+    'Psychedelic wall murals',
+    'Wood-paneled accent walls',
+    'Lava lamp displays',
+    'Atomic Age starburst wall clock',
+    'Floor-standing jukebox (Wurlitzer style)',
+    'Colorful 1960s dinnerware (orange, turquoise, avocado) on tables',
+    'Neon accent lighting',
+    'Early 1960s electric drip coffee maker',
+    'Chrome espresso machine with chrome drip trays',
+    'Percolator on display',
+    'Pop Art posters'
   ],
   menu: {
     items: [
@@ -29,14 +44,38 @@ export const Period1965 = {
   },
   lighting: { color: '#FFD700', intensity: 0.7, fixtureType: 'Globe pendant light' },
   signage: {
-    posters: ['Beatles "Help!" Poster', '1965 New York Travel Poster', 'Mod Fashion Flyer', '1965 World's Fair Poster'],
+    posters: [
+      'Beatles \"Help!\" Poster',
+      '1965 New York Travel Poster',
+      'Mod Fashion Flyer',
+      '1965 World\'s Fair Poster'
+    ],
     menuBoard: { style: 'Glowing neon', frame: 'Chrome' },
-    windowDisplays: ['Mini Cooper Display', 'Music Records Showcase']
+    windowDisplays: [
+      'Mini Cooper Display',
+      'Music Records Showcase'
+    ]
   },
   patrons: {
-    outfits: ['Mini skirts', 'Bell-bottoms', 'Mod suits', 'Go-go boots'],
-    hairstyles: ['Beehive', 'Twiggy bob', 'Bouffant', 'Afro', 'Side part'],
-    gadgets: ['Portable transistor radio', 'Polaroid camera', 'Fender guitar', 'Mixtape']
+    outfits: [
+      'Mini skirts',
+      'Bell-bottoms',
+      'Mod suits',
+      'Go-go boots'
+    ],
+    hairstyles: [
+      'Beehive',
+      'Twiggy bob',
+      'Bouffant',
+      'Afro',
+      'Side part'
+    ],
+    gadgets: [
+      'Portable transistor radio',
+      'Polaroid camera',
+      'Fender guitar',
+      'Mixtape'
+    ]
   },
   counterTech: 'Electric soda fountain with chrome trim and electronic cash register with paper receipts'
 };
