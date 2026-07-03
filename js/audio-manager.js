@@ -26,10 +26,19 @@ class AudioManager {
     this.sfxBuffers = new Map();
     this.ambientBuffers = new Map();
 
+    // Era-specific ambient sounds (at least 3 distinct types per era)
+    this.ambientSoundsByEra = new Map([
+      [1945, ['distant-train', 'am-radio-static', 'coffee-urn-boiling', 'conversation-murmur-1945']],
+      [1965, ['jukebox-coin-drop', 'mechanical-arm', 'milk-bottles-clink', '60s-music-bed']],
+      [1985, ['cash-register-beeps', 'cassette-tape-hiss', 'new-wave-music-hum', 'soda-machine-sounds']],
+      [2005, ['espresso-machine-auto-steam', 'indoor-chatter', 'espresso-grinder']],
+      [2025, ['future-hum', 'ambient-music', 'robot-chatter']] // placeholder
+    ]);
+
     // Current audio sources
     this.currentMusicSource = null;
     this.currentMusicGainNode = null;
-    this.ambientSources = new Map();
+    this.ambientSources = new Map(); // { name: { source, gainNode } }
 
     // Crossfade settings
     this.crossfadeDuration = 1.0; // seconds
@@ -37,7 +46,6 @@ class AudioManager {
 
     // Era mapping
     this.eras = [1945, 1965, 1985, 2005, 2025];
-    this.ambientSounds = ['coffee-hiss', 'conversation-murmur', 'jukebox-crackle'];
     this.sfxSounds = ['milk-steamer', 'cups-clatter'];
 
     // State
@@ -53,6 +61,7 @@ class AudioManager {
       // Play the current era if set
       if (this.currentEra !== null) {
         await this.playEraMusic(this.currentEra, false);
+        this.setupAmbientForEra(this.currentEra);
       }
       console.log('AudioManager initialized');
     } catch (error) {
@@ -81,13 +90,15 @@ class AudioManager {
       }
     }
 
-    // Load ambient sounds
-    for (const ambient of this.ambientSounds) {
-      try {
-        const buffer = await this.loadAudioFile(`public/assets/audio/sfx/${ambient}.mp3`);
-        this.ambientBuffers.set(ambient, buffer);
-      } catch (e) {
-        console.warn(`Failed to load ambient ${ambient}:`, e);
+    // Load ambient sounds for all eras
+    for (const [_era, soundNames] of this.ambientSoundsByEra) {
+      for (const soundName of soundNames) {
+        try {
+          const buffer = await this.loadAudioFile(`public/assets/audio/sfx/${soundName}.mp3`);
+          this.ambientBuffers.set(soundName, buffer);
+        } catch (e) {
+          console.warn(`Failed to load ambient sound ${soundName}:`, e);
+        }
       }
     }
   }
@@ -114,13 +125,33 @@ class AudioManager {
   }
 
   setupAmbient() {
-    // Start ambient sounds (looping)
-    for (const [name, buffer] of this.ambientBuffers) {
+    // Start ambient sounds (looping) for the current era
+    if (this.currentEra !== null) {
+      this.setupAmbientForEra(this.currentEra);
+    }
+  }
+
+  setupAmbientForEra(era) {
+    // Stop any existing ambient sounds
+    for (const [_name, node] of this.ambientSources) {
+      node.source.stop();
+      node.source.disconnect();
+      node.gainNode.disconnect();
+    }
+    this.ambientSources.clear();
+
+    const ambienceNames = this.ambientSoundsByEra.get(era) || [];
+    for (const name of ambienceNames) {
+      const buffer = this.ambientBuffers.get(name);
+      if (!buffer) {
+        console.warn(`Ambient sound buffer not found for ${name} in era ${era}`);
+        continue;
+      }
       const source = this.audioContext.createBufferSource();
       source.buffer = buffer;
       source.loop = true;
       const gainNode = this.audioContext.createGain();
-      gainNode.gain.value = this.ambientVolume;
+      gainNode.gain.value = this.ambientVolume; // initial volume
       source.connect(gainNode).connect(this.ambientGain);
       source.start(0);
       this.ambientSources.set(name, { source, gainNode });
@@ -296,7 +327,26 @@ class AudioManager {
     this.currentEra = era;
     if (this.initialized) {
       this.playEraMusic(era, true);
+      this.transitionAmbiance(era);
     }
+  }
+
+  transitionAmbiance(newEra) {
+    // Crossfade ambient sounds when era changes
+    const now = this.audioContext.currentTime;
+    const fadeDuration = this.crossfadeDuration;
+    const currentVolume = this.ambientGain.gain.value;
+
+    // Fade out current ambiance
+    this.ambientGain.gain.exponentialRampToValueAtTime(0.001, now + fadeDuration);
+
+    // After fade out, switch ambiance and fade in
+    setTimeout(() => {
+      this.setupAmbientForEra(newEra);
+      // Fade in to target volume
+      this.ambientGain.gain.setValueAtTime(0.001, now + fadeDuration);
+      this.ambientGain.gain.exponentialRampToValueAtTime(currentVolume, now + 2 * fadeDuration);
+    }, fadeDuration * 1000);
   }
 
   // Resume audio context if suspended (required for autoplay policies)
