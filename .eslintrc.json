@@ -1,0 +1,9 @@
+{
+  "extends": "eslint:recommended",
+  "rules": {
+    "no-console": ["error", { "allow: warn": true }],
+    "no-unused-vars": [2, { "varsIgnorePattern": "^_" }],
+    "prefer-const": 2,
+    "semi": [2, "always"]
+  }
+}
