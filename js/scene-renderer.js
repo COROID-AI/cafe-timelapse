@@ -181,13 +181,13 @@ function createCaféRoom() {
     scene.add(counterTop);
 
     // Add some basic café furniture (tables and chairs)
-    createCaféFurniture(roomSize);
+    createCaféFurniture();
 }
 
 /**
  * Create basic café furniture
  */
-function createCaféFurniture(roomSize) {
+function createCaféFurniture() {
     const tableMaterial = new THREE.MeshStandardMaterial({ 
         color: 0x8b4513, // Wooden table
         roughness: 0.6,

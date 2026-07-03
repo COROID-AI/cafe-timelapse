@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
     } catch (error) {
         console.error('Failed to initialize Three.js scene:', error);
-        loadingElement.innerHTML = '<h1>Error Loading Scene</h1><p>' + error.message + '</p>';;
+        loadingElement.innerHTML = '<h1>Error Loading Scene</h1><p>' + error.message + '</p>';
     }
 });
 
