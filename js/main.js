@@ -7,28 +7,39 @@ document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('container');
   const loadingElement = document.getElementById('loading');
 
+  // Declare variables that will be assigned in the try block
+  let scene, camera, renderer, periodManager;
+
   try {
     // Initialize Three.js scene
-    const { scene, camera, renderer, _controls } = initScene(container);
+    const sceneData = initScene(container);
+    scene = sceneData.scene;
+    camera = sceneData.camera;
+    renderer = sceneData.renderer;
 
     // Initialize Period Manager and set default era
-    const periodManager = new PeriodManager();
+    periodManager = new PeriodManager();
     periodManager.selectEra(1945);
 
     // Initialize stats panel
-    const _statsPanel = initStatsPanel();
+    initStatsPanel();
 
     // Set up era change listener
     periodManager.onEraChange((era) => {
-      updateStats(era.year, 0);
+      const yearElement = document.getElementById('current-year');
+      if (yearElement) {
+        yearElement.textContent = era.year || '1945';
+      }
     });
 
     // Start render loop
-    function animate() {
+    const animate = () => {
       requestAnimationFrame(animate);
+      const start = performance.now();
       renderer.render(scene, camera);
-      updateStats(periodManager.getState().year, 0);
-    }
+      const renderTime = performance.now() - start;
+      updateStats(periodManager.getState().year, renderTime);
+    };
 
     animate();
 
