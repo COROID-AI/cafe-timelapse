@@ -9,14 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try {
     // Initialize Three.js scene
-    const { scene, camera, renderer, controls } = initScene(container);
+    const { scene, camera, renderer, _controls } = initScene(container);
 
     // Initialize Period Manager and set default era
     const periodManager = new PeriodManager();
     periodManager.selectEra(1945);
 
     // Initialize stats panel
-    const statsPanel = initStatsPanel();
+    const _statsPanel = initStatsPanel();
 
     // Set up era change listener
     periodManager.onEraChange((era) => {

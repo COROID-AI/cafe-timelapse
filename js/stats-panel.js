@@ -4,7 +4,6 @@
  */
 
 let statsPanel = null;
-let fpsCounter = 0;
 let lastTime = performance.now();
 let fps = 0;
 let frameCount = 0;
