@@ -5,14 +5,39 @@ export const Period2025 = {
   year: 2025,
   name: '2020s Modern',
   theme: 'Contemporary sustainable café culture',
-  furniture: ['Reclaimed wood tables', 'Ergonomic upholstered chairs', 'Bar-height counter stools', 'Recycled material flooring'],
-  decor: ['Living green walls', 'Contemporary art', 'Smart mirrors', 'Minimalist sculptures'],
+  furniture: [
+    'Reclaimed wood and bamboo tables',
+    'Mid-century modern lounge chairs',
+    'Live-edge wood counter',
+    'Bar-height counter stools',
+    'Recycled material flooring'
+  ],
+  decor: [
+    'Living green walls',
+    'Gallery-style art prints',
+    'Smart mirrors',
+    'Minimalist sculptures',
+    'Hanging plant installations',
+    'Smart display screens',
+    'Smart espresso machine with touchscreen',
+    'IoT-connected grinder',
+    'Single-serve specialty brewer (Fellow)',
+    'Cold brew tower',
+    'Nitrogen tap system',
+    'Bluetooth smart speaker',
+    'Sustainable decals',
+    'QR code standee',
+    'Reusable ceramic cups',
+    'Compostable to-go cups',
+    'Digital tablets on tables'
+  ],
   menu: {
     items: [
       { name: 'Cold Brew Nitro', price: 5.95, description: 'Nitrogen-infused cold brew with creamy texture' },
+      { name: 'Matcha Latte', price: 5.50, description: 'Organic matcha with oat milk' },
+      { name: 'Oat Milk Latte', price: 4.95, description: 'Organic oat milk with single-origin espresso' },
       { name: 'Avocado Toast', price: 8.95, description: 'Sourdough with smashed avocado, radish, and microgreens' },
-      { name: 'Plant-Based Bowl', price: 9.95, description: 'Quinoa, roasted vegetables, tahini dressing' },
-      { name: 'Oat Milk Latte', price: 4.95, description: 'Organic oat milk with single-origin espresso' }
+      { name: 'Plant-Based Bowl', price: 9.95, description: 'Quinoa, roasted vegetables, tahini dressing' }
     ],
     board: { style: 'Interactive digital display', material: 'Sustainable bamboo' }
   },
@@ -25,7 +50,7 @@ export const Period2025 = {
     ],
     ambientNoise: 'lofi_hip_hop_and_nature_sounds'
   },
-  lighting: { color: '#E6E6FA', intensity: 0.4, fixtureType: 'Smart LED with circadian rhythm' },
+  lighting: { color: '#F0F8FF', intensity: 0.5, fixtureType: 'Smart LED downlights and modern geometric pendant lights' },
   signage: {
     posters: ['Sustainability Infographic', 'Local Art Flyer', 'QR Code Menu Board', 'Plant-Based Poster'],
     menuBoard: { style: 'Interactive touchscreen', frame: 'Recycled aluminum' },
@@ -34,9 +59,9 @@ export const Period2025 = {
   patrons: {
     outfits: ['Athleisure wear', 'Sustainable fashion', 'Vintage revival', 'Tech wear'],
     hairstyles: ['Natural curls', 'Balayage highlights', 'Braided updos', 'Pixie cut'],
-    gadgets: ['Smartphone', 'E-reader', 'Wireless earbuds', 'Smartwatch']
+    gadgets: ['Smartphone', 'E-reader', 'Wireless earbuds (AirPods)', 'Smartwatch', 'Laptop']
   },
-  counterTech: 'Contactless NFC payment terminal with mobile app integration'
+  counterTech: 'Contactless NFC payment terminal with tablet-based POS'
 };
 
 export default Period2025;
