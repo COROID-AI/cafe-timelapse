@@ -18,9 +18,16 @@
  * The manager is engine-agnostic: it accepts an `adapter` object that implements
  * the rendering and audio operations. In production this is a Three.js adapter;
  * in tests a no-op or mock adapter is used.
+ *
+ * Audio-bus integration: the default singleton instance bridges its `yearChange`
+ * lifecycle event to the AudioManager (feature/coroid-c1c7f1-build-audio-bus-sfx),
+ * so production code (js/main.js) only has to call `periodManager.setYear()`.
+ * Test instances created via `new PeriodManager({...})` start with a clean,
+ * un-bridged listener set so audio wiring does not leak into unit tests.
  */
 
 import { validatePeriodPackage } from '../src/contracts/PeriodPackage.js';
+import audioManager from './audio-manager.js';
 
 /**
  * Map of supported years to their dynamic import factory functions.
@@ -46,6 +53,12 @@ export const SUPPORTED_YEARS = Object.freeze(Object.keys(ERA_LOADERS).map(Number
  * @type {number}
  */
 const DEFAULT_TRANSFORM_DURATION = 1200;
+
+/**
+ * The era the manager reports before any transform has run.
+ * @type {number}
+ */
+const DEFAULT_INITIAL_YEAR = 1945;
 
 /**
  * A no-op rendering/audio adapter. In production, inject a Three.js adapter.
@@ -83,12 +96,15 @@ export class PeriodManager {
    * @param {Object} [options]
    * @param {PeriodManagerAdapter} [options.adapter] — rendering/audio adapter
    * @param {number} [options.transformDuration] — transform duration in ms
+   * @param {number} [options.initialYear] — year reported before any transform (default 1945)
    */
-  constructor({ adapter = NOOP_ADAPTER, transformDuration = DEFAULT_TRANSFORM_DURATION } = {}) {
+  constructor({ adapter = NOOP_ADAPTER, transformDuration = DEFAULT_TRANSFORM_DURATION, initialYear = DEFAULT_INITIAL_YEAR } = {}) {
     /** @type {PeriodManagerAdapter} */
     this._adapter = adapter;
     /** @type {number} */
     this._transformDuration = transformDuration;
+    /** @type {number} */
+    this._initialYear = initialYear;
     /** @type {number|null} */
     this._currentYear = null;
     /** @type {PeriodPackage|null} */
@@ -121,6 +137,16 @@ export class PeriodManager {
    */
   get isTransforming() {
     return this._transforming;
+  }
+
+  /**
+   * Get the current year. Before any transform has run, returns the initial
+   * year (1945 by default) so callers like the AudioManager can play music for
+   * the default era on startup.
+   * @returns {number}
+   */
+  getYear() {
+    return this._currentYear ?? this._initialYear;
   }
 
   /**
@@ -369,4 +395,21 @@ export class PeriodManager {
   }
 }
 
-export default PeriodManager;
+/**
+ * Default singleton instance for production use.
+ *
+ * Bridges the `yearChange` lifecycle event to the AudioManager so that the
+ * audio bus crossfades whenever the era changes — preserving the
+ * feature/coroid-c1c7f1-build-audio-bus-sfx audio integration. Production
+ * code (js/main.js) imports this singleton and calls `setYear()` /
+ * `getYear()`; unit tests instantiate `new PeriodManager({...})` directly
+ * to keep listener sets isolated from audio wiring.
+ */
+const periodManager = new PeriodManager();
+
+// Wire the audio bus onto the singleton only.
+periodManager.onYearChange(({ from, to }) => {
+  audioManager.onYearChange(to, from);
+});
+
+export default periodManager;
