@@ -5,38 +5,54 @@ export const Period1945 = {
   year: 1945,
   name: '1940s Vintage',
   theme: 'Post-war American café culture',
-  furniture: ['Formica tables', 'Vinyl booth seats', 'Metal stools', 'Checkerboard floor'],
-  decor: ['Art Deco wall sconces', 'Vintage Coca-Cola signs', 'Radio cabinet', 'Wooden paneling'],
+  furniture: [
+    'Wooden tables with checked tablecloths',
+    'Formica-topped counter stools',
+    'Chrome-and-leather bar stools',
+    'Classic wooden chairs with woven seats'
+  ],
+  decor: [
+    'Wall-mounted coat hooks',
+    'Vintage clock on the wall',
+    'Wall-mounted AM radio/wireless set',
+    'WWII-era propaganda posters',
+    'Vintage Coca-Cola signs',
+    'Wooden paneling',
+    'Traditional stovetop percolator',
+    'Manual espresso machine (Lamarzocco style)',
+    'Metal french press carafes',
+    'Ceramic drip coffee filter'
+  ],
   menu: {
     items: [
-      { name: 'Classic Coffee', price: 0.15, description: 'Strong drip coffee served in thick mugs' },
-      { name: 'Egg Sandwich', price: 0.25, description: 'Fresh-baked croissant with fried egg' },
-      { name: 'Milk Shake', price: 0.35, description: 'Vanilla or chocolate, served with a straw' },
-      { name: 'Pie of the Day', price: 0.20, description: 'Apple or cherry, served warm' }
+      { name: 'Classic Coffee', price: 0.15, description: 'Freshly brewed coffee served in a white ceramic cup with saucer, accompanied by chrome creamer and sugar set' },
+      { name: 'Egg Sandwich', price: 0.25, description: 'Fried egg on toasted bread with lettuce' },
+      { name: 'Milk Shake', price: 0.20, description: 'Vanilla or chocolate milk shake' },
+      { name: 'Pie of the Day', price: 0.15, description: 'Apple or cherry pie, served warm' }
     ],
-    board: { style: 'Chalkboard', material: 'Wood frame' }
+    board: { style: 'Hand-painted chalkboard', material: 'Oak' }
   },
   audio: {
-    music: { id: 'bigband_1945', type: 'Record Player', volume: 0.7 },
+    music: { id: 'radio_1945', type: 'AM Radio', volume: 0.6 },
     sfx: [
-      { type: 'coffee_grinder', id: 'grinder_hiss_01' },
-      { type: 'espresso_pump', id: 'pump_click_01' },
+      { type: 'radio_tune', id: 'radio_tune_01' },
+      { type: 'percolator_bubble', id: 'percolator_01' },
       { type: 'patrons_chatter', id: 'low_talk_01' }
     ],
     ambientNoise: 'soft_radio_jazz'
   },
-  lighting: { color: '#F5DEB3', intensity: 0.6, fixtureType: 'Art Deco pendant' },
+  lighting: { color: '#E8D8B3', intensity: 0.7, fixtureType: 'Incandescent pendant with metal shade' },
   signage: {
-    posters: ['Wartime Ration Poster', 'Vintage Coca-Cola Ad', 'Einstein Quote Poster'],
+    posters: ['WWII War Bonds Poster', 'Vintage Coca-Cola Ad', 'Rosie the Riveter Poster'],
     menuBoard: { style: 'Hand-painted chalkboard', frame: 'Oak' },
-    windowDisplays: ['Vintage Camera Display', 'Radio Collection Showcase']
+    windowDisplays: ['Radio Collection', 'Newspaper Stand']
   },
   patrons: {
-    outfits: ['Poodle skirts', 'Tailored suits', 'Polka dot dresses', 'Newsboy caps'],
-    hairstyles: ['Buns', 'Crew cuts', 'Pompadours', 'Bob cuts'],
-    gadgets: ['Phonograph', 'Handheld radio', 'Pocket watch', 'Reading glasses']
+    outfits: ['Military uniform', 'House dress with apron', 'Business suit', 'Casual day dress', 'Hat'],
+    hairstyles: ['Victory rolls', 'Pin curls', 'Short back and sides', 'Bob cut'],
+    gadgets: ['Pocket watch', 'Wireless radio', 'Compacts', 'Reading glasses']
   },
-  counterTech: 'Manual cash register with brass till'
+  counterTech: 'Manual NCR-style cash register with brass till'
 };
 
 export default Period1945;
