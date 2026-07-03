@@ -82,6 +82,15 @@ class AudioManager {
 
     /** Bound key handler reference for cleanup. */
     this._keyHandler = null;
+
+    /** Whether SFX captions are enabled (toggled with C key). */
+    this._captionsEnabled = false;
+
+    /** Callback fired when an SFX plays, for the captions display. */
+    this._captionCallback = null;
+
+    /** Set of years whose audio has been lazily loaded. */
+    this._loadedYears = new Set();
   }
 
   // -----------------------------------------------------------------------
@@ -182,6 +191,70 @@ class AudioManager {
     const audioBuf = await this.ctx.decodeAudioData(arrayBuf);
     this._bufferCache.set(path, audioBuf);
     return audioBuf;
+  }
+
+  /**
+   * Set the SFX captions callback. When captions are enabled and an SFX
+   * plays, this callback receives a human-readable label.
+   * @param {(label: string) => void} callback
+   */
+  setCaptionCallback(callback) {
+    this._captionCallback = callback;
+  }
+
+  /**
+   * Toggle SFX captions on/off.
+   * @param {boolean} [force] — if provided, set to this value; otherwise toggle.
+   * @returns {boolean} the new captions state
+   */
+  toggleCaptions(force) {
+    this._captionsEnabled = (typeof force === 'boolean') ? force : !this._captionsEnabled;
+    return this._captionsEnabled;
+  }
+
+  /**
+   * Returns whether captions are currently enabled.
+   * @returns {boolean}
+   */
+  isCaptionsEnabled() {
+    return this._captionsEnabled;
+  }
+
+  /**
+   * Lazy-load the audio assets for a specific era year.
+   * Only loads the year's music track — SFX are shared across eras and
+   * loaded on demand. This keeps GPU/memory usage low by only having the
+   * active era's audio in the buffer cache.
+   *
+   * @param {number} year
+   * @returns {Promise<void>}
+   */
+  async lazyLoadEraAudio(year) {
+    if (this._loadedYears.has(year)) return;
+    if (!this._initialised) await this.init();
+
+    const path = MUSIC_PATHS[year];
+    if (!path) return;
+
+    try {
+      await this._loadBuffer(path);
+      this._loadedYears.add(year);
+      console.log(`[AudioManager] Lazy-loaded audio for era ${year}`);
+    } catch (err) {
+      console.warn(`[AudioManager] Lazy-load failed for era ${year}:`, err.message);
+    }
+  }
+
+  /**
+   * Evict a year's audio from the buffer cache to free memory.
+   * @param {number} year
+   */
+  evictEraAudio(year) {
+    const path = MUSIC_PATHS[year];
+    if (path && this._bufferCache.has(path)) {
+      this._bufferCache.delete(path);
+      this._loadedYears.delete(year);
+    }
   }
 
   /**
@@ -303,14 +376,14 @@ class AudioManager {
   stopAllMusic() {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
-    for (const [year, entry] of this._musicSources) {
+    for (const [, entry] of this._musicSources) {
       const { source, gain } = entry;
       gain.gain.cancelScheduledValues(now);
       gain.gain.setValueAtTime(gain.gain.value, now);
       gain.gain.linearRampToValueAtTime(0, now + 0.1);
       try {
         source.stop(now + 0.15);
-      } catch (e) {
+      } catch (_e) {
         // Already stopped.
       }
     }
@@ -360,10 +433,23 @@ class AudioManager {
 
     source.start(now);
 
+    // Fire caption callback if captions are enabled
+    if (this._captionsEnabled && this._captionCallback) {
+      const sfxLabels = {
+        'murmur': 'Conversation murmur',
+        'espresso-hiss': 'Espresso machine hiss',
+        'cup-clatter': 'Cup and plate clatter',
+        'register-ding': 'Cash register ding',
+        'jukebox-clack': 'Jukebox mechanism clack',
+      };
+      const label = sfxLabels[name] || name;
+      this._captionCallback(label);
+    }
+
     // Duck music while SFX plays, then restore.
     if (duck) {
       this.duckVoice(true);
-      const restoreTime = now + buffer.duration + 0.1;
+      const restoreTime = now + buffer.duration + 0.1; // eslint-disable-line no-unused-vars
       // Schedule duck release.
       const restoreDuck = () => {
         // Only release if no other ducking request is pending.
@@ -434,7 +520,7 @@ class AudioManager {
     gain.gain.linearRampToValueAtTime(0, now + 0.5);
     try {
       source.stop(now + 0.6);
-    } catch (e) {
+    } catch (_e) {
       // Already stopped.
     }
     this._ambientSources.delete(name);

@@ -1,6 +1,6 @@
 export default [
   {
-    files: ['public/js/**/*.js'],
+    files: ['js/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -12,6 +12,11 @@ export default [
         AudioContext: 'readonly',
         webkitAudioContext: 'readonly',
         setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        requestAnimationFrame: 'readonly',
+        cancelAnimationFrame: 'readonly',
         navigator: 'readonly',
         performance: 'readonly',
         requestAnimationFrame: 'readonly',
@@ -23,7 +28,11 @@ export default [
         Event: 'readonly',
         KeyboardEvent: 'readonly',
         MouseEvent: 'readonly',
+        PointerEvent: 'readonly',
         AbortController: 'readonly',
+        THREE: 'readonly',
+        Stats: 'readonly',
+        performance: 'readonly',
       },
     },
     rules: {
