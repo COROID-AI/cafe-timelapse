@@ -13,10 +13,12 @@
  *   3. Camera navigation: orbit controls + keyboard fly + hotspot jump.
  *   4. Acts as the PeriodManagerAdapter — wired via periodManager.setAdapter().
  *
- * Three.js is loaded from CDN via an <script> import map in index.html, so the
- * global `THREE` is available without a bundler.
+ * Three.js is loaded from CDN via an <script> import map in index.html. The import
+ * map only resolves the bare specifier `"three"` for ES module `import` statements —
+ * it does NOT create a global `THREE`, so this module must import it explicitly.
  */
 
+import * as THREE from 'three';
 import { StatsPanel } from './stats-panel.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
