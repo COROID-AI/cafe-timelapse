@@ -1,0 +1,17 @@
+{
+  "name": "timelapse-cafe",
+  "version": "1.0.0",
+  "description": "A timelapse cafe scene with eras",
+  "main": "js/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "http-server",
+    "dev": "http-server"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
