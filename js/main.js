@@ -6,8 +6,9 @@
 import { initScene } from './scene-renderer.js';
 import PeriodManager from './period-manager.js';
 import { StatsPanel } from './stats-panel.js';
-import { hotspotData, getHotspotsForEra } from '../public/js/hotspot-data.js';
+import { getHotspotsForEra } from '../public/js/hotspot-data.js';
 import { InspectorPanel } from '../public/js/inspector.js';
+import { TimelineSlider, eraDescriptions } from './timeline-slider.js';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -31,6 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize inspector panel
   const inspectorPanel = new InspectorPanel();
 
+  // Timeline slider UI (top overlay)
+  const sliderContainerForUI = document.createElement('div');
+  sliderContainerForUI.id = 'ui-overlay';
+  sliderContainerForUI.style.position = 'fixed';
+  sliderContainerForUI.style.top = '0';
+  sliderContainerForUI.style.left = '0';
+  sliderContainerForUI.style.width = '100%';
+  sliderContainerForUI.style.pointerEvents = 'auto';
+  sliderContainerForUI.style.zIndex = '1000';
+  document.body.appendChild(sliderContainerForUI);
+
+  const timelineSlider = new TimelineSlider(sliderContainerForUI, periodManager, eraDescriptions);
+  // eslint-disable-next-line no-unused-vars
+  const _unusedTimelineSlider = timelineSlider;
+
   // Create a group for hotspot markers and add to scene
   const hotspotGroup = new THREE.Group();
   scene.add(hotspotGroup);
@@ -44,48 +60,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to create a hotspot sprite (pulsing dot)
   function createHotspotSprite() {
-    // Create a sprite material with a circular texture
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     canvas.width = 64;
     canvas.height = 64;
+
     const center = 32;
     const radius = 24;
     context.beginPath();
     context.arc(center, center, radius, 0, Math.PI * 2);
-    context.fillStyle = 'rgba(255, 255, 0, 0.8)'; // Yellow pulsating
+    context.fillStyle = 'rgba(255, 255, 0, 0.8)';
     context.fill();
+
     const texture = new THREE.CanvasTexture(canvas);
     const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
     const sprite = new THREE.Sprite(material);
-    sprite.scale.set(0.2, 0.2, 0.2); // Initial size
+    sprite.scale.set(0.2, 0.2, 0.2);
     return sprite;
   }
 
   // Function to update hotspots for the current era
   function updateHotspotsForEra(era) {
-    // Remove existing hotspots
-    currentHotspots.forEach(hotspot => {
+    currentHotspots.forEach((hotspot) => {
       hotspotGroup.remove(hotspot.sprite);
     });
     currentHotspots = [];
 
-    // Get hotspots for this era
     const hotspots = getHotspotsForEra(era);
-    hotspots.forEach(hotspotData => {
+    hotspots.forEach((hotspot) => {
       const sprite = createHotspotSprite();
-      sprite.position.set(hotspotData.position.x, hotspotData.position.y, hotspotData.position.z);
-      // Store the hotspot data in userData for click handling
-      sprite.userData = { info: hotspotData.info, name: hotspotData.name };
+      sprite.position.set(hotspot.position.x, hotspot.position.y, hotspot.position.z);
+      sprite.userData = { info: hotspot.info, name: hotspot.name };
       hotspotGroup.add(sprite);
-      currentHotspots.push({ sprite, data: hotspotData });
+      currentHotspots.push({ sprite, data: hotspot });
     });
   }
 
   // Function to animate hotspot pulsation
   function updateHotspotAnimation(time) {
-    currentHotspots.forEach(hotspot => {
-      // Pulse scale between 0.2 and 0.3
+    currentHotspots.forEach((hotspot) => {
       const scale = 0.25 + 0.05 * Math.sin(time * 2 + hotspot.sprite.position.x * 10);
       hotspot.sprite.scale.set(scale, scale, scale);
     });
@@ -93,41 +106,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Mouse click handler
   function onMouseClick(event) {
-    // Calculate mouse position in normalized device coordinates (-1 to +1)
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    // Update the raycaster
     raycaster.setFromCamera(mouse, camera);
 
-    // Check for intersections with hotspot sprites
     const intersects = raycaster.intersectObjects(hotspotGroup.children);
     if (intersects.length > 0) {
       const intersected = intersects[0];
-      const hotspotData = intersected.object.userData;
-      if (hotspotData && hotspotData.info) {
-        inspectorPanel.show(hotspotData.info.title, `<p>${hotspotData.info.description}</p>`);
+      const hotspotInfo = intersected.object.userData;
+      if (hotspotInfo && hotspotInfo.info) {
+        inspectorPanel.show(hotspotInfo.info.title, `<p>${hotspotInfo.info.description}</p>`);
       }
     }
   }
 
   // Set up era change event bus
-  periodManager.onEraChange(async (era) => {
-    console.log(`Era changed to: ${era.year}`);
-    // Update hotspots for the new era
+  periodManager.onEraChange((era) => {
+    if (!era || typeof era.year !== 'number') return;
     updateHotspotsForEra(era.year);
-    // TODO: Update scene with era-specific objects (to be implemented in downstream tasks)
-    // For now, we just log the era change
   });
 
   // Load default era (1945) and render initial scene
   const initializeApp = async () => {
     try {
       await periodManager.setEra(1945);
-      console.log('Initial era (1945) loaded');
-      // Update hotspots for initial era
       updateHotspotsForEra(1945);
-      // Initial render is handled by the animation loop
     } catch (error) {
       console.error('Failed to initialize app:', error);
     }
@@ -138,10 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const animate = () => {
     requestAnimationFrame(animate);
     const elapsedTime = clock.getElapsedTime();
-    controls.update(); // Required if controls.enableDamping = true, or if using auto-rotation
+    controls.update();
     renderer.render(scene, camera);
     statsPanel.update();
-    // Update hotspot animation
     updateHotspotAnimation(elapsedTime);
   };
 
@@ -155,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Mouse click event listener
   window.addEventListener('click', onMouseClick);
 
-  // Initialize app and start animation loop
   initializeApp().then(() => {
     animate();
   });
