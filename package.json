@@ -1,0 +1,13 @@
+{
+  "name": "cafe-timelapse",
+  "version": "1.0.0",
+  "description": "Cafe timelapse project",
+  "main": "js/scene-renderer.js",
+  "scripts": {
+    "build": "node -c js/scene-renderer.js",
+    "lint": "node -c js/scene-renderer.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
