@@ -1,11 +1,5 @@
-/**
- * @typedef {import('../contracts/PeriodPackage.js').Era} Era
- */
-
-/**
- * Era data for 2025
- * @type {Era}
- */
+// Era data for 2025
+// @type {Era}
 const era2025 = {
   year: 2025,
   name: '2025: Sustainable Tech & AI',
@@ -86,4 +80,4 @@ const era2025 = {
   counterTech: 'Contactless POS with facial recognition and crypto payment'
 };
 
-module.exports = era2025;
+export default era2025;

@@ -1,11 +1,5 @@
-/**
- * @typedef {import('../contracts/PeriodPackage.js').Era} Era
- */
-
-/**
- * Era data for 1945
- * @type {Era}
- */
+// Era data for 1945
+// @type {Era}
 const era1945 = {
   year: 1945,
   name: '1945: Post-War Era',
@@ -86,4 +80,4 @@ const era1945 = {
   counterTech: 'Manual cash register with metal keys'
 };
 
-module.exports = era1945;
+export default era1945;
