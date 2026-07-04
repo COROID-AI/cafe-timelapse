@@ -7,8 +7,9 @@ import { initScene } from './scene-renderer.js';
 import PeriodManager from './period-manager.js';
 import { StatsPanel } from './stats-panel.js';
 import AudioManager from './audio-manager.js';
-import { hotspotData, getHotspotsForEra } from '../public/js/hotspot-data.js';
+import { getHotspotsForEra } from '../public/js/hotspot-data.js';
 import { InspectorPanel } from '../public/js/inspector.js';
+import { TimelineSlider, eraDescriptions } from './timeline-slider.js';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -40,6 +41,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize inspector panel
   const inspectorPanel = new InspectorPanel();
 
+  // Timeline slider UI (top overlay)
+  const sliderContainerForUI = document.createElement('div');
+  sliderContainerForUI.id = 'ui-overlay';
+  sliderContainerForUI.style.position = 'fixed';
+  sliderContainerForUI.style.top = '0';
+  sliderContainerForUI.style.left = '0';
+  sliderContainerForUI.style.width = '100%';
+  sliderContainerForUI.style.pointerEvents = 'auto';
+  sliderContainerForUI.style.zIndex = '1000';
+  document.body.appendChild(sliderContainerForUI);
+
+  const timelineSlider = new TimelineSlider(sliderContainerForUI, periodManager, eraDescriptions);
+  // eslint-disable-next-line no-unused-vars
+  const _unusedTimelineSlider = timelineSlider;
+
   // Create a group for hotspot markers and add to scene
   const hotspotGroup = new THREE.Group();
   scene.add(hotspotGroup);
@@ -64,48 +80,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Function to create a hotspot sprite (pulsing dot)
   function createHotspotSprite() {
-    // Create a sprite material with a circular texture
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     canvas.width = 64;
     canvas.height = 64;
+
     const center = 32;
     const radius = 24;
     context.beginPath();
     context.arc(center, center, radius, 0, Math.PI * 2);
-    context.fillStyle = 'rgba(255, 255, 0, 0.8)'; // Yellow pulsating
+    context.fillStyle = 'rgba(255, 255, 0, 0.8)';
     context.fill();
+
     const texture = new THREE.CanvasTexture(canvas);
     const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
     const sprite = new THREE.Sprite(material);
-    sprite.scale.set(0.2, 0.2, 0.2); // Initial size
+    sprite.scale.set(0.2, 0.2, 0.2);
     return sprite;
   }
 
   // Function to update hotspots for the current era
-  function updateHotspotsForEra(eraYear) {
-    // Remove existing hotspots
-    currentHotspots.forEach(hotspot => {
+  function updateHotspotsForEra(era) {
+    currentHotspots.forEach((hotspot) => {
       hotspotGroup.remove(hotspot.sprite);
     });
     currentHotspots = [];
 
-    // Get hotspots for this era
-    const hotspots = getHotspotsForEra(eraYear);
-    hotspots.forEach(hotspotData => {
+    const hotspots = getHotspotsForEra(era);
+    hotspots.forEach((hotspot) => {
       const sprite = createHotspotSprite();
-      sprite.position.set(hotspotData.position.x, hotspotData.position.y, hotspotData.position.z);
-      // Store the hotspot data in userData for click handling
-      sprite.userData = { info: hotspotData.info, name: hotspotData.name };
+      sprite.position.set(hotspot.position.x, hotspot.position.y, hotspot.position.z);
+      sprite.userData = { info: hotspot.info, name: hotspot.name };
       hotspotGroup.add(sprite);
-      currentHotspots.push({ sprite, data: hotspotData });
+      currentHotspots.push({ sprite, data: hotspot });
     });
   }
 
   // Function to animate hotspot pulsation
   function updateHotspotAnimation(time) {
-    currentHotspots.forEach(hotspot => {
-      // Pulse scale between 0.2 and 0.3
+    currentHotspots.forEach((hotspot) => {
       const scale = 0.25 + 0.05 * Math.sin(time * 2 + hotspot.sprite.position.x * 10);
       hotspot.sprite.scale.set(scale, scale, scale);
     });
@@ -113,20 +126,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Mouse click handler
   function onMouseClick(event) {
-    // Calculate mouse position in normalized device coordinates (-1 to +1)
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    // Update the raycaster
     raycaster.setFromCamera(mouse, camera);
 
-    // Check for intersections with hotspot sprites
     const intersects = raycaster.intersectObjects(hotspotGroup.children);
     if (intersects.length > 0) {
       const intersected = intersects[0];
-      const hotspotData = intersected.object.userData;
-      if (hotspotData && hotspotData.info) {
-        inspectorPanel.show(hotspotData.info.title, `<p>${hotspotData.info.description}</p>`);
+      const hotspotInfo = intersected.object.userData;
+      if (hotspotInfo && hotspotInfo.info) {
+        inspectorPanel.show(hotspotInfo.info.title, `<p>${hotspotInfo.info.description}</p>`);
       }
     }
   }
@@ -134,10 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Helper function to set opacity of a group and its children
   function setGroupOpacity(group, opacity) {
     if (!group) return;
-    group.traverse(child => {
+    group.traverse((child) => {
       if (child.isMesh) {
         if (Array.isArray(child.material)) {
-          child.material.forEach(material => {
+          child.material.forEach((material) => {
             material.opacity = opacity;
             material.transparent = opacity < 1;
           });
@@ -219,21 +229,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update lights: interpolate between old era and new era lighting
     if (oldEra && newEra) {
-      // Ambient light
-      const oldAmbientColor = new THREE.Color(oldEra.lighting.color);
-      const newAmbientColor = new THREE.Color(newEra.lighting.color);
-      ambientLight.color.lerp(newAmbientColor, easedProgress);
+      ambientLight.color.lerp(new THREE.Color(newEra.lighting.color), easedProgress);
       ambientLight.intensity = THREE.MathUtils.lerp(
         oldEra.lighting.intensity,
         newEra.lighting.intensity,
         easedProgress
       );
 
-      // Directional light (we adjust intensity slightly to match the era's lighting intensity)
-      const oldDirectionalColor = new THREE.Color(oldEra.lighting.color);
-      const newDirectionalColor = new THREE.Color(newEra.lighting.color);
-      directionalLight.color.lerp(newDirectionalColor, easedProgress);
-      // Directional light intensity matches the era's lighting intensity
+      directionalLight.color.lerp(new THREE.Color(newEra.lighting.color), easedProgress);
       directionalLight.intensity = THREE.MathUtils.lerp(
         oldEra.lighting.intensity,
         newEra.lighting.intensity,
@@ -247,27 +250,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // End transition
     if (progress >= 1) {
       transitionInProgress = false;
-      // Remove old group from scene
       if (oldGroup) {
         scene.remove(oldGroup);
       }
-      // Set oldGroup to newGroup for next transition
       oldGroup = newGroup;
       newGroup = null;
-      // Remove particle system
       if (particleSystem) {
         scene.remove(particleSystem.points);
         particleSystem = null;
       }
-      // Update current era to the new era
       currentEra = newEra;
     }
   }
 
   // Set up era change event bus
-  periodManager.onEraChange(async (era) => {
-    console.log(`Era changed to: ${era.year}`);
-    // Update hotspots for the new era
+  periodManager.onEraChange((era) => {
+    if (!era || typeof era.year !== 'number') return;
+
     updateHotspotsForEra(era.year);
 
     // If this is the initial load (no oldGroup), just set up the scene without transition
@@ -286,7 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Create the new era's group
     newGroup = newEra.buildScene();
-    // Initially set new group opacity to 0 (invisible)
     setGroupOpacity(newGroup, 0);
     scene.add(newGroup);
 
@@ -295,7 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
       setGroupOpacity(oldGroup, 1);
     }
 
-    // Start transition
     transitionInProgress = true;
     transitionStartTime = Date.now();
 
@@ -310,8 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const initializeApp = async () => {
     try {
       await periodManager.setEra(1945);
-      console.log('Initial era (1945) loaded');
-      // The era change callback will handle the initial setup
     } catch (error) {
       console.error('Failed to initialize app:', error);
     }
@@ -322,13 +317,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const animate = () => {
     requestAnimationFrame(animate);
     const elapsedTime = clock.getElapsedTime();
-    controls.update(); // Required if controls.enableDamping = true, or if using auto-rotation
+    controls.update();
     renderer.render(scene, camera);
     statsPanel.update();
-    // Update hotspot animation
     updateHotspotAnimation(elapsedTime);
 
-    // Update transition if in progress
     if (transitionInProgress) {
       updateTransition(Date.now());
     }
@@ -344,7 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Mouse click event listener
   window.addEventListener('click', onMouseClick);
 
-  // Initialize app and start animation loop
   initializeApp().then(() => {
     animate();
   });
