@@ -7,10 +7,61 @@
     <style>
         body, html { margin: 0; padding: 0; overflow: hidden; width: 100%; height: 100%; }
         #canvas-container { width: 100%; height: 100%; display: block; }
-    </style>
+
+        #audio-controls {
+          position: fixed;
+          left: 14px;
+          bottom: 14px;
+          z-index: 10;
+          background: rgba(0,0,0,0.35);
+          color: #fff;
+          padding: 10px 12px;
+          border-radius: 10px;
+          font: 12px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+          backdrop-filter: blur(6px);
+          user-select: none;
+        }
+        #audio-controls .row { display: flex; align-items: center; gap: 10px; margin: 6px 0; }
+        #audio-controls label { width: 64px; opacity: 0.95; }
+        #audio-controls input[type="range"] { width: 160px; }
+        #audio-controls .val { width: 42px; text-align: right; opacity: 0.9; }
+      </style>
 </head>
 <body>
     <div id="canvas-container"></div>
+
+    <div id="audio-controls" aria-label="Audio controls">
+      <div class="row">
+        <label for="music-volume">Music</label>
+        <input id="music-volume" type="range" min="0" max="100" value="60" />
+        <div class="val" data-music-volume>60</div>
+      </div>
+      <div class="row">
+        <label for="sfx-volume">SFX</label>
+        <input id="sfx-volume" type="range" min="0" max="100" value="70" />
+        <div class="val" data-sfx-volume>70</div>
+      </div>
+      <div class="row">
+        <label for="ambient-volume">Ambient</label>
+        <input id="ambient-volume" type="range" min="0" max="100" value="35" />
+        <div class="val" data-ambient-volume>35</div>
+      </div>
+    </div>
+
+    <script type="module">
+      const bindVal = (rangeId, valAttr) => {
+        const range = document.getElementById(rangeId);
+        const val = document.querySelector(valAttr);
+        if (!range || !val) return;
+        const update = () => { val.textContent = String(range.value); };
+        range.addEventListener('input', update);
+        update();
+      };
+      bindVal('music-volume', '[data-music-volume]');
+      bindVal('sfx-volume', '[data-sfx-volume]');
+      bindVal('ambient-volume', '[data-ambient-volume]');
+    </script>
+
     <script type="module" src="/js/main.js"></script>
 </body>
 </html>

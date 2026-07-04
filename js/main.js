@@ -6,6 +6,7 @@
 import { initScene } from './scene-renderer.js';
 import PeriodManager from './period-manager.js';
 import { StatsPanel } from './stats-panel.js';
+import AudioManager from './audio-manager.js';
 import { hotspotData, getHotspotsForEra } from '../public/js/hotspot-data.js';
 import { InspectorPanel } from '../public/js/inspector.js';
 
@@ -27,6 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize stats panel
   const statsPanel = new StatsPanel();
+
+  // Initialize audio manager (era music + SFX + ambient)
+  const audioManager = new AudioManager({
+    periodManager,
+    // Slightly shorter crossfade feels better for quick era changes.
+    crossfadeDurationMs: 1800
+  });
+  audioManager.bindVolumeSliders();
 
   // Initialize inspector panel
   const inspectorPanel = new InspectorPanel();
