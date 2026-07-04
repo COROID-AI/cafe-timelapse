@@ -198,12 +198,14 @@ function initScene(container) {
   animate();
 
   // Return objects for external manipulation if needed
-  return {
-    scene,
-    camera,
-    renderer,
-    controls
-  };
+   return {
+     scene,
+     camera,
+     renderer,
+     controls,
+     ambientLight,
+     directionalLight
+   };
 }
 
 // Export for use in other modules (if using ES modules)
