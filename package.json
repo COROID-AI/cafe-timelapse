@@ -5,8 +5,8 @@
   "main": "js/scene-renderer.js",
   "type": "module",
   "scripts": {
-    "build": "node -c js/scene-renderer.js",
-    "lint": "node -c js/scene-renderer.js",
+    "build": "node -c js/*.js",
+    "lint": "node -c js/*.js",
     "start": "http-server",
     "dev": "http-server"
   },
