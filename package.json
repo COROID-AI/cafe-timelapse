@@ -2,21 +2,21 @@
   "name": "timelapse-cafe",
   "version": "1.0.0",
   "description": "A timelapse cafe scene with eras",
-  "main": "js/scene-renderer.js",
   "type": "module",
+  "main": "js/scene-renderer.js",
   "scripts": {
     "build": "node -c js/*.js",
     "lint": "node -c js/*.js",
-    "start": "http-server",
-    "dev": "http-server"
+    "start": "http-server -p $PORT -c-1",
+    "dev": "http-server -p $PORT -c-1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "three": "^0.160.0"
   },
   "devDependencies": {
     "http-server": "^14.1.1"
-  }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
