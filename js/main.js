@@ -7,8 +7,22 @@ import { initScene } from './scene-renderer.js';
 import PeriodManager from './period-manager.js';
 import { StatsPanel } from './stats-panel.js';
 import AudioManager from './audio-manager.js';
-import { getHotspotsForEra } from '../public/js/hotspot-data.js';
-import { InspectorPanel } from '../public/js/inspector.js';
+import { getHotspotsForEra } from './hotspot-data.js';
+
+// Ensure THREE and its helpers exist before scene initialization.
+// In this project, Three.js is expected to be provided as a global (window.THREE)
+// by the hosting HTML template.
+function assertThreeReady() {
+  if (!globalThis.THREE) {
+    throw new Error('THREE is not available on window/globalThis. Ensure Three.js script is loaded.');
+  }
+  if (!globalThis.THREE.OrbitControls) {
+    // OrbitControls is usually attached to the THREE global by the integration layer.
+    // If it is not available, scene navigation will fail.
+    // We don't throw here because the scene may still be visible without controls.
+  }
+}
+import { InspectorPanel } from './inspector.js';
 import { TimelineSlider, eraDescriptions } from './timeline-slider.js';
 
 // Wait for DOM to be ready

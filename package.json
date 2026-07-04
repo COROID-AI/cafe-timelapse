@@ -7,8 +7,8 @@
   "scripts": {
     "build": "node -c js/*.js",
     "lint": "node -c js/*.js",
-    "start": "http-server -p $PORT -c-1",
-    "dev": "http-server -p $PORT -c-1"
+    "start": "http-server -p $PORT -c-1 ./public",
+    "dev": "http-server -p $PORT -c-1 ./public"
   },
   "dependencies": {
     "three": "^0.160.0"
