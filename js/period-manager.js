@@ -116,11 +116,11 @@ export class PeriodManager {
    */
   _triggerTransitionAnimation() {
     this.transitioning = true;
-    // Animation will be handled by CSS/transitions
+    // Animation will be handled by visual transitions
     // Reset transitioning flag after animation duration
     setTimeout(() => {
       this.transitioning = false;
-    }, 500);
+    }, 1500); // Match visual transition duration
   }
 
   /**

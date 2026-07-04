@@ -40,6 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         eraNameElement.textContent = `${era.year} — ${era.name}`;
         eraDescriptionElement.textContent = era.description || '';
       }
+      // Start transition to new era
+      sceneData.startTransitionToEra(era.data, 1500);
     });
 
     // Initialize stats panel

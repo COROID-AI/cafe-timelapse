@@ -9,6 +9,17 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 let scene, camera, renderer, controls;
 let resizeObserver;
 
+// Transition properties
+let transitionStartTime = null;
+let transitionDuration = 1500; // 1.5 seconds
+let isTransitioning = false;
+let startBackground, endBackground;
+let startAmbientColor, endAmbientColor, startAmbientIntensity, endAmbientIntensity;
+let startDirectionalColor, endDirectionalColor, startDirectionalIntensity, endDirectionalIntensity;
+let startWarmLight1Color, endWarmLight1Color, startWarmLight1Intensity, endWarmLight1Intensity;
+let startWarmLight2Color, endWarmLight2Color, startWarmLight2Intensity, endWarmLight2Intensity;
+let startCounterLightColor, endCounterLightColor, startCounterLightIntensity, endCounterLightIntensity;
+
 /**
  * Initialize the 3D scene with café room setup
  * @param {HTMLElement} container - The DOM element to render the scene into
@@ -64,7 +75,19 @@ export function initScene(container) {
     // Handle resize
     setupResizeHandling(container);
 
-    return { scene, camera, renderer, controls };
+    // Return API object with update method
+    return {
+        scene,
+        camera,
+        renderer,
+        controls,
+        startTransitionToEra: (newEraData, duration) => {
+            startTransitionToEra(newEraData, duration);
+        },
+        update: () => {
+            update();
+        }
+    };
 }
 
 /**
@@ -170,12 +193,12 @@ function createCaféRoom() {
 
     // Counter top surface
     const counterTopGeometry = new THREE.PlaneGeometry(counterSize.width, counterSize.depth);
-    const counterTop = new THREE.Mesh(counterTopGeometry, new THREE.MeshStandardMaterial({ 
-        color: 0x4a3c30,
-        roughness: 0.5,
-        metalness: 0.3
-    }));
-    counterTop.rotation.x = -Math.PI / 2;
+        const counterTop = new THREE.Mesh(counterTopGeometry, new THREE.MeshStandardMaterial({ 
+            color: 0x4a3c30,
+            roughness: 0.5,
+            metalness: 0.3
+        }));
+        counterTop.rotation.x = -Math.PI / 2;
     counterTop.position.y = counterSize.height;
     counterTop.receiveShadow = true;
     scene.add(counterTop);
@@ -248,6 +271,7 @@ function addLighting() {
     // Ambient light for overall illumination
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
+    scene.ambientLight = ambientLight; // Store reference
 
     // Directional light (simulating sunlight through window)
     const directionalLight = new THREE.DirectionalLight(0xffd700, 0.8); // Warm golden light
@@ -261,20 +285,114 @@ function addLighting() {
     directionalLight.shadow.camera.bottom = -15;
     directionalLight.shadow.bias = -0.001;
     scene.add(directionalLight);
+    scene.directionalLight = directionalLight; // Store reference
 
     // Additional warm point lights for café ambiance
     const warmLight1 = new THREE.PointLight(0xff8c00, 0.5, 10);
     warmLight1.position.set(-5, 2, 0);
     scene.add(warmLight1);
+    scene.warmLight1 = warmLight1; // Store reference
 
     const warmLight2 = new THREE.PointLight(0xffa500, 0.4, 10);
     warmLight2.position.set(5, 2, -2);
     scene.add(warmLight2);
+    scene.warmLight2 = warmLight2; // Store reference
 
     // Counter light (hanging pendant)
     const counterLight = new THREE.PointLight(0xffd700, 0.6, 8);
     counterLight.position.set(0, 2.5, 2);
     scene.add(counterLight);
+    scene.counterLight = counterLight; // Store reference
+}
+
+/**
+ * Start transition to a new era's lighting and background
+ * @param {Object} newEraData - The period package data for the target era
+ * @param {number} duration - Transition duration in milliseconds
+ */
+function startTransitionToEra(newEraData, duration) {
+    if (isTransitioning) return; // Prevent overlapping transitions
+    
+    isTransitioning = true;
+    transitionDuration = duration !== undefined ? duration : 1500;
+    transitionStartTime = performance.now();
+    
+    // Store start values
+    startBackground = scene.background.clone();
+    endBackground = new THREE.Color(newEraData.lighting.color);
+    
+    startAmbientColor = scene.ambientLight.color.clone();
+    endAmbientColor = new THREE.Color(newEraData.lighting.color);
+    startAmbientIntensity = scene.ambientLight.intensity;
+    endAmbientIntensity = newEraData.lighting.intensity;
+    
+    startDirectionalColor = scene.directionalLight.color.clone();
+    endDirectionalColor = new THREE.Color(newEraData.lighting.color);
+    startDirectionalIntensity = scene.directionalLight.intensity;
+    endDirectionalIntensity = newEraData.lighting.intensity;
+    
+    startWarmLight1Color = scene.warmLight1.color.clone();
+    endWarmLight1Color = new THREE.Color(newEraData.lighting.color);
+    startWarmLight1Intensity = scene.warmLight1.intensity;
+    endWarmLight1Intensity = newEraData.lighting.intensity;
+    
+    startWarmLight2Color = scene.warmLight2.color.clone();
+    endWarmLight2Color = new THREE.Color(newEraData.lighting.color);
+    startWarmLight2Intensity = scene.warmLight2.intensity;
+    endWarmLight2Intensity = newEraData.lighting.intensity;
+    
+    startCounterLightColor = scene.counterLight.color.clone();
+    endCounterLightColor = new THREE.Color(newEraData.lighting.color);
+    startCounterLightIntensity = scene.counterLight.intensity;
+    endCounterLightIntensity = newEraData.lighting.intensity;
+}
+
+/**
+ * Update transition progress
+ */
+function update() {
+    if (!isTransitioning) return;
+    
+    const elapsed = performance.now() - transitionStartTime;
+    const progress = Math.min(elapsed / transitionDuration, 1);
+    const easing = easeInOutCubic(progress);
+    
+    // Update background
+    scene.background.copy(startBackground).lerp(endBackground, easing);
+    
+    // Update ambient light
+    scene.ambientLight.color.copy(startAmbientColor).lerp(endAmbientColor, easing);
+    scene.ambientLight.intensity = startAmbientIntensity + (endAmbientIntensity - startAmbientIntensity) * easing;
+    
+    // Update directional light
+    scene.directionalLight.color.copy(startDirectionalColor).lerp(endDirectionalColor, easing);
+    scene.directionalLight.intensity = startDirectionalIntensity + (endDirectionalIntensity - startDirectionalIntensity) * easing;
+    
+    // Update warm light 1
+    scene.warmLight1.color.copy(startWarmLight1Color).lerp(endWarmLight1Color, easing);
+    scene.warmLight1.intensity = startWarmLight1Intensity + (endWarmLight1Intensity - startWarmLight1Intensity) * easing;
+    
+    // Update warm light 2
+    scene.warmLight2.color.copy(startWarmLight2Color).lerp(endWarmLight2Color, easing);
+    scene.warmLight2.intensity = startWarmLight2Intensity + (endWarmLight2Intensity - startWarmLight2Intensity) * easing;
+    
+    // Update counter light
+    scene.counterLight.color.copy(startCounterLightColor).lerp(endCounterLightColor, easing);
+    scene.counterLight.intensity = startCounterLightIntensity + (endCounterLightIntensity - startCounterLightIntensity) * easing;
+    
+    // End transition
+    if (progress >= 1) {
+        isTransitioning = false;
+    }
+}
+
+/**
+ * Easing function for smooth transition
+ * @param {number} t - Normalized time (0 to 1)
+ * @returns {number} Eased value
+ */
+function easeInOutCubic(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
 /**
