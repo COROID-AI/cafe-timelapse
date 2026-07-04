@@ -1,35 +1,42 @@
 // Era data for 1945
 // @type {Era}
+import { create1945Scene } from '../../js/period1945.js';
+
 const era1945 = {
   year: 1945,
   name: '1945: Post-War Era',
   theme: 'Post-war optimism, beginning of suburban life',
   furniture: [
-    'Wooden radio',
-    'Formica kitchen table',
-    'Metal kitchen chairs',
-    'Wooden icebox',
-    'Coal stove'
+    'Wooden tables with checked tablecloths',
+    'Formica-topped counter stools',
+    'Chrome-and-leather bar stools',
+    'Wall-mounted coat hooks',
+    'Classic wooden chairs with woven seats',
+    'Vintage clock on the wall'
   ],
   decor: [
-    'Victory garden posters',
-    'Handmade quilts',
-    'Enamelware',
-    'Wire baskets',
-    'Cloth curtains'
+    'Traditional stovetop percolator',
+    'Manual espresso machine',
+    'Metal french press carafes',
+    'Ceramic drip filters',
+    'Menu board',
+    'Wall-mounted wireless set/radio',
+    'WWII-era propaganda posters',
+    'Vintage Coca-Cola signs',
+    'Hand-painted chalk menu board',
+    '\'Open\' neon sign'
   ],
   menu: {
     items: [
-      { name: 'Meatloaf', price: 0.35, description: 'Classic meatloaf with gravy' },
-      { name: 'Victory Garden Vegetables', price: 0.25, description: 'Seasonal vegetables from the garden' },
-      { name: 'Apple Pie', price: 0.15, description: 'Homemade apple pie with lattice crust' },
-      { name: 'Coffee', price: 0.05, description: 'Brewed coffee' },
-      { name: 'Milk', price: 0.05, description: 'Fresh milk' }
+      { name: 'Coffee', price: 0.05, description: 'Coffee' },
+      { name: 'Cup of Coffee', price: 0.10, description: 'Cup of Coffee' },
+      { name: 'Pie Slice', price: 0.15, description: 'Pie Slice' },
+      { name: 'Milkshake', price: 0.20, description: 'Milkshake' }
     ],
     board: {
-      special: 'Meatloaf Special - $0.35',
+      special: 'Coffee and Pie - $0.20',
       hours: 'Open 6am-8pm',
-      message: 'Support our troops!'
+      message: 'Buy War Bonds'
     }
   },
   audio: {
@@ -51,9 +58,8 @@ const era1945 = {
   },
   signage: {
     posters: [
-      'War Bonds Poster',
-      'Rosie the Riveter',
-      'Buy War Stamps'
+      'Buy War Bonds',
+      'Keep Your Eyes on the Mark'
     ],
     menuBoard: {
       material: 'wood',
@@ -66,18 +72,20 @@ const era1945 = {
   },
   patrons: {
     outfits: [
-      'Women: dresses with aprons, men: suits and hats',
-      'Children: knitted sweaters, short pants'
+      'Soldiers in uniform',
+      'Women in hats/dresses (typical 1940s fashion)'
     ],
     hairstyles: [
-      'Women: victory rolls, men: short back and sides'
+      'Victory rolls',
+      'Slicked-back hair'
     ],
     gadgets: [
       'Wooden radio',
       'Manual telephone'
     ]
   },
-  counterTech: 'Manual cash register with metal keys'
+  counterTech: 'Manual cash register with metal keys',
+  buildScene: create1945Scene
 };
 
 export default era1945;
