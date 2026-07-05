@@ -104,6 +104,7 @@ const period2025 = {
   music: {
     source: 'phone',
     description: 'Lo-fi chill beats streaming from a phone on a smart speaker dock',
+    audio: { track: 'lofi-chill', ambience: 'cafe-murmur', machine: 'automaticEspresso' },
     x: 1.5, y: 1.1, z: -2.5,
   },
 

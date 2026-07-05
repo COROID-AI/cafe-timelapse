@@ -97,6 +97,7 @@ const period1965 = {
   music: {
     source: 'jukebox',
     description: 'Motown and Beat music on a glowing Wurlitzer jukebox',
+    audio: { track: 'motown-soul', ambience: 'cafe-murmur', machine: 'leverEspresso' },
     x: -3.8, y: 0, z: -1.8,
   },
 

@@ -103,6 +103,7 @@ const period2005 = {
   music: {
     source: 'ipod',
     description: 'Indie and chillout from an iPod in a speaker dock',
+    audio: { track: 'indie-chillout', ambience: 'cafe-murmur', machine: 'automaticEspresso' },
     x: 1.5, y: 1.1, z: -2.5,
   },
 

@@ -101,6 +101,7 @@ const period1985 = {
   music: {
     source: 'boombox',
     description: 'Synth-pop and new-wave from a portable boombox',
+    audio: { track: 'synth-pop', ambience: 'cafe-murmur', machine: 'pumpEspresso' },
     x: -2.0, y: 1.0, z: -2.5,
   },
 

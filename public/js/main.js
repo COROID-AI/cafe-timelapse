@@ -1,6 +1,7 @@
 import { CafeSceneRenderer } from './scene-renderer.js';
 import { TimelineSlider } from './timeline-slider.js';
 import { PeriodManager } from '@/managers/PeriodManager.js';
+import { AudioManager } from './audio-manager.js';
 
 /**
  * Application entry point for the Café Timelapse shell.
@@ -135,3 +136,33 @@ timeline.addEventListener('change', (event) => {
   const { year } = event.detail;
   window.CafeScene.activeYear = year;
 });
+
+/**
+ * AudioManager — layered soundscape (music + ambience + machine SFX) that
+ * cross-fades with each era change.  Audio does not autoplay until the user
+ * interacts with the page (browser autoplay policy).
+ */
+const audioManager = new AudioManager({
+  timeline,
+  initialYear: timeline.getYear(),
+});
+
+// Expose on the public API for debugging / external control.
+window.CafeScene.audioManager = audioManager;
+
+/**
+ * Unlocks the AudioContext on the first user gesture.  Browsers block audio
+ * playback until the user has interacted with the page (click, keypress, or
+ * touch).  This listener fires once, resumes the context, and starts the
+ * initial era's soundscape.
+ */
+const unlockAudio = () => {
+  audioManager.unlock();
+  // Remove the listeners once unlocked — no need to keep firing.
+  window.removeEventListener('pointerdown', unlockAudio);
+  window.removeEventListener('keydown', unlockAudio);
+  window.removeEventListener('touchstart', unlockAudio);
+};
+window.addEventListener('pointerdown', unlockAudio);
+window.addEventListener('keydown', unlockAudio);
+window.addEventListener('touchstart', unlockAudio);

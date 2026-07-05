@@ -94,6 +94,7 @@ const period1945 = {
   music: {
     source: 'wireless',
     description: 'BBC Home Service on a walnut wireless set',
+    audio: { track: 'swing-big-band', ambience: 'cafe-murmur', machine: 'leverEspresso' },
     x: -4.0, y: 0.7, z: -2.0,
   },
 
