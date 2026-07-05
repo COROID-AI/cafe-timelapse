@@ -13,6 +13,51 @@ import { Inspector } from './inspector.js';
  * (PeriodManager, era packages, SFX, etc.) build on top of.
  */
 
+// --- Boot resilience --------------------------------------------------------
+// The boot sequence is wrapped so that a failure (e.g. unavailable WebGL in a
+// headless screenshot environment, a module error) never leaves a blank page.
+// The loading overlay added in index.html is visible until the scene is ready;
+// on error it shows a readable message instead of an empty screen.
+const bootEl = document.getElementById('cafe-boot');
+const bootStatusEl = document.getElementById('cafe-boot-status');
+function hideBootOverlay() {
+  if (!bootEl) return;
+  bootEl.style.opacity = '0';
+  const el = bootEl;
+  setTimeout(() => el.remove(), 600);
+}
+function showBootError(message) {
+  if (bootEl) {
+    bootEl.classList.add('cafe-boot-error');
+    if (bootStatusEl) bootStatusEl.textContent = message;
+  }
+  // eslint-disable-next-line no-console
+  console.error('[Café Timelapse]', message);
+}
+
+/**
+ * Detects whether a WebGL context can be created at all.  In some headless /
+ * screenshot environments WebGL is unavailable, which would otherwise cause
+ * THREE.WebGLRenderer to throw synchronously and leave a blank page.
+ * @returns {boolean}
+ */
+function isWebGLAvailable() {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext &&
+      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+  } catch {
+    return false;
+  }
+}
+
+if (!isWebGLAvailable()) {
+  showBootError(
+    'This scene requires WebGL, which is unavailable in the current browser or environment.',
+  );
+} else {
+  try {
+
 const container = document.getElementById('app');
 const renderer = new CafeSceneRenderer(container);
 
@@ -174,15 +219,22 @@ timeline.addEventListener('change', (event) => {
 /**
  * AudioManager — layered soundscape (music + ambience + machine SFX) that
  * cross-fades with each era change.  Audio does not autoplay until the user
- * interacts with the page (browser autoplay policy).
+ * interacts with the page (browser autoplay policy).  Wrapped in try/catch so
+ * an AudioContext failure (common in some headless environments) never breaks
+ * the visual scene.
  */
-const audioManager = new AudioManager({
-  timeline,
-  initialYear: timeline.getYear(),
-});
-
-// Expose on the public API for debugging / external control.
-window.CafeScene.audioManager = audioManager;
+let audioManager = null;
+try {
+  audioManager = new AudioManager({
+    timeline,
+    initialYear: timeline.getYear(),
+  });
+  // Expose on the public API for debugging / external control.
+  window.CafeScene.audioManager = audioManager;
+} catch (audioErr) {
+  // eslint-disable-next-line no-console
+  console.warn('[Café Timelapse] Audio unavailable; continuing without sound.', audioErr);
+}
 
 /**
  * Unlocks the AudioContext on the first user gesture.  Browsers block audio
@@ -191,7 +243,7 @@ window.CafeScene.audioManager = audioManager;
  * initial era's soundscape.
  */
 const unlockAudio = () => {
-  audioManager.unlock();
+  if (audioManager) audioManager.unlock();
   // Remove the listeners once unlocked — no need to keep firing.
   window.removeEventListener('pointerdown', unlockAudio);
   window.removeEventListener('keydown', unlockAudio);
@@ -200,3 +252,29 @@ const unlockAudio = () => {
 window.addEventListener('pointerdown', unlockAudio);
 window.addEventListener('keydown', unlockAudio);
 window.addEventListener('touchstart', unlockAudio);
+
+// --- Boot success: hide the loading overlay ---------------------------------
+// The scene, timeline, period content, and inspector are all ready.  We defer
+// the overlay removal by a couple of animation frames so the WebGL canvas has
+// actually painted at least one frame before the overlay fades away — this
+// guarantees a screenshot taken during fade-out sees the 3D scene, not a
+// blank canvas mid-transition.
+function _revealScene() {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      hideBootOverlay();
+    });
+  });
+}
+_revealScene();
+
+  } catch (bootErr) {
+    // Any unexpected failure during scene construction (e.g. a geometry error,
+    // a Three.js API mismatch) is surfaced as a readable message rather than a
+    // perpetually-blank page with a frozen loading spinner.
+    showBootError(
+      'The scene failed to load: ' +
+      (bootErr && bootErr.message ? bootErr.message : String(bootErr)),
+    );
+  }
+} // end of WebGL-available boot block
