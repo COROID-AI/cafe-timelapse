@@ -771,6 +771,87 @@ export class CafeSceneRenderer {
   }
 
   /**
+   * Returns the currently mounted era content group, or null.
+   * @returns {THREE.Object3D | null}
+   */
+  getMountedEra() {
+    return this._mountedEra || null;
+  }
+
+  /**
+   * Returns the persistent era group parent (the layer all era content is
+   * added to).  Used by PeriodManager for cross-fade transitions.
+   * @returns {THREE.Group}
+   */
+  getEraGroup() {
+    return this.eraGroup;
+  }
+
+  /**
+   * Adds an era content group to the scene *without* removing the current one.
+   * Intended for cross-fade: the old group stays visible while the new one is
+   * faded in.  Does not update `_mountedEra` — call {@link setActiveEra} after
+   * the transition completes.
+   *
+   * @param {THREE.Object3D} group
+   * @returns {void}
+   */
+  mountEraChild(group) {
+    this.eraGroup.add(group);
+  }
+
+  /**
+   * Removes + disposes a specific era child group.  Used after a cross-fade to
+   * clean up the outgoing era without touching the incoming one.
+   *
+   * @param {THREE.Object3D} group
+   * @returns {void}
+   */
+  disposeEraChild(group) {
+    if (!group) return;
+    this._disposeObject(group);
+    this.eraGroup.remove(group);
+  }
+
+  /**
+   * Designates a mounted group as the active era (updates internal tracking).
+   * Called after a cross-fade completes.
+   *
+   * @param {THREE.Object3D} group
+   * @returns {void}
+   */
+  setActiveEra(group) {
+    this._mountedEra = group;
+  }
+
+  /**
+   * Sets the opacity of every mesh inside the era content layer, enabling
+   * smooth cross-fade transitions between eras.
+   *
+   * Materials that were transparent before the call are left untouched
+   * (window glass, etc.). Meshes whose material opacity cannot be animated
+   * (e.g. un-initialised) are skipped safely.
+   *
+   * @param {number} opacity - Target opacity in 0..1.
+   * @returns {void}
+   */
+  setEraOpacity(opacity) {
+    const o = Math.max(0, Math.min(1, opacity));
+    this.eraGroup.traverse((node) => {
+      if (!node.isMesh) return;
+      const mat = node.material;
+      const apply = (m) => {
+        if (!m) return;
+        m.transparent = o < 1 || m.transparent;
+        m.opacity = o;
+        m.depthWrite = o >= 1;
+      };
+      if (Array.isArray(mat)) mat.forEach(apply);
+      else apply(mat);
+    });
+  }
+
+  /**
    * Recursively disposes geometries + materials of an Object3D subtree.
    * @private
    * @param {THREE.Object3D} obj
@@ -780,8 +861,19 @@ export class CafeSceneRenderer {
       if (node.isMesh) {
         node.geometry?.dispose?.();
         const mat = node.material;
-        if (Array.isArray(mat)) mat.forEach((m) => m?.dispose?.());
-        else mat?.dispose?.();
+        const disposeMaterial = (m) => {
+          if (!m) return;
+          // Dispose all texture maps attached to the material.
+          for (const key of Object.keys(m)) {
+            const val = m[key];
+            if (val && typeof val === 'object' && typeof val.isTexture === 'boolean' && val.isTexture) {
+              val.dispose?.();
+            }
+          }
+          m.dispose?.();
+        };
+        if (Array.isArray(mat)) mat.forEach(disposeMaterial);
+        else disposeMaterial(mat);
       }
     });
   }

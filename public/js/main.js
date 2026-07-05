@@ -1,5 +1,6 @@
 import { CafeSceneRenderer } from './scene-renderer.js';
 import { TimelineSlider } from './timeline-slider.js';
+import { PeriodManager } from '@/managers/PeriodManager.js';
 
 /**
  * Application entry point for the Café Timelapse shell.
@@ -62,11 +63,75 @@ window.CafeScene = {
   unmountEra() {
     return renderer.unmountEra();
   },
+
+  /**
+   * Returns the currently mounted era content group, or null.
+   * @returns {THREE.Object3D | null}
+   */
+  getMountedEra() {
+    return renderer.getMountedEra();
+  },
+
+  /**
+   * Returns the persistent era group layer.  Used by PeriodManager for
+   * cross-fade transitions.
+   * @returns {THREE.Group}
+   */
+  getEraGroup() {
+    return renderer.getEraGroup();
+  },
+
+  /**
+   * Adds an era child group without removing the current one (for cross-fade).
+   * @param {THREE.Object3D} group
+   * @returns {void}
+   */
+  mountEraChild(group) {
+    return renderer.mountEraChild(group);
+  },
+
+  /**
+   * Removes + disposes a specific era child group (post cross-fade cleanup).
+   * @param {THREE.Object3D} group
+   * @returns {void}
+   */
+  disposeEraChild(group) {
+    return renderer.disposeEraChild(group);
+  },
+
+  /**
+   * Designates a mounted group as the active era after a cross-fade.
+   * @param {THREE.Object3D} group
+   * @returns {void}
+   */
+  setActiveEra(group) {
+    return renderer.setActiveEra(group);
+  },
+
+  /**
+   * Sets the opacity of every mesh inside the era content layer for
+   * cross-fade transitions.
+   * @param {number} opacity - Target opacity in 0..1.
+   * @returns {void}
+   */
+  setEraOpacity(opacity) {
+    return renderer.setEraOpacity(opacity);
+  },
 };
 
+/**
+ * PeriodManager — subscribes to the timeline and orchestrates era content
+ * mounting + 1.5s cross-fade transitions.  Mounts the initial era on
+ * construction.
+ */
+const periodManager = new PeriodManager({
+  timeline,
+  sceneApi: window.CafeScene,
+  initialYear: timeline.getYear(),
+});
+
+// Keep activeYear in sync after each transition settles.
 timeline.addEventListener('change', (event) => {
   const { year } = event.detail;
   window.CafeScene.activeYear = year;
-  // Era content packages are authored + wired by a downstream task
-  // (PeriodManager). The shell simply records the selection here.
 });
