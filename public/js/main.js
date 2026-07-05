@@ -2,6 +2,7 @@ import { CafeSceneRenderer } from './scene-renderer.js';
 import { TimelineSlider } from './timeline-slider.js';
 import { PeriodManager } from '@/managers/PeriodManager.js';
 import { AudioManager } from './audio-manager.js';
+import { Inspector } from './inspector.js';
 
 /**
  * Application entry point for the Café Timelapse shell.
@@ -118,6 +119,16 @@ window.CafeScene = {
   setEraOpacity(opacity) {
     return renderer.setEraOpacity(opacity);
   },
+
+  /**
+   * Applies a per-era lighting profile to the persistent base lights so the
+   * overall mood of the room visibly changes when the timeline slides.
+   * @param {number} year
+   * @returns {void}
+   */
+  applyLightingProfile(year) {
+    return renderer.applyLightingProfile(year);
+  },
 };
 
 /**
@@ -131,10 +142,33 @@ const periodManager = new PeriodManager({
   initialYear: timeline.getYear(),
 });
 
+/**
+ * Inspector — interactive hotspot markers + detail side panel.  Renders glowing
+ * markers at key scene objects (menu board, coffee machine, music source,
+ * counter technology, one patron) for the active era.  Hover shows a label;
+ * click opens a side panel with an era-specific description, price list, or
+ * product detail.  Markers are rebuilt on every era change.
+ */
+const inspector = new Inspector({
+  camera: renderer.camera,
+  domElement: renderer.renderer.domElement,
+  scene: renderer.scene,
+});
+inspector.setEra(timeline.getYear());
+renderer.addUpdateCallback(inspector.update);
+window.CafeScene.inspector = inspector;
+
+// Apply the initial era's distinct lighting profile.
+window.CafeScene.applyLightingProfile(timeline.getYear());
+
 // Keep activeYear in sync after each transition settles.
 timeline.addEventListener('change', (event) => {
   const { year } = event.detail;
   window.CafeScene.activeYear = year;
+  // Rebuild hotspot markers for the newly selected era.
+  inspector.setEra(year);
+  // Tune the base lighting mood for the new era.
+  window.CafeScene.applyLightingProfile(year);
 });
 
 /**

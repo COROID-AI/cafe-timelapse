@@ -103,8 +103,50 @@ function ensureUiStyles() {
       font-size: 12px; pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
     }
     .cafe-hint.is-visible { opacity: 1; }
+
+    .cafe-fps {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 50;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(20,16,12,0.62);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #f3ece0;
+      font-family: "SF Mono", "Fira Code", Consolas, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .cafe-fps.is-visible { opacity: 1; }
+    .cafe-fps .fps-ok { color: #4aaa8a; }
+    .cafe-fps .fps-warn { color: #ffd166; }
+    .cafe-fps .fps-bad { color: #ef6f6c; }
   `;
   document.head.appendChild(style);
+}
+
+/**
+ * Creates a performance FPS counter overlay (hidden by default, shown when
+ * `?fps=1` is in the URL or `CafeScene.showFps(true)` is called).
+ *
+ * @returns {HTMLDivElement}
+ */
+function createFpsCounter() {
+  const el = document.createElement('div');
+  el.className = 'cafe-fps';
+  el.textContent = 'FPS --';
+  document.body.appendChild(el);
+  // Show automatically if the URL requests it (for QA profiling).
+  if (new URLSearchParams(window.location.search).has('fps')) {
+    el.classList.add('is-visible');
+  }
+  return el;
 }
 
 /**
@@ -213,7 +255,9 @@ export class CafeSceneRenderer {
 
     // --- Renderer -----------------------------------------------------------
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    // Cap pixel ratio at 2 — high-DPI values (3x) double fragment work and
+    // tank FPS on mid-range laptops while looking virtually identical.
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
@@ -259,9 +303,35 @@ export class CafeSceneRenderer {
     this._animate = this._animate.bind(this);
     this.renderer.setAnimationLoop(this._animate);
 
+    // --- Per-frame update callbacks (e.g. inspector markers) ---------------
+    /** @type {Array<() => void>} */
+    this._updateCallbacks = [];
+
+    // --- Performance / FPS counter -----------------------------------------
+    this._fpsEl = createFpsCounter();
+    this._fpsFrames = 0;
+    this._fpsAccum = 0;
+    this._fpsVisible = new URLSearchParams(window.location.search).has('fps');
+
     // --- Resize -------------------------------------------------------------
     this._onResize = this._onResize.bind(this);
     window.addEventListener('resize', this._onResize);
+  }
+
+  /**
+   * Registers a callback invoked at the end of every animation frame, after
+   * the scene is rendered.  Used by the Inspector to project markers and
+   * update tooltips.  Returns an unsubscribe function.
+   *
+   * @param {() => void} cb
+   * @returns {() => void} Unsubscribe.
+   */
+  addUpdateCallback(cb) {
+    this._updateCallbacks.push(cb);
+    return () => {
+      const i = this._updateCallbacks.indexOf(cb);
+      if (i >= 0) this._updateCallbacks.splice(i, 1);
+    };
   }
 
   // -------------------------------------------------------------------------
@@ -269,11 +339,11 @@ export class CafeSceneRenderer {
   // -------------------------------------------------------------------------
   /** @private */
   _buildLights() {
-    const hemi = new THREE.HemisphereLight(0xfff1d6, 0x3b2a1a, 0.55);
-    this.scene.add(hemi);
+    this.hemiLight = new THREE.HemisphereLight(0xfff1d6, 0x3b2a1a, 0.55);
+    this.scene.add(this.hemiLight);
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.18);
-    this.scene.add(ambient);
+    this.ambientLight = new THREE.AmbientLight(0xffffff, 0.18);
+    this.scene.add(this.ambientLight);
 
     // Warm key light (the floor lamp is added in _buildRoom; this is a soft
     // ceiling fill so the room reads even before era lighting is mounted).
@@ -283,6 +353,81 @@ export class CafeSceneRenderer {
     this.keyLight.shadow.mapSize.set(1024, 1024);
     this.keyLight.shadow.bias = -0.0004;
     this.scene.add(this.keyLight);
+  }
+
+  /**
+   * Tuning constants for each era's base lighting profile.
+   *
+   * Each era has a distinct combination of hemisphere colour, ambient
+   * intensity, key-light colour, key-light intensity, and tone-mapping
+   * exposure so the overall mood of the room visibly changes when the
+   * timeline slides.
+   *
+   * @private
+   * @type {Record<number, Object>}
+   */
+  static ERA_LIGHTING_PROFILES = {
+    1945: {
+      // Warm, dim incandescent — candle-like amber.
+      hemiSky: 0xfff1d6, hemiGround: 0x3b2a1a, hemiIntensity: 0.45,
+      ambientColor: 0xffd9a0, ambientIntensity: 0.14,
+      keyColor: 0xffd9a0, keyIntensity: 0.85, exposure: 0.95,
+    },
+    1965: {
+      // Warmer mustard / gold — golden-age diner glow.
+      hemiSky: 0xffe8c0, hemiGround: 0x4a3a2a, hemiIntensity: 0.55,
+      ambientColor: 0xffe8c0, ambientIntensity: 0.18,
+      keyColor: 0xffe8c0, keyIntensity: 1.05, exposure: 1.0,
+    },
+    1985: {
+      // Cool harsh fluorescent — bluish, bright, slightly clinical.
+      hemiSky: 0xf0f0ff, hemiGround: 0x2a2a3a, hemiIntensity: 0.7,
+      ambientColor: 0xe8e8ff, ambientIntensity: 0.24,
+      keyColor: 0xf0f0ff, keyIntensity: 1.2, exposure: 1.1,
+    },
+    2005: {
+      // Warm halogen spotlight — soft, inviting, slightly yellow.
+      hemiSky: 0xfff5dc, hemiGround: 0x3a3a30, hemiIntensity: 0.5,
+      ambientColor: 0xfff5dc, ambientIntensity: 0.16,
+      keyColor: 0xfff5dc, keyIntensity: 1.0, exposure: 1.0,
+    },
+    2025: {
+      // Clean warm-white LED — bright, crisp, with a green accent tint.
+      hemiSky: 0xfff0d8, hemiGround: 0x2a3a32, hemiIntensity: 0.6,
+      ambientColor: 0xfff0d8, ambientIntensity: 0.2,
+      keyColor: 0xfff0d8, keyIntensity: 1.15, exposure: 1.05,
+    },
+  };
+
+  /**
+   * Applies a per-era lighting profile to the persistent base lights
+   * (hemisphere, ambient, key point light) and tone-mapping exposure.
+   *
+   * Era-specific fixture lights (pendants, fluorescents) are added by the era
+   * builder as part of the era content group.  This method tunes the *base*
+   * ambient atmosphere so the overall mood visibly shifts between eras.
+   *
+   * @param {number} year
+   * @returns {void}
+   */
+  applyLightingProfile(year) {
+    const profile = CafeSceneRenderer.ERA_LIGHTING_PROFILES[year]
+      ?? CafeSceneRenderer.ERA_LIGHTING_PROFILES[1945];
+
+    if (this.hemiLight) {
+      this.hemiLight.color.setHex(profile.hemiSky);
+      this.hemiLight.groundColor.setHex(profile.hemiGround);
+      this.hemiLight.intensity = profile.hemiIntensity;
+    }
+    if (this.ambientLight) {
+      this.ambientLight.color.setHex(profile.ambientColor);
+      this.ambientLight.intensity = profile.ambientIntensity;
+    }
+    if (this.keyLight) {
+      this.keyLight.color.setHex(profile.keyColor);
+      this.keyLight.intensity = profile.keyIntensity;
+    }
+    this.renderer.toneMappingExposure = profile.exposure;
   }
 
   // -------------------------------------------------------------------------
@@ -892,6 +1037,36 @@ export class CafeSceneRenderer {
     }
 
     this.renderer.render(this.scene, this.camera);
+
+    // FPS tracking (updates ~2x per second).
+    if (this._fpsVisible) {
+      this._fpsFrames++;
+      this._fpsAccum += dt;
+      if (this._fpsAccum >= 0.5) {
+        const fps = Math.round(this._fpsFrames / this._fpsAccum);
+        const cls = fps >= 30 ? 'fps-ok' : fps >= 20 ? 'fps-warn' : 'fps-bad';
+        this._fpsEl.innerHTML = `FPS <span class="${cls}">${fps}</span>`;
+        this._fpsFrames = 0;
+        this._fpsAccum = 0;
+      }
+    }
+
+    // Run registered per-frame update callbacks (inspector markers, etc.).
+    if (this._updateCallbacks.length > 0) {
+      for (const cb of this._updateCallbacks) {
+        try { cb(); } catch (e) { /* keep loop alive on callback error */ }
+      }
+    }
+  }
+
+  /**
+   * Shows or hides the FPS performance counter overlay.
+   * @param {boolean} visible
+   * @returns {void}
+   */
+  showFps(visible) {
+    this._fpsVisible = visible;
+    this._fpsEl.classList.toggle('is-visible', visible);
   }
 
   /**
@@ -948,6 +1123,7 @@ export class CafeSceneRenderer {
     this._walkBtn?.remove();
     this._crosshair?.remove();
     this._hint?.remove();
+    this._fpsEl?.remove();
     this.renderer.dispose();
     if (this.renderer.domElement.parentNode) {
       this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
