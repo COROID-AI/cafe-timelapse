@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Inline favicon avoids a stray 404 for /favicon.ico. -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%E2%98%95%3C/text%3E%3C/svg%3E"
+    />
+    <title>Café Timelapse</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #111;
+        font-family: system-ui, sans-serif;
+      }
+      #app {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      /* Loading overlay — visible immediately, before JS boots.  Ensures the
+         page is never blank even if WebGL or a module fails to load. */
+      #cafe-boot {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 50% 40%, #2a2018 0%, #14110d 100%);
+        color: #f3ece0;
+        font-family: system-ui, sans-serif;
+        transition: opacity 0.5s ease;
+      }
+      #cafe-boot-card {
+        text-align: center;
+        max-width: 420px;
+        padding: 0 24px;
+      }
+      #cafe-boot-icon {
+        font-size: 56px;
+        margin-bottom: 12px;
+      }
+      #cafe-boot-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 8px;
+        color: #ffd9a0;
+      }
+      #cafe-boot-sub {
+        font-size: 14px;
+        color: rgba(243, 236, 224, 0.6);
+        margin: 0 0 28px;
+        line-height: 1.5;
+      }
+      #cafe-boot-spinner {
+        width: 36px;
+        height: 36px;
+        margin: 0 auto 14px;
+        border: 3px solid rgba(255, 217, 160, 0.2);
+        border-top-color: #ffd9a0;
+        border-radius: 50%;
+        animation: cafe-spin 0.9s linear infinite;
+      }
+      @keyframes cafe-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #cafe-boot-status {
+        font-size: 13px;
+        color: rgba(243, 236, 224, 0.5);
+        margin: 0;
+      }
+      #cafe-boot.cafe-boot-error #cafe-boot-spinner {
+        display: none;
+      }
+      #cafe-boot.cafe-boot-error #cafe-boot-status {
+        color: #ef6f6c;
+        max-width: 380px;
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Loading overlay — visible before JS boots so the page is never blank. -->
+      <div id="cafe-boot">
+        <div id="cafe-boot-card">
+          <div id="cafe-boot-icon">☕</div>
+          <h1 id="cafe-boot-title">Café Timelapse</h1>
+          <p id="cafe-boot-sub">Explore a café interior across five decades — 1945 to 2025. Drag to look around, use the timeline to travel through time.</p>
+          <div id="cafe-boot-spinner"></div>
+          <p id="cafe-boot-status">Loading scene…</p>
+        </div>
+      </div>
+    </div>
+    <!-- Module entry; bundled by Vite from public/js/main.js -->
+    <script type="module" src="/js/main.js"></script>
+  </body>
+</html>
