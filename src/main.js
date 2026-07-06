@@ -109,6 +109,7 @@ function init() {
   const startBtn = $('loading-start');
 
   function dismissLoading() {
+    if (!loadingScreen.classList.contains('is-visible')) return;
     loadingScreen.classList.remove('is-visible');
     document.body.setAttribute('data-interactive', 'true');
     // Unlock audio on this gesture.
@@ -125,7 +126,17 @@ function init() {
     if (loadingScreen.classList.contains('is-visible')) {
       dismissLoading();
     }
-  }, { once: true });
+  });
+
+  // Auto-dismiss the loading overlay shortly after the scene is built so the 3D
+  // café is visible immediately. Audio remains gated until the first user
+  // gesture (autoplay policy); the overlay prompt + toggle handle that.
+  setTimeout(() => {
+    if (loadingScreen.classList.contains('is-visible')) {
+      loadingScreen.classList.remove('is-visible');
+      document.body.setAttribute('data-interactive', 'true');
+    }
+  }, 1500);
 
   // --- Periodic ambient SFX for life (clinks, chimes) ---
   setInterval(() => {

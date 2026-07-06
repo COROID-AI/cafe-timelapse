@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 
 /**
+ * Render a menu / sign / neon / QR texture onto a canvas-backed CanvasTexture.
  * @param {{
  *   title?:string,
  *   lines?:Array<{left:string,right:string}>,
@@ -15,10 +16,11 @@ import * as THREE from 'three';
  *   subtitle?:string,
  *   neon?:boolean,
  *   qr?:boolean
- * }} o
+ * }} options
  * @returns {THREE.CanvasTexture}
  */
-export function createTextTexture(o = {}) {
+export function createTextTexture(options) {
+  const o = options || {};
   const W = 512;
   const H = 384;
   const canvas = document.createElement('canvas');
