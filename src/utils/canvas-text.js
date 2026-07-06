@@ -235,8 +235,8 @@ export function createFloorTexture(o) {
  * Tile floor texture (checkered) for 1985 / 1965.
  * @param {{a:number, b:number, cells?:number}} o
  */
-export function createTileTexture(o) {
-  const opts = o || {};
+export function createTileTexture(cfg = {}) {
+  const opts = cfg;
   const size = 512;
   const canvas = document.createElement('canvas');
   canvas.width = size;
