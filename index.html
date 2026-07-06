@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="A 3D café interior that transforms across five eras — 1945 to 2025." />
+    <title>Café Timelapse · 1945–2025</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%98%95%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/styles/app.css" />
+  </head>
+  <body data-era="1945" data-interactive="false">
+    <!-- Persistent black backdrop painted by CSS before Three.js boots. -->
+    <div id="scene-root" role="img" aria-label="3D café interior scene"></div>
+
+    <!-- Loading / audio-gesture screen -->
+    <div id="loading-screen" class="is-visible">
+      <div class="loading-inner">
+        <div class="loading-mark" aria-hidden="true">
+          <span class="loading-cup">☕</span>
+        </div>
+        <h1 class="loading-title">Café Timelapse</h1>
+        <p class="loading-sub">Five decades of coffee, in one room.</p>
+        <button id="loading-start" class="loading-start" type="button">
+          <span class="loading-start-label">Enter the Café</span>
+          <span class="loading-start-hint">Click to start · enables audio</span>
+        </button>
+        <div class="loading-bar"><div class="loading-bar-fill" id="loading-bar-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- Timeline slider HUD -->
+    <div id="timeline-root" class="timeline" aria-hidden="true">
+      <div class="timeline-rail" id="timeline-rail"></div>
+      <div class="timeline-track" id="timeline-track">
+        <div class="timeline-track-fill" id="timeline-track-fill"></div>
+      </div>
+      <button class="timeline-thumb" id="timeline-thumb" type="button" aria-label="Select year"></button>
+      <div class="timeline-stops" id="timeline-stops"></div>
+    </div>
+
+    <!-- Inspector overlay (side panel) -->
+    <div id="inspector-root" class="inspector" aria-hidden="true">
+      <div class="inspector-scrim" id="inspector-scrim"></div>
+      <aside class="inspector-panel" id="inspector-panel" role="dialog" aria-modal="true" aria-labelledby="inspector-title">
+        <button class="inspector-close" id="inspector-close" type="button" aria-label="Back to scene">×</button>
+        <div class="inspector-era" id="inspector-era"></div>
+        <h2 class="inspector-title" id="inspector-title"></h2>
+        <p class="inspector-body" id="inspector-body"></p>
+        <button class="inspector-back" id="inspector-back" type="button">Back to scene</button>
+      </aside>
+    </div>
+
+    <!-- Audio toggle -->
+    <button id="audio-toggle" class="audio-toggle" type="button" aria-pressed="false" title="Mute / unmute audio">
+      <span class="audio-icon audio-icon-on" aria-hidden="true">🔊</span>
+      <span class="audio-icon audio-icon-off" aria-hidden="true">🔇</span>
+    </button>
+
+    <!-- Era badge -->
+    <div id="era-badge" class="era-badge" aria-hidden="true">
+      <span class="era-badge-year" id="era-badge-year">1945</span>
+      <span class="era-badge-name" id="era-badge-name">Post-War</span>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

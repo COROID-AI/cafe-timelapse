@@ -1,12 +1,49 @@
-# Café Time Period Timelapse
+# Café Timelapse
 
-Create a 3D scene of a café interior. Emphasis on detail is very important.
+A 3D café interior that transforms across five eras — 1945, 1965, 1985, 2005, and 2025 — via a timeline slider. Every detail changes: furniture, coffee equipment, menu and prices, music source, wall art, lighting, payment technology, and the patrons themselves.
 
-The scene must have a timeline slider in the top, with the following options:
-1945, 1965, 1985, 2005 and 2025
+## Run
 
-The point of the scene is to be able to select any of the 5 different years, and the café will transform in front of your eyes to the time period selected from the slider.
+```bash
+npm install
+npm run dev
+```
 
-Time period should affect every detail of the café. The furniture and decor, the coffee machines and brewing equipment, the menu board and its prices, the music and what it plays from (wireless set, jukebox, boombox, iPod, phone), the posters and advertisements on the walls, the tableware, the signage and lighting, the technology at the counter (from manual till to contactless), and the outfits, hairstyles and gadgets of the patrons — everything.
+Open the printed URL (default `http://localhost:5173`). Click **"Enter the Café"** to start — this first click also unlocks audio per browser autoplay policy.
 
-This must be a polished high end scene with SFX (period-appropriate music, the murmur of conversation, the hiss and clatter of the coffee machine), the ability to navigate around and look at things up close, etc. Go all out.
+### Controls
+
+- **Timeline slider** (top): click a year, drag the thumb, or use **←/→/Home/End** to switch eras.
+- **Camera**: drag to orbit, scroll/pinch to zoom, right-drag to pan (clamped to the room).
+- **Hotspots**: click the glowing markers (or the objects themselves) to open the inspector panel. **Esc** or click outside to close.
+
+### Audio
+
+Audio is fully procedural (Web Audio API synthesis) — no licensed assets are shipped. Period-style music loops, ambient crowd murmur, and coffee-machine SFX are generated at runtime. Audio starts after your first click anywhere on the page (browser autoplay policy).
+
+#### Adding your own music
+
+Drop royalty-free / CC0 tracks into `public/assets/audio/` named by era — e.g. `1945.mp3`, `1965.ogg`. The AudioManager will use them instead of the synthesized loops. Supported formats: `.mp3`, `.ogg`, `.wav`.
+
+## Build
+
+```bash
+npm run build      # produces dist/
+npm run preview    # serves the production build
+```
+
+## Tech Stack
+
+- **Vite** + **Three.js** (vanilla ES modules — no React, no UI framework)
+- Hand-styled CSS HUD with per-era theming via `body[data-era]` custom properties
+- Procedural geometry and audio — zero external image/audio assets required
+
+## Eras
+
+| Year | Era | Music Source | Coffee Equipment | Payment |
+|------|-----|-------------|-----------------|---------|
+| 1945 | Post-War Austerity | Cathedral radio | Stove-top percolator | Crank cash register |
+| 1965 | Mid-Century Modern | Wurlitzer jukebox | Lever espresso machine | Adding-machine register |
+| 1985 | Neon 80s | Boombox | Two-group espresso | Digital register |
+| 2005 | Third-Wave Minimalist | iPod dock | Commercial espresso + pour-over | Flat-screen POS |
+| 2025 | Modern Sustainable | Bluetooth speaker | Modbar under-counter brewer | Contactless POS |

@@ -1,0 +1,4 @@
+# Optional royalty-free / CC0 audio overrides.
+# AudioManager looks for {era}.{mp3|ogg} here (e.g. 1945.mp3) and falls back to
+# fully procedural synthesis when no file is present, so the demo works with zero
+# licensed assets. Drop your own CC0 tracks here to replace the synthesized loops.
