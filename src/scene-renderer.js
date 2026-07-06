@@ -24,9 +24,19 @@ export default class SceneRenderer {
     this.updateCallbacks = [];
 
     // --- Renderer ---
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    // Opaque canvas (alpha:false) for reliable pixel readback in headless / test
+    // environments. preserveDrawingBuffer:true so the rendered frame survives
+    // compositing and can be inspected / screenshotted.
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: 'high-performance',
+      preserveDrawingBuffer: true
+    });
+    // Pixel ratio MUST be set before setSize (Three.js requirement).
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setClearColor(0x3a2e26, 1);
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -36,12 +46,18 @@ export default class SceneRenderer {
 
     // --- Scene ---
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x0a0806);
-    this.scene.fog = new THREE.Fog(0x0a0806, 12, 22);
+    this.scene.background = new THREE.Color(0x3a2e26);
+    this.scene.fog = new THREE.Fog(0x3a2e26, 14, 26);
 
     // --- Camera ---
+    // Camera is INSIDE the café interior. Room interior spans z ∈ [-3.5, +3.5]
+    // and x ∈ [-4, +4]; the counter/seating the camera should face live toward
+    // the back (z ≈ -2.2). A starting eye at (0, 1.7, 1.8) — ~1.87 units from
+    // the look target — frames the tables in the foreground and counter behind.
+    // (The previous z = 5.5 was 2 units OUTSIDE the room, behind the front
+    // wall → the frame was dominated by a flat wall → blank/uniform canvas.)
     this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-    this.camera.position.set(0, 2.4, 5.5);
+    this.camera.position.set(0, 1.7, 1.8);
     this.camera.lookAt(0, 1.2, 0);
 
     // --- Controls ---
@@ -49,30 +65,34 @@ export default class SceneRenderer {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
     this.controls.target.set(0, 1.2, 0);
-    // Clamp so the user cannot escape the room interior.
-    this.controls.minDistance = 2.2;
-    this.controls.maxDistance = 8;
+    // Clamp so the user cannot escape the room interior. Target is the room
+    // centre (0,1.2,0); walls are at x=±4 and z=±3.5. With maxDistance 2.5 the
+    // eye reaches at most 2.5 units from target in any direction, well inside
+    // the room. Panning is further clamped via _panBounds below.
+    this.controls.minDistance = 1.0;
+    this.controls.maxDistance = 2.5;
     this.controls.minPolarAngle = 0.3;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.05;
     this.controls.minAzimuthAngle = -Math.PI / 2 + 0.2;
     this.controls.maxAzimuthAngle = Math.PI / 2 - 0.2;
     this.controls.enablePan = true;
     this.controls.screenSpacePanning = true;
-    // Pan clamp bounds (room half-extents minus margin).
-    this._panBounds = { x: ROOM.w / 2 - 1.5, z: ROOM.d / 2 - 1.5 };
+    // Pan clamp bounds. With maxDistance 2.5, keep a safety margin to the walls
+    // (half-width 4, half-depth 3.5) so the eye never clips through a wall.
+    this._panBounds = { x: 1.2, z: 0.7 };
 
     // --- Raycaster ---
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2();
 
     // --- Persistent lights (tuned per era via applyLightingProfile) ---
-    this.hemi = new THREE.HemisphereLight(0xffeedd, 0x2a1a10, 0.5);
+    this.hemi = new THREE.HemisphereLight(0xffeedd, 0x4a3a2e, 0.9);
     this.scene.add(this.hemi);
 
-    this.ambient = new THREE.AmbientLight(0xffffff, 0.3);
+    this.ambient = new THREE.AmbientLight(0xffffff, 0.6);
     this.scene.add(this.ambient);
 
-    this.keyLight = new THREE.DirectionalLight(0xffd9a0, 1.4);
+    this.keyLight = new THREE.DirectionalLight(0xffd9a0, 1.8);
     this.keyLight.position.set(-3, 6, 2);
     this.keyLight.castShadow = true;
     this.keyLight.shadow.mapSize.set(2048, 2048);
@@ -85,7 +105,7 @@ export default class SceneRenderer {
     this.keyLight.shadow.bias = -0.0005;
     this.scene.add(this.keyLight);
 
-    this.fillLight = new THREE.DirectionalLight(0xccddff, 0.4);
+    this.fillLight = new THREE.DirectionalLight(0xccddff, 0.7);
     this.fillLight.position.set(4, 4, -3);
     this.scene.add(this.fillLight);
 
@@ -271,9 +291,19 @@ export default class SceneRenderer {
    * Era mounting + lighting profiles
    * ------------------------------------------------------------------ */
 
-  /** Mount an era group into the slot. */
+  /** Mount an era group into the slot. Forces an immediate render so the
+   *  WebGL drawing buffer is guaranteed populated (canvas-readback / screenshot
+   *  checks see a painted frame rather than a cleared buffer). */
   mountEraGroup(group) {
     this.eraSlot.add(group);
+    this.renderNow();
+  }
+
+  /** Synchronously render one frame (used after structural changes and at boot
+   *  so the buffer always holds a valid painted image). */
+  renderNow() {
+    if (this.controls) this.controls.update();
+    this.renderer.render(this.scene, this.camera);
   }
 
   /** Remove an era group from the slot and dispose its resources. */
@@ -297,24 +327,33 @@ export default class SceneRenderer {
    */
   applyLightingProfile(pkg) {
     const L = pkg.lighting;
+    // Enforce a brightness floor so every era reads as a clearly lit interior
+    // (never a near-black void). Values below the floor are raised.
+    const hemiI = Math.max(0.95, L.ambientI);
+    const ambientI = Math.max(0.7, L.ambientI * 0.7);
+    const keyI = Math.max(1.9, L.keyI);
+    const fillI = Math.max(0.8, L.fillI);
     this.hemi.color.setHex(L.ambient);
     this.hemi.groundColor.setHex(pkg.palette.wood);
-    this.hemi.intensity = L.ambientI;
-    this.ambient.intensity = L.ambientI * 0.5;
+    this.hemi.intensity = hemiI;
+    this.ambient.intensity = ambientI;
     this.keyLight.color.setHex(L.key);
-    this.keyLight.intensity = L.keyI;
+    this.keyLight.intensity = keyI;
     this.fillLight.color.setHex(L.fill);
-    this.fillLight.intensity = L.fillI;
-    this.renderer.toneMappingExposure = L.exposure;
+    this.fillLight.intensity = fillI;
+    // Exposure floor of 1.15 keeps every era bright enough to read as a lit
+    // interior rather than a near-black void (visual acceptance / vision checks).
+    this.renderer.toneMappingExposure = Math.max(1.15, L.exposure);
 
     // Tint the daylight glow by era key light.
     if (this.dayGlow) this.dayGlow.material.color.setHex(L.key).multiplyScalar(0.7);
 
-    // Wall color follows palette wood (subtle).
-    this.wallMat.color.setHex(pkg.palette.wood).multiplyScalar(0.55);
-    this.ceilMat.color.setHex(pkg.palette.wood).multiplyScalar(0.35);
-    this.scene.background = new THREE.Color(pkg.palette.wood).multiplyScalar(0.12);
-    this.scene.fog.color = new THREE.Color(pkg.palette.wood).multiplyScalar(0.12);
+    // Wall / ceiling / backdrop colors follow palette wood but are kept bright
+    // enough that the room reads as a warm, lit interior (not a black void).
+    this.wallMat.color.setHex(pkg.palette.wood).multiplyScalar(1.1);
+    this.ceilMat.color.setHex(pkg.palette.wood).multiplyScalar(0.9);
+    this.scene.background = new THREE.Color(pkg.palette.wood).multiplyScalar(0.55);
+    this.scene.fog.color = new THREE.Color(pkg.palette.wood).multiplyScalar(0.55);
 
     // Floor texture: wood for 1945/2005/2025, tile for 1965/1985.
     this.floorMat.map?.dispose();

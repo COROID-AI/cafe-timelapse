@@ -184,16 +184,17 @@ export function createSolidTexture(hex) {
  * Wood-plank floor texture generator.
  * @param {{base:number, plank:number, rows?:number}} o
  */
-export function createFloorTexture(o = {}) {
+export function createFloorTexture(o) {
+  const opts = o || {};
   const size = 512;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d');
 
-  const base = '#' + (o.base ?? 0x6b4a2b).toString(16).padStart(6, '0');
-  const plank = '#' + (o.plank ?? 0x5a3a20).toString(16).padStart(6, '0');
-  const rows = o.rows ?? 8;
+  const base = '#' + (opts.base ?? 0x6b4a2b).toString(16).padStart(6, '0');
+  const plank = '#' + (opts.plank ?? 0x5a3a20).toString(16).padStart(6, '0');
+  const rows = opts.rows ?? 8;
   const ph = size / rows;
 
   ctx.fillStyle = base;
@@ -234,16 +235,17 @@ export function createFloorTexture(o = {}) {
  * Tile floor texture (checkered) for 1985 / 1965.
  * @param {{a:number, b:number, cells?:number}} o
  */
-export function createTileTexture(o = {}) {
+export function createTileTexture(o) {
+  const opts = o || {};
   const size = 512;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
   const ctx = canvas.getContext('2d');
-  const cells = o.cells ?? 8;
+  const cells = opts.cells ?? 8;
   const cs = size / cells;
-  const a = '#' + (o.a ?? 0xeeeeee).toString(16).padStart(6, '0');
-  const b = '#' + (o.b ?? 0xcccccc).toString(16).padStart(6, '0');
+  const a = '#' + (opts.a ?? 0xeeeeee).toString(16).padStart(6, '0');
+  const b = '#' + (opts.b ?? 0xcccccc).toString(16).padStart(6, '0');
   for (let r = 0; r < cells; r++) {
     for (let c = 0; c < cells; c++) {
       ctx.fillStyle = (r + c) % 2 === 0 ? a : b;

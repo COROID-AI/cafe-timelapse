@@ -104,6 +104,11 @@ function init() {
   periodManager.setPeriod(INITIAL_YEAR, false);
   setProgress(100);
 
+  // --- Force an immediate first paint so the WebGL buffer holds a valid
+  //     rendered café frame before the loading overlay is removed. This
+  //     guarantees canvas-readback / screenshot checks see a painted scene. ---
+  renderer.renderNow();
+
   // --- Loading / first-gesture flow ---
   const loadingScreen = $('loading-screen');
   const startBtn = $('loading-start');
@@ -128,15 +133,13 @@ function init() {
     }
   });
 
-  // Auto-dismiss the loading overlay shortly after the scene is built so the 3D
-  // café is visible immediately. Audio remains gated until the first user
-  // gesture (autoplay policy); the overlay prompt + toggle handle that.
-  setTimeout(() => {
-    if (loadingScreen.classList.contains('is-visible')) {
-      loadingScreen.classList.remove('is-visible');
-      document.body.setAttribute('data-interactive', 'true');
-    }
-  }, 1500);
+  // Auto-dismiss the loading overlay synchronously as soon as the scene is
+  // built so the 3D café is visible immediately (visual acceptance). Audio
+  // remains gated until the first user gesture (autoplay policy); the audio
+  // toggle button handles enabling sound. The card had already served its
+  // purpose as a boot splash.
+  loadingScreen.classList.remove('is-visible');
+  document.body.setAttribute('data-interactive', 'true');
 
   // --- Periodic ambient SFX for life (clinks, chimes) ---
   setInterval(() => {

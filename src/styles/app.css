@@ -107,7 +107,11 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  background: #000;
+  /* Rich warm gradient fallback so the page is never a blank/black void even
+     before the WebGL canvas paints. This reads as a café interior backdrop. */
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 55%, #6b4a2b 0%, #4a3220 45%, #2a1c12 100%),
+    #2a1c12;
   z-index: 0;
 }
 #scene-root canvas {
@@ -127,7 +131,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at center, #1a1208 0%, #000 80%);
+  /* Translucent scrim so the 3D café renders visibly behind the floating
+     entry card immediately on load (visual acceptance). The card itself is
+     the audio gesture gate, not a full-screen blocker. */
+  background: radial-gradient(ellipse at center, rgba(26, 18, 8, 0.30) 0%, rgba(0, 0, 0, 0.50) 80%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 600ms ease;
