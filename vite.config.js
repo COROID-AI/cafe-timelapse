@@ -10,14 +10,17 @@ export default defineConfig({
   base: './',
   publicDir: 'public',
   server: {
-    host: 'localhost',
+    // Bind to IPv4 loopback explicitly so the smoke-check harness (which probes
+    // 127.0.0.1) can always reach the server. `host: 'localhost'` can resolve
+    // to IPv6 '::1' on some systems, causing "fetch failed" probe timeouts.
+    host: '127.0.0.1',
     port: Number(process.env.PORT) || 5173,
-    strictPort: false
+    strictPort: true
   },
   preview: {
-    host: 'localhost',
+    host: '127.0.0.1',
     port: Number(process.env.PORT) || 4173,
-    strictPort: false
+    strictPort: true
   },
   build: {
     target: 'es2019',

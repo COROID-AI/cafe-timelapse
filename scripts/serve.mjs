@@ -1,60 +1,86 @@
 /**
- * Minimal localhost static file server for smoke checks.
- * Binds explicitly to 127.0.0.1 (not a wildcard) on the runner-provided $PORT.
- * Serves the dist/ directory with SPA fallback to index.html.
+ * @file scripts/serve.mjs
+ * Minimal static file server for the production preview (dist/).
+ *
+ * Binds to 127.0.0.1 (localhost) explicitly so the smoke-check harness — which
+ * probes 127.0.0.1 — can always reach it. Vite's `preview` command appends
+ * `--host 0.0.0.0` when invoked through the harness, which triggers the
+ * "wildcard host" guard; this script avoids that by binding only to loopback.
+ *
+ * Usage: node scripts/serve.mjs
+ * Env:   PORT (default 4173)
  */
-import http from 'http';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { createServer } from 'node:http';
+import { readFile, stat } from 'node:fs/promises';
+import { extname, join, normalize } from 'node:path';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..', 'dist');
+const ROOT = join(process.cwd(), 'dist');
 const PORT = Number(process.env.PORT) || 4173;
+const HOST = '127.0.0.1';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
-  '.js': 'application/javascript; charset=utf-8',
-  '.mjs': 'application/javascript; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
   '.ico': 'image/x-icon',
   '.woff': 'font/woff',
-  '.woff2': 'font/woff2'
+  '.woff2': 'font/woff2',
+  '.wasm': 'application/wasm',
+  '.map': 'application/json; charset=utf-8'
 };
 
-const server = http.createServer((req, res) => {
-  let url = (req.url || '/').split('?')[0];
-  if (url === '/') url = '/index.html';
-  let filePath = path.join(ROOT, url);
-  // Prevent path traversal.
-  if (!filePath.startsWith(ROOT)) {
-    res.writeHead(403);
-    res.end('Forbidden');
-    return;
-  }
-  if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-    // SPA fallback.
-    filePath = path.join(ROOT, 'index.html');
-  }
-  const ext = path.extname(filePath).toLowerCase();
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(404);
-      res.end('Not found');
+const server = createServer(async (req, res) => {
+  try {
+    let urlPath = decodeURIComponent(req.url.split('?')[0]);
+    // Strip base path prefix if present (base './' → no leading segment, but be safe).
+    // Prevent path traversal.
+    let filePath = normalize(join(ROOT, urlPath));
+    if (!filePath.startsWith(ROOT)) {
+      res.writeHead(403);
+      res.end('Forbidden');
       return;
     }
-    res.writeHead(200, {
-      'Content-Type': MIME[ext] || 'application/octet-stream',
-      'Cache-Control': 'no-cache'
-    });
+
+    // Try the file as-is, then index.html for directories, then SPA fallback.
+    let s;
+    try {
+      s = await stat(filePath);
+    } catch {
+      // If the bare file doesn't exist, try adding .html or fall back to index.
+      filePath = join(ROOT, 'index.html');
+      s = await stat(filePath);
+    }
+    if (s.isDirectory()) {
+      filePath = join(filePath, 'index.html');
+      s = await stat(filePath);
+    }
+
+    const data = await readFile(filePath);
+    const mime = MIME[extname(filePath).toLowerCase()] || 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': mime });
     res.end(data);
-  });
+  } catch (err) {
+    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Not found');
+  }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`[serve] http://127.0.0.1:${PORT} → ${ROOT}`);
+server.listen(PORT, HOST, () => {
+  // eslint-disable-next-line no-console
+  console.log(`[serve] dist/ on http://${HOST}:${PORT}`);
 });
+
+// Clean exit on signal.
+for (const sig of ['SIGINT', 'SIGTERM']) {
+  process.on(sig, () => {
+    server.close();
+    process.exit(0);
+  });
+}
