@@ -38,21 +38,23 @@ function CafeLighting({ period }: { period: Period }) {
   
   return (
     <>
-      <ambientLight 
-        color={config.lighting.ambientColor} 
-        intensity={config.lighting.ambientIntensity} 
-      />
-      <directionalLight
-        position={[10, 10, 5]}
-        color={config.lighting.directionalColor}
-        intensity={config.lighting.directionalIntensity}
-        castShadow
-      />
-      <directionalLight
-        position={[-10, 5, -5]}
-        color={config.lighting.fillColor}
-        intensity={0.5}
-      />
+      {/* TypeScript JSX intrinsic elements for Three objects are provided via react-three-fiber types. */}
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      {React.createElement('ambientLight', {
+        color: config.lighting.ambientColor,
+        intensity: config.lighting.ambientIntensity,
+      } as any)}
+      {React.createElement('directionalLight', {
+        position: [10, 10, 5],
+        color: config.lighting.directionalColor,
+        intensity: config.lighting.directionalIntensity,
+        castShadow: true,
+      } as any)}
+      {React.createElement('directionalLight', {
+        position: [-10, 5, -5],
+        color: config.lighting.fillColor,
+        intensity: 0.5,
+      } as any)}
     </>
   );
 }
