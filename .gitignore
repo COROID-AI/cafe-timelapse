@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+
+# Coroid
+.coroid-cache
+.coroid-runtime
+
+# Playwright
+.playwright
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+
+# Coverage
+coverage
+
+# OS
+.DS_Store
+*.local
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
