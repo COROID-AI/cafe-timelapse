@@ -12,6 +12,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "jsx": "preserve",
+    "types": ["@react-three/fiber"],
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
