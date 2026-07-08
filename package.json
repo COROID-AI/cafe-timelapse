@@ -1,0 +1,35 @@
+{
+  "name": "cafe-timelapse",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.0.0",
+    "@react-three/fiber": "^8.0.0",
+    "@types/three": "^0.160.0",
+    "three": "^0.160.0",
+    "next": "15.0.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "zustand": "^4.0.0",
+    "howler": "^2.2.4",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/howler": "^2.2.9",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.0.0",
+    "postcss": "^8.0.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.0.0"
+  }
+}

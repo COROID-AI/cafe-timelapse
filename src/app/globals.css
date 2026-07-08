@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-900 text-white antialiased;
+  }
+  
+  canvas {
+    @apply touch-none;
+  }
+}
+
+@layer components {
+  .glass-morphism {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg;
+  }
+  
+  .slider-thumb {
+    @apply w-5 h-5 bg-white rounded-full shadow-lg cursor-pointer transition-transform duration-150 hover:scale-125;
+  }
+  
+  .period-transition {
+    @apply transition-all duration-1000 ease-in-out;
+  }
+}
+
+/* Custom scrollbar for timeline */
+.timeline-scrollbar::-webkit-scrollbar {
+  @apply h-2;
+}
+
+.timeline-scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-800 rounded-full;
+}
+
+.timeline-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-blue-500 rounded-full;
+}
+
+/* 3D Scene styling */
+.threejs-canvas {
+  @apply w-full h-full;
+}
+
+/* Selection indicator */
+.selection-indicator {
+  @apply absolute top-0 left-0 w-full h-1 bg-blue-500 rounded-full;
+  box-shadow: 0 0 10px #3b82f6;
+}
