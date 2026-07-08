@@ -58,11 +58,7 @@ export function SteamParticles({
         p.scale = 0.05 + Math.random() * 0.1;
       }
 
-      const opacity = Math.sin(Math.min(p.life * Math.PI, Math.PI)) * 0.4;
       dummy.position.set(position[0] + p.x, position[1] + p.y, position[2] + p.z);
-      dummy.scale.setScalar(p.scale);
-      dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
       // Fade by scaling — InstancedMesh doesn't support per-instance opacity without shaders
       // so we use scale as a proxy for fade.
       const fadeScale = Math.sin(Math.min(p.life * Math.PI, Math.PI));
@@ -71,8 +67,6 @@ export function SteamParticles({
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }
     meshRef.current.instanceMatrix.needsUpdate = true;
-    // Silence unused opacity var
-    void 0;
   });
 
   return (

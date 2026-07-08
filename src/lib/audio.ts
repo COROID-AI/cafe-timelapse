@@ -361,6 +361,7 @@ class AudioManagerClass {
   /** Start the initial audio for an era (no crossfade). */
   start(profile: EraAudioProfile, eraId: string): void {
     this.currentEraId = eraId;
+    void this.currentEraId; // tracked for diagnostics / future guard logic
     this.crossfade(null, profile, 800);
   }
 

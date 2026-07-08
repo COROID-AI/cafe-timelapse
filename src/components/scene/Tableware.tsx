@@ -90,7 +90,7 @@ export function Tableware() {
       {/* Saucer */}
       <mesh position={[0, 0.005, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.1, 0.09, 0.012, 24]} />
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={config.saucerColor}
           metalness={config.metalness}
           roughness={config.roughness}
@@ -102,7 +102,7 @@ export function Tableware() {
       {/* Cup */}
       <mesh position={[0, 0.045, 0]} castShadow>
         <cylinderGeometry args={[0.04, 0.035, 0.06, 16]} />
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={config.cupColor}
           metalness={config.metalness}
           roughness={config.roughness}
@@ -134,7 +134,7 @@ export function Tableware() {
       {/* Small plate */}
       <mesh position={[0.15, 0.008, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[0.08, 0.07, 0.01, 24]} />
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={config.plateColor}
           metalness={config.metalness}
           roughness={config.roughness}

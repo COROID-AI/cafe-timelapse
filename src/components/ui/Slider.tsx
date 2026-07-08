@@ -14,7 +14,8 @@ export interface SliderProps
 
 const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
   ({ className, label, onValueChange, value, min = 0, max = 1, step = 0.01, id, ...props }, ref) => {
-    const sliderId = id ?? React.useId();
+    const generatedId = React.useId();
+    const sliderId = id ?? generatedId;
     return (
       <div className="flex items-center gap-2">
         {label && (

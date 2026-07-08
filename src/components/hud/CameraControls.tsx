@@ -1,4 +1,4 @@
-import { Orbit, Walk, Camera } from 'lucide-react';
+import { Orbit, PersonStanding, Camera } from 'lucide-react';
 import { useSceneStore, type CameraMode } from '../../store/sceneStore';
 import { Button } from '../ui/Button';
 import { cn } from '../../lib/cn';
@@ -34,7 +34,7 @@ export function CameraControls() {
           title="Walk — WASD to move, click to look"
           className="rounded-xl"
         >
-          <Walk className="h-5 w-5" />
+          <PersonStanding className="h-5 w-5" />
         </Button>
       </div>
       <p

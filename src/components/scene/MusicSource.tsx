@@ -211,8 +211,8 @@ function Boombox() {
       {/* Two speakers */}
       {[-0.35, 0.35].map((x, i) => (
         <group key={x} position={[x, 0, 0.13]}>
-          <mesh>
-            <cylinderGeometry args={[0.18, 0.18, 0.02, 24]} rotation={[Math.PI / 2, 0, 0]} />
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.18, 0.18, 0.02, 24]} />
             <meshStandardMaterial color="#1a1a1a" />
           </mesh>
           <mesh
@@ -331,14 +331,9 @@ function PhoneMat() {
         <meshStandardMaterial color="#1a1a1a" roughness={0.2} metalness={0.3} />
       </mesh>
       {/* Phone screen glow */}
-      <mesh position={[0, 0.036, 0]}>
+      <mesh position={[0, 0.036, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[0.12, 0.25]} />
-        <meshStandardMaterial
-          color="#0a0a0a"
-          emissive="#E0A458"
-          emissiveIntensity={0.4}
-          rotation={[-Math.PI / 2, 0, 0]}
-        />
+        <meshStandardMaterial color="#0a0a0a" emissive="#E0A458" emissiveIntensity={0.4} />
       </mesh>
       {/* Small Bluetooth speaker beside it */}
       <mesh position={[0.3, 0.06, 0]} castShadow>

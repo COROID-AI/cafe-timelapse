@@ -47,7 +47,6 @@ export function useAudio(): void {
     const profile = toAudioProfile(era.audio);
     AudioManager.crossfade(prevProfileRef.current, profile, 1200);
     prevProfileRef.current = profile;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeEraId, entered]);
 
   // React to enable/disable.

@@ -199,12 +199,12 @@ function LaMarzocco() {
         </group>
       ))}
       {/* Pressure gauges */}
-      <mesh position={[-0.35, 0.5, 0.26]}>
-        <cylinderGeometry args={[0.05, 0.05, 0.02, 16]} rotation={[Math.PI / 2, 0, 0]} />
+      <mesh position={[-0.35, 0.5, 0.26]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.05, 0.05, 0.02, 16]} />
         <meshStandardMaterial color="#fff" emissive="#ddd" emissiveIntensity={0.2} />
       </mesh>
-      <mesh position={[0.35, 0.5, 0.26]}>
-        <cylinderGeometry args={[0.05, 0.05, 0.02, 16]} rotation={[Math.PI / 2, 0, 0]} />
+      <mesh position={[0.35, 0.5, 0.26]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.05, 0.05, 0.02, 16]} />
         <meshStandardMaterial color="#fff" emissive="#ddd" emissiveIntensity={0.2} />
       </mesh>
       {/* Cup warming tray on top */}

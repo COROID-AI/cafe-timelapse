@@ -27,6 +27,9 @@ export default tseslint.config(
       ...react.configs.recommended.rules,
       'react/prop-types': 'off',
       'react/react-in-jsx-scope': 'off',
+      // React Three Fiber uses custom intrinsic elements (mesh, boxGeometry, etc.)
+      // that eslint-plugin-react doesn't recognise.
+      'react/no-unknown-property': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },

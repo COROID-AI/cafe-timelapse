@@ -48,16 +48,11 @@ function AppContent() {
           }}
           camera={{ position: [8, 5, 10], fov: 50, near: 0.1, far: 100 }}
         >
-          <Suspense fallback={null}>
+          <Suspense fallback={<LoadingScreen />}>
             <CafeScene />
           </Suspense>
         </Canvas>
       </div>
-
-      {/* Loading overlay (shown until Suspense resolves) */}
-      <Suspense fallback={null}>
-        <LoadingScreen />
-      </Suspense>
 
       {/* HUD overlay */}
       <div className="pointer-events-none fixed inset-0 z-20">
