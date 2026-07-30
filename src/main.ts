@@ -10,6 +10,11 @@ import { WebGLRenderer } from 'three';
 import { getSceneManager } from './systems/SceneManager.js';
 import { registerEraFragments } from './registry/eraFragments.js';
 import { ERAS } from './data/eras.js';
+import {
+  ERA_CHANGE_EVENT,
+  TimelineSlider,
+  type EraChangeEventDetail,
+} from './ui/TimelineSlider.js';
 
 function bootstrap(): void {
   const container =
@@ -28,6 +33,22 @@ function bootstrap(): void {
 
   const sceneManager = getSceneManager();
   sceneManager.setActiveEra(ERAS[0].year);
+
+  // --- Timeline UI (top bar) -----------------------------------------------
+  // The slider overlays the canvas and emits eraChange on every selection.
+  // We forward that event to SceneManager.setActiveEra (which drives the
+  // transition controller via its hooks). The audio engine, when present,
+  // can subscribe to the same eraChange event independently.
+  const timeline = new TimelineSlider({ initialYear: ERAS[0].year }).mount(
+    document.body,
+  );
+  timeline.element.addEventListener(
+    ERA_CHANGE_EVENT,
+    (e: Event) => {
+      const { year } = (e as CustomEvent<EraChangeEventDetail>).detail;
+      sceneManager.setActiveEra(year);
+    },
+  );
 
   // --- Resize ---------------------------------------------------------------
   window.addEventListener('resize', () => {
