@@ -157,12 +157,117 @@ export interface CategoryDataMap {
   patrons: PatronsCategory;
 }
 
+// ---------------------------------------------------------------------------
+// Per-era audio bed config (consumed by systems/AudioEngine.ts)
+// ---------------------------------------------------------------------------
+// The audio contract is intentionally a sibling of the 11 brief categories
+// rather than a 12th entry in CATEGORY_KEYS: audio is not a renderable scene
+// fragment (the AssetRegistry iterates CATEGORY_KEYS to build Object3Ds), so
+// it lives directly on EraData alongside `year` and `label`.
+
+/** A plain 3D position in scene metres (matches the Three.js coordinate space). */
+export interface AudioVec3 {
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+}
+
+/**
+ * The playback-medium family of the era's music source. Drives the timbre of
+ * the synthesized music bed so the *sonic character* matches the in-scene
+ * music-source object (wireless set → jukebox → boombox → iPod → phone).
+ */
+export type MusicDeviceTimbre =
+  | 'am-radio' // 1945 — wireless set, mid-band-limited, slightly staticky
+  | 'vinyl-45' // 1965 — jukebox, full-range with surface crackle
+  | 'cassette' // 1985 — boombox, rolled-off highs with tape wow/flutter
+  | 'digital-mp3' // 2005 — iPod, clean with a gentle high-shelf roll-off
+  | 'streaming' // 2025 — phone, curated lofi muffled warmth
+  | 'spatial-audio'; // 2055 — adaptive generative, airy and wide
+
+/** Synthesis recipe for the period-appropriate generative music bed. */
+export interface EraMusicBedConfig {
+  /** Playback-medium family — selects the music-source object timbre. */
+  readonly timbre: MusicDeviceTimbre;
+  /** Fundamental root note of the generative loop, in Hz. */
+  readonly rootFrequency: number;
+  /** Scale, as semitone offsets from the root, used to pick melodic notes. */
+  readonly scale: readonly number[];
+  /** Oscillator waveform for the pad + melodic voices. */
+  readonly waveform: OscillatorType;
+  /** Melodic note cadence (notes per second). */
+  readonly notesPerSecond: number;
+  /**
+   * Biquad filter that imprints the playback-medium character (e.g. a narrow
+   * AM-radio bandpass, or a cassette low-pass).
+   */
+  readonly mediumFilter: {
+    readonly type: BiquadFilterType;
+    readonly frequency: number;
+    readonly Q: number;
+  };
+  /** Vinyl-style surface crackle amplitude, 0–1 (0 = none). */
+  readonly crackle: number;
+  /** Tape wow/flutter pitch-modulation depth, 0–1 (0 = none). */
+  readonly wow: number;
+  /** Relative loudness of the music bed, 0–1. */
+  readonly gain: number;
+}
+
+/** Synthesis recipe for the coffee-machine hiss/clatter bed. */
+export interface EraCoffeeMachineConfig {
+  /** Continuous steam-hiss bed loudness, 0–1. */
+  readonly hissGain: number;
+  /** Hiss low-pass cutoff in Hz (higher = brighter steam). */
+  readonly hissCutoff: number;
+  /** Average clatter events per second (cups/spoons/portafilter). */
+  readonly clatterRate: number;
+  /** Clatter transient loudness, 0–1. */
+  readonly clatterGain: number;
+}
+
+/** Synthesis recipe for the conversation-murmur bed. */
+export interface EraMurmurConfig {
+  /** Overall murmur bed loudness, 0–1 (busier eras are louder). */
+  readonly gain: number;
+  /** Count of overlapping synthesized "voices". */
+  readonly voiceCount: number;
+}
+
+/**
+ * Spatial anchors for the two spatialized sound sources, in scene metres.
+ * Coffee-machine and music-source era tasks (Phase 4/5) MUST align their
+ * in-scene Object3D positions to these coordinates so the PannerNode-emitted
+ * audio matches the visible object. This is the shared position contract.
+ */
+export interface EraSpatialConfig {
+  /** Where the coffee machine sits (typically the back counter). */
+  readonly coffeeMachine: AudioVec3;
+  /** Where the era's music-source object sits. */
+  readonly musicSource: AudioVec3;
+}
+
+/** Seconds the ambient beds take to crossfade on an era change. */
+export const AUDIO_CROSSFADE_SECONDS = 1.5;
+
+/** Complete synthesis + spatialization recipe for a single era's audio beds. */
+export interface EraAudioConfig {
+  readonly music: EraMusicBedConfig;
+  readonly coffeeMachine: EraCoffeeMachineConfig;
+  readonly murmur: EraMurmurConfig;
+  readonly spatial: EraSpatialConfig;
+  /** Per-era override of the crossfade duration (defaults to the global value). */
+  readonly crossfadeSeconds?: number;
+}
+
 /**
  * The complete data contract for a single era — every brief category, typed.
  */
 export interface EraData {
   year: EraYear;
   label: string;
+  /** Synthesis + spatialization recipe for this era's three ambient beds. */
+  audio: EraAudioConfig;
   architecture: ArchitectureCategory;
   furnitureDecor: FurnitureDecorCategory;
   coffeeMachines: CoffeeMachinesCategory;

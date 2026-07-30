@@ -22,6 +22,30 @@ export const ERAS: readonly EraData[] = [
   {
     year: 1945,
     label: 'Postwar Café',
+    audio: {
+      music: {
+        timbre: 'am-radio',
+        rootFrequency: 130.81,
+        scale: [0, 4, 7, 9, 12],
+        waveform: 'triangle',
+        notesPerSecond: 1.2,
+        mediumFilter: { type: 'bandpass', frequency: 1000, Q: 1.5 },
+        crackle: 0.15,
+        wow: 0.02,
+        gain: 0.32,
+      },
+      coffeeMachine: {
+        hissGain: 0.22,
+        hissCutoff: 4500,
+        clatterRate: 0.4,
+        clatterGain: 0.32,
+      },
+      murmur: { gain: 0.28, voiceCount: 4 },
+      spatial: {
+        coffeeMachine: { x: -3, y: 1.3, z: -4 },
+        musicSource: { x: 3, y: 1.5, z: -3 },
+      },
+    },
     architecture: {
       walls: { material: 'plaster', color: 'cream', pattern: 'faded-stripe' },
       floor: { material: 'terrazzo', color: 'mottled-grey' },
@@ -82,6 +106,30 @@ export const ERAS: readonly EraData[] = [
   {
     year: 1965,
     label: 'Swinging Sixties Diner',
+    audio: {
+      music: {
+        timbre: 'vinyl-45',
+        rootFrequency: 146.83,
+        scale: [0, 3, 5, 6, 7, 10],
+        waveform: 'sawtooth',
+        notesPerSecond: 1.8,
+        mediumFilter: { type: 'lowpass', frequency: 9000, Q: 0.5 },
+        crackle: 0.25,
+        wow: 0.03,
+        gain: 0.36,
+      },
+      coffeeMachine: {
+        hissGain: 0.26,
+        hissCutoff: 5000,
+        clatterRate: 0.5,
+        clatterGain: 0.3,
+      },
+      murmur: { gain: 0.34, voiceCount: 5 },
+      spatial: {
+        coffeeMachine: { x: -3, y: 1.3, z: -4 },
+        musicSource: { x: 4, y: 1.2, z: -3 },
+      },
+    },
     architecture: {
       walls: { material: 'wood-paneling', color: 'mahogany' },
       floor: { material: 'checkerboard-lino', color: 'black-and-white' },
@@ -142,6 +190,30 @@ export const ERAS: readonly EraData[] = [
   {
     year: 1985,
     label: 'Eighties Coffee Bar',
+    audio: {
+      music: {
+        timbre: 'cassette',
+        rootFrequency: 110,
+        scale: [0, 3, 5, 7, 10, 12],
+        waveform: 'square',
+        notesPerSecond: 1.6,
+        mediumFilter: { type: 'lowpass', frequency: 6000, Q: 0.7 },
+        crackle: 0.06,
+        wow: 0.2,
+        gain: 0.34,
+      },
+      coffeeMachine: {
+        hissGain: 0.3,
+        hissCutoff: 5500,
+        clatterRate: 0.55,
+        clatterGain: 0.28,
+      },
+      murmur: { gain: 0.36, voiceCount: 5 },
+      spatial: {
+        coffeeMachine: { x: -3, y: 1.3, z: -4 },
+        musicSource: { x: 3, y: 1.2, z: -2 },
+      },
+    },
     architecture: {
       walls: { material: 'brick-veneer', color: 'rust-red', pattern: 'exposed' },
       floor: { material: 'terracotta-tile', color: 'terracotta' },
@@ -202,6 +274,30 @@ export const ERAS: readonly EraData[] = [
   {
     year: 2005,
     label: 'Third-Wave Coffeehouse',
+    audio: {
+      music: {
+        timbre: 'digital-mp3',
+        rootFrequency: 196,
+        scale: [0, 2, 4, 7, 9],
+        waveform: 'sine',
+        notesPerSecond: 1.0,
+        mediumFilter: { type: 'lowpass', frequency: 16000, Q: 0.5 },
+        crackle: 0.0,
+        wow: 0.0,
+        gain: 0.3,
+      },
+      coffeeMachine: {
+        hissGain: 0.32,
+        hissCutoff: 6000,
+        clatterRate: 0.5,
+        clatterGain: 0.26,
+      },
+      murmur: { gain: 0.4, voiceCount: 6 },
+      spatial: {
+        coffeeMachine: { x: -3, y: 1.3, z: -4 },
+        musicSource: { x: 2, y: 1.0, z: 0 },
+      },
+    },
     architecture: {
       walls: { material: 'reclaimed-wood', color: 'natural-oak' },
       floor: { material: 'polished-concrete', color: 'grey' },
@@ -262,6 +358,30 @@ export const ERAS: readonly EraData[] = [
   {
     year: 2025,
     label: 'Contemporary Specialty Café',
+    audio: {
+      music: {
+        timbre: 'streaming',
+        rootFrequency: 174.61,
+        scale: [0, 3, 5, 7, 10],
+        waveform: 'sine',
+        notesPerSecond: 0.9,
+        mediumFilter: { type: 'lowpass', frequency: 4000, Q: 0.8 },
+        crackle: 0.0,
+        wow: 0.05,
+        gain: 0.3,
+      },
+      coffeeMachine: {
+        hissGain: 0.34,
+        hissCutoff: 6500,
+        clatterRate: 0.45,
+        clatterGain: 0.22,
+      },
+      murmur: { gain: 0.44, voiceCount: 6 },
+      spatial: {
+        coffeeMachine: { x: -3, y: 1.3, z: -4 },
+        musicSource: { x: -2, y: 1.1, z: 1 },
+      },
+    },
     architecture: {
       walls: { material: 'limewash-plaster', color: 'soft-white' },
       floor: { material: 'large-format-porcelain', color: 'warm-stone' },
@@ -322,6 +442,30 @@ export const ERAS: readonly EraData[] = [
   {
     year: 2055,
     label: 'Future Smart Café',
+    audio: {
+      music: {
+        timbre: 'spatial-audio',
+        rootFrequency: 87.31,
+        scale: [0, 7, 12, 19],
+        waveform: 'sine',
+        notesPerSecond: 0.7,
+        mediumFilter: { type: 'lowpass', frequency: 12000, Q: 0.4 },
+        crackle: 0.0,
+        wow: 0.0,
+        gain: 0.28,
+      },
+      coffeeMachine: {
+        hissGain: 0.2,
+        hissCutoff: 7000,
+        clatterRate: 0.3,
+        clatterGain: 0.16,
+      },
+      murmur: { gain: 0.42, voiceCount: 6 },
+      spatial: {
+        coffeeMachine: { x: -3, y: 1.3, z: -4 },
+        musicSource: { x: 0, y: 2.5, z: -2 },
+      },
+    },
     architecture: {
       walls: { material: 'adaptive-smart-glass', color: 'tint-shifts-on-demand', pattern: 'programmable' },
       floor: { material: 'recycled-composite', color: 'pearl-graphite' },
