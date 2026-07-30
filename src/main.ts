@@ -8,6 +8,7 @@
  */
 import {
   AmbientLight,
+  Clock,
   DirectionalLight,
   PerspectiveCamera,
   Scene,
@@ -16,6 +17,7 @@ import {
 import { assetRegistry } from './registry/AssetRegistry.js';
 import { registerEraFragments } from './registry/eraFragments.js';
 import { ERAS } from './data/eras.js';
+import { Navigation } from './systems/Navigation.js';
 
 function bootstrap(): void {
   const container =
@@ -61,6 +63,11 @@ function bootstrap(): void {
     scene.add(fragment);
   }
 
+  // --- Navigation -----------------------------------------------------------
+  // Orbit/pan/zoom rig clamped to the café interior, with a close-up inspection
+  // mode. Listeners are wired to the renderer canvas.
+  const nav = new Navigation({ camera, domElement: renderer.domElement });
+
   // --- Resize ---------------------------------------------------------------
   window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -69,8 +76,10 @@ function bootstrap(): void {
   });
 
   // --- Render loop ----------------------------------------------------------
+  const clock = new Clock();
   function animate(): void {
     requestAnimationFrame(animate);
+    nav.update(clock.getDelta());
     renderer.render(scene, camera);
   }
   animate();
