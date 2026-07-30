@@ -2,9 +2,12 @@
  * main.ts — application entrypoint.
  *
  * Initializes a Three.js renderer and drives the {@link SceneManager}, which
- * owns the persistent scene, per-era groups, and lighting environment.
+ * owns the persistent scene (including the era-neutral café
+ * {@link ArchitectureShell}), per-era groups, and lighting environment.
  * Registers all era fragments then mounts the first era. The render loop
- * integrates with the manager via its `render` and `onResize` points.
+ * integrates with the manager via its `render` and `onResize` points, and the
+ * {@link Navigation} orbit/pan/zoom rig (clamped to the canonical café
+ * interior bounds) drives the manager's camera.
  *
  * Audio integration: the shared {@link AudioEngine} is seeded with the first
  * era and wired to era transitions so the ambient beds crossfade in step with
@@ -12,28 +15,15 @@
  * AudioContext (autoplay policy) — the mute toggle (see
  * {@link mountAudioControls}) is that gesture surface.
  */
-<<<<<<< HEAD
-import { WebGLRenderer } from 'three';
+import { Clock, WebGLRenderer } from 'three';
 import { getSceneManager } from './systems/SceneManager.js';
 import type { EraTransitionInfo } from './systems/SceneManager.js';
 import { registerEraFragments } from './registry/eraFragments.js';
 import { ERAS } from './data/eras.js';
 import { getAudioEngine } from './systems/AudioEngine.js';
 import { mountAudioControls } from './ui/AudioControls.js';
-=======
-import {
-  AmbientLight,
-  Clock,
-  DirectionalLight,
-  PerspectiveCamera,
-  Scene,
-  WebGLRenderer,
-} from 'three';
-import { assetRegistry } from './registry/AssetRegistry.js';
-import { registerEraFragments } from './registry/eraFragments.js';
-import { ERAS } from './data/eras.js';
 import { Navigation } from './systems/Navigation.js';
->>>>>>> origin/feature/coroid-99961a-orbit-pan-zoom-navigation
+import { INTERIOR_BOUNDS } from './world/layout.js';
 
 function bootstrap(): void {
   const container =
@@ -60,6 +50,8 @@ function bootstrap(): void {
   mountAudioControls();
 
   // --- Scene manager (wired to drive audio on era change) ------------------
+  // Owns the persistent scene, the café ArchitectureShell (a base layer that
+  // survives era switches), the per-era groups, and the lighting rig.
   const sceneManager = getSceneManager({
     hooks: {
       onTransitionStart: (info: EraTransitionInfo) => {
@@ -70,9 +62,14 @@ function bootstrap(): void {
   sceneManager.setActiveEra(ERAS[0].year);
 
   // --- Navigation -----------------------------------------------------------
-  // Orbit/pan/zoom rig clamped to the café interior, with a close-up inspection
-  // mode. Listeners are wired to the renderer canvas.
-  const nav = new Navigation({ camera, domElement: renderer.domElement });
+  // Orbit/pan/zoom rig clamped to the canonical café interior bounds (single
+  // source of truth from layout.ts), with a close-up inspection mode.
+  // Listeners are wired to the renderer canvas and drive the manager's camera.
+  const nav = new Navigation({
+    camera: sceneManager.mainCamera,
+    domElement: renderer.domElement,
+    bounds: INTERIOR_BOUNDS,
+  });
 
   // --- Resize ---------------------------------------------------------------
   window.addEventListener('resize', () => {
@@ -84,12 +81,8 @@ function bootstrap(): void {
   const clock = new Clock();
   function animate(): void {
     requestAnimationFrame(animate);
-<<<<<<< HEAD
-    sceneManager.render(renderer);
-=======
     nav.update(clock.getDelta());
-    renderer.render(scene, camera);
->>>>>>> origin/feature/coroid-99961a-orbit-pan-zoom-navigation
+    sceneManager.render(renderer);
   }
   animate();
 }

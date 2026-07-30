@@ -41,6 +41,7 @@ import {
 import type { EraYear, LightingCategory } from '../data/EraData.js';
 import { assetRegistry } from '../registry/AssetRegistry.js';
 import { getEra, isEraYear } from '../data/eras.js';
+import { ArchitectureShell } from '../world/ArchitectureShell.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -201,6 +202,14 @@ export class SceneManager {
   private readonly keyLight: DirectionalLight;
   private readonly fillLight: DirectionalLight;
 
+  /**
+   * The persistent (non-era) café architecture shell. Mounted once into the
+   * root scene as a base layer beneath the per-era groups; it survives every
+   * era switch and is era-neutral geometry only (era finishes plug into its
+   * surface slots, see {@link ArchitectureShell.slots}).
+   */
+  private readonly shell: ArchitectureShell;
+
   constructor(options: SceneManagerOptions = {}) {
     const {
       fov = 50,
@@ -245,6 +254,13 @@ export class SceneManager {
       this.fillLight,
     );
 
+    // --- Persistent architecture shell (base layer) ------------------------
+    // Era-neutral room geometry: floor, walls, ceiling, storefront. Mounted
+    // once and never touched by era switches; era finishes plug into its
+    // surface slots. Added before any era group so it renders beneath them.
+    this.shell = new ArchitectureShell();
+    this.scene.add(this.shell.root);
+
     // Seed the rig with the default (1945) environment.
     this.applyEraLighting(1945);
   }
@@ -266,6 +282,15 @@ export class SceneManager {
   /** The currently active era year, or `null` before the first mount. */
   get currentEra(): EraYear | null {
     return this.activeEra;
+  }
+
+  /**
+   * The persistent café architecture shell. Era tasks read this to access the
+   * era-neutral surface slots (walls/floor/ceiling/light mount) that they
+   * populate with period-specific finishes. The shell itself never changes.
+   */
+  get architectureShell(): ArchitectureShell {
+    return this.shell;
   }
 
   /** The currently mounted era group, or `null` before the first mount. */
@@ -457,6 +482,9 @@ export class SceneManager {
       }
       this.groups.delete(year);
     }
+    // Dispose the persistent shell geometry/materials too.
+    if (this.shell.root.parent) this.shell.root.parent.remove(this.shell.root);
+    this.shell.dispose();
     this.activeEra = null;
     this.activeGroup = null;
   }

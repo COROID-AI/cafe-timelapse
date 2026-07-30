@@ -22,6 +22,7 @@ import {
   PerspectiveCamera,
   Vector3,
 } from 'three';
+import { INTERIOR_BOUNDS } from '../world/layout.js';
 
 // ---------------------------------------------------------------------------
 // Pure helpers (exported for unit testing — no camera / DOM required)
@@ -100,14 +101,14 @@ export function clampToBounds(
 export type NavigationBounds = Box3;
 
 /**
- * Default café interior volume used until the Phase 3 architecture task
- * publishes canonical shell dimensions. A modest single-room café:
- * 12 m wide × 4 m tall × 10 m deep, floor at y = 0.
+ * Default café interior volume — the canonical shell interior bounds published
+ * by the architecture task (single source of truth in layout.ts). This is the
+ * exact box the camera eye is clamped inside so it never clips out of the room.
+ *
+ * Aliased (not copied) so Navigation always tracks the canonical dimensions;
+ * the spatial contract lives in one place.
  */
-export const DEFAULT_CAFE_INTERIOR: NavigationBounds = new Box3(
-  new Vector3(-6, 0, -5),
-  new Vector3(6, 4, 5),
-);
+export const DEFAULT_CAFE_INTERIOR: NavigationBounds = INTERIOR_BOUNDS;
 
 /** Internal spherical state (radius, azimuth, polar). */
 interface SphericalState {
