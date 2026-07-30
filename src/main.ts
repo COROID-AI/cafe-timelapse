@@ -12,6 +12,7 @@
  * AudioContext (autoplay policy) — the mute toggle (see
  * {@link mountAudioControls}) is that gesture surface.
  */
+<<<<<<< HEAD
 import { WebGLRenderer } from 'three';
 import { getSceneManager } from './systems/SceneManager.js';
 import type { EraTransitionInfo } from './systems/SceneManager.js';
@@ -19,6 +20,20 @@ import { registerEraFragments } from './registry/eraFragments.js';
 import { ERAS } from './data/eras.js';
 import { getAudioEngine } from './systems/AudioEngine.js';
 import { mountAudioControls } from './ui/AudioControls.js';
+=======
+import {
+  AmbientLight,
+  Clock,
+  DirectionalLight,
+  PerspectiveCamera,
+  Scene,
+  WebGLRenderer,
+} from 'three';
+import { assetRegistry } from './registry/AssetRegistry.js';
+import { registerEraFragments } from './registry/eraFragments.js';
+import { ERAS } from './data/eras.js';
+import { Navigation } from './systems/Navigation.js';
+>>>>>>> origin/feature/coroid-99961a-orbit-pan-zoom-navigation
 
 function bootstrap(): void {
   const container =
@@ -54,6 +69,11 @@ function bootstrap(): void {
   });
   sceneManager.setActiveEra(ERAS[0].year);
 
+  // --- Navigation -----------------------------------------------------------
+  // Orbit/pan/zoom rig clamped to the café interior, with a close-up inspection
+  // mode. Listeners are wired to the renderer canvas.
+  const nav = new Navigation({ camera, domElement: renderer.domElement });
+
   // --- Resize ---------------------------------------------------------------
   window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -61,9 +81,15 @@ function bootstrap(): void {
   });
 
   // --- Render loop ----------------------------------------------------------
+  const clock = new Clock();
   function animate(): void {
     requestAnimationFrame(animate);
+<<<<<<< HEAD
     sceneManager.render(renderer);
+=======
+    nav.update(clock.getDelta());
+    renderer.render(scene, camera);
+>>>>>>> origin/feature/coroid-99961a-orbit-pan-zoom-navigation
   }
   animate();
 }
