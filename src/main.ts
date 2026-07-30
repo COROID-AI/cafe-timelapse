@@ -8,6 +8,7 @@
  */
 import { WebGLRenderer } from 'three';
 import { getSceneManager } from './systems/SceneManager.js';
+import { TransitionController } from './systems/TransitionController.js';
 import { registerEraFragments } from './registry/eraFragments.js';
 import { ERAS } from './data/eras.js';
 
@@ -27,6 +28,10 @@ function bootstrap(): void {
   registerEraFragments();
 
   const sceneManager = getSceneManager();
+  // Wire the cross-fade transition controller so era changes animate smoothly
+  // (fade + scale morph + camera dolly) instead of hard-cutting. The controller
+  // self-registers as the manager's transition hook on construction.
+  new TransitionController(sceneManager);
   sceneManager.setActiveEra(ERAS[0].year);
 
   // --- Resize ---------------------------------------------------------------
