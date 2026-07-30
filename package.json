@@ -1,0 +1,22 @@
+{
+  "name": "cafe-timelapse",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Café Time Period Timelapse — a 3D café interior that transforms across six eras (1945–2055).",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "check:eras": "node scripts/check-eras.mjs"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@types/three": "^0.185.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0"
+  }
+}
