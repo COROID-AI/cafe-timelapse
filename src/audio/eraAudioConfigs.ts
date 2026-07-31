@@ -14,6 +14,9 @@
  *  - 1985: a boombox/ghetto-blaster playing a synth-pop/new-wave-evocative
  *    generative bed (cassette hiss + tape wobble character), the churn of
  *    the grinder doser, and the hiss of the commercial espresso machine.
+ *  - 2005: an iPod dock playing an indie/acoustic-evocative generative bed,
+ *    the whir and hiss of the superautomatic espresso machine, and warm
+ *    halogen-lit room tone.
  */
 export interface EraAudioLayer {
   /** Stable identifier for the layer (engine hook / debugging). */
@@ -150,10 +153,60 @@ export const ERA_AUDIO_1985: EraAudioConfig = {
   },
 };
 
+/** The 2005 second-wave coffeehouse audio bed. */
+export const ERA_AUDIO_2005: EraAudioConfig = {
+  era: 2005,
+  label: '2005 — indie/acoustic-evocative bed from an iPod dock, superauto hiss',
+  layers: [
+    {
+      id: 'indie-bed',
+      label: 'Indie / acoustic-evocative generative bed',
+      kind: 'swing-bed',
+      gain: 0.32,
+      note: 'fingerpicked acoustic guitar arpeggios, brushed drums, soft vocal hum, mid-tempo ~88 bpm',
+    },
+    {
+      id: 'ipod-dock',
+      label: 'iPod dock character',
+      kind: 'radio-static',
+      gain: 0.05,
+      note: 'tiny dock speaker roll-off, faint white-noise floor and a click when a track advances',
+    },
+    {
+      id: 'superauto-hiss',
+      label: 'Superautomatic espresso machine hiss',
+      kind: 'machine-hiss',
+      gain: 0.09,
+      note: 'one-touch grinder whir, then short high-pressure steam hiss bursts every ~30 s',
+    },
+    {
+      id: 'murmur',
+      label: 'Patron conversation murmur',
+      kind: 'murmur',
+      gain: 0.12,
+      note: 'low-passed speech-like granular noise, gentle swell',
+    },
+    {
+      id: 'room-tone',
+      label: 'Room tone',
+      kind: 'ambient-room',
+      gain: 0.07,
+      note: 'warm halogen-lit room tone with laptop keyboard clicks',
+    },
+  ],
+  meta: {
+    tempo: '88 bpm',
+    mode: 'generative-loop',
+    masterGain: '0.33',
+    source: 'ipod-dock',
+  },
+};
+
 /** Registry of era audio configs by year (extend as later era tasks land). */
 export const ERA_AUDIO_CONFIGS: Record<number, EraAudioConfig> = {
   1945: ERA_AUDIO_1945,
   1985: ERA_AUDIO_1985,
+  2005: ERA_AUDIO_2005,
 };
 
 /** Return the audio config for an era (falls back to a silent bed). */
