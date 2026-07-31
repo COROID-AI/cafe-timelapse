@@ -12,7 +12,8 @@
     "check:navigation": "tsx src/scripts/checkNavigation.ts",
     "check:transitions": "tsx src/scripts/checkTransitions.ts",
     "check:scene": "tsx src/scripts/checkScene.ts",
-    "check": "npm run check:eras && npm run check:navigation && npm run check:transitions && npm run check:scene && npm run typecheck"
+    "check:assets": "tsx src/scripts/checkAssets.ts",
+    "check": "npm run check:eras && npm run check:navigation && npm run check:transitions && npm run check:scene && npm run check:assets && npm run typecheck"
   },
   "dependencies": {
     "three": "^0.185.1"
