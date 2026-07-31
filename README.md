@@ -24,13 +24,14 @@ npm install
 npm run dev        # start the Vite dev server (shows the placeholder café canvas)
 npm run build      # type-check + produce the dist bundle
 npm run check:eras # QA gate: every era supplies every required category
-npm run check      # check:eras + typecheck
+npm run check:scene # QA gate: every era's fragments mount/unmount correctly
+npm run check      # check:eras + check:scene + typecheck
 ```
 
 ### Project structure
 
-- `src/main.ts` — entrypoint: Three.js renderer, scene, camera, OrbitControls,
-  placeholder café geometry and the animation loop.
+- `src/main.ts` — entrypoint: boots the SceneManager, wires the timeline
+  slider to era selection, and drives the render loop.
 - `src/data/EraData.ts` — the canonical `EraData` type covering every brief
   category: architecture (walls/floor/ceiling/trim), furniture & decor, coffee
   machines & brewing equipment, menu board & prices, music source (wireless
@@ -45,8 +46,21 @@ npm run check      # check:eras + typecheck
   Three.js geometry.
 - `src/registry/eras/*.ts` — the per-era registrations (loaded by
   `src/registry/loadEras.ts`).
+- `src/systems/SceneManager.ts` — the era-managed scene controller. Owns the
+  persistent Three.js Scene, camera, renderer, OrbitControls and animation
+  loop integration (`update`/`render`/`resize`). Manages a per-era `Object3D`
+  group and `setActiveEra(year)` mounts the selected era's registered
+  fragments, unmounting and disposing the previous era's heavy resources
+  (geometries, materials, textures). Exposes `onBeforeTransition` /
+  `onAfterTransition` hooks for the cross-fade controller and applies the
+  per-era lighting environment (`src/systems/lighting.ts`).
+- `src/systems/lighting.ts` — the per-era lighting config (background, ambient,
+  key/fill/rim lights, fog), grounded in each era's canonical record.
 - `src/scripts/checkEras.ts` — the `check:eras` QA gate: asserts every canonical
   era is registered and supplies all required fragment categories.
+- `src/scripts/checkScene.ts` — the `check:scene` QA gate: headlessly verifies
+  every era's fragment group mounts with the expected category children and
+  the timeline step contract matches the canonical `ERAS` timeline.
 
 ### Adding a new era
 

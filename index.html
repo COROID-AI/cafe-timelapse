@@ -12,6 +12,19 @@
       <h1>Café Time Period Timelapse</h1>
       <p id="era-label">Loading eras…</p>
     </div>
+    <div id="timeline-wrap">
+      <label for="timeline">Era</label>
+      <input
+        id="timeline"
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        value="0"
+        aria-label="Timeline era selector"
+      />
+      <span id="timeline-year">1945</span>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

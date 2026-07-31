@@ -1,104 +1,87 @@
 import './style.css';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { ERAS, type EraYear } from './data/eras';
-import { registerAllEras, getEraRegistration } from './registry';
+import type { EraYear } from './data/eras';
+import { registerAllEras } from './registry';
+import {
+  createSceneManager,
+  type SceneManagerHandle,
+} from './systems/SceneManager';
 
+const app = document.querySelector<HTMLDivElement>('#app');
 const eraLabel = document.querySelector<HTMLParagraphElement>('#era-label');
+const timeline = document.querySelector<HTMLInputElement>('#timeline');
+const timelineYear = document.querySelector<HTMLSpanElement>('#timeline-year');
 
-// --- Scene, camera, renderer ---------------------------------------------
+if (!app) {
+  throw new Error('#app container missing');
+}
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x17171c);
+// --- Scene, camera, renderer, controls --------------------------------------
+// The SceneManager owns the persistent scene, per-era fragment groups, the
+// per-era lighting environment and the render loop integration points.
 
-const camera = new THREE.PerspectiveCamera(
-  50,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100,
-);
-camera.position.set(8, 6, 12);
-camera.lookAt(0, 0, 0);
+const manager: SceneManagerHandle = createSceneManager({
+  container: app,
+  initialEra: 1945,
+});
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
-document.querySelector('#app')?.appendChild(renderer.domElement);
+// --- Timeline UI -------------------------------------------------------------
+// The slider drives era selection; every position maps to the nearest era
+// step and triggers the transition controller via setActiveEra.
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.target.set(0, 1, 0);
-
-// --- Lights ----------------------------------------------------------------
-
-scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-const keyLight = new THREE.DirectionalLight(0xfff2df, 2.2);
-keyLight.position.set(6, 10, 6);
-keyLight.castShadow = true;
-scene.add(keyLight);
-
-// --- Placeholder scene -----------------------------------------------------
-// A stand-in café floor so `npm run dev` visibly renders before era fragment
-// geometry is built in later phases.
-
-const floor = new THREE.Mesh(
-  new THREE.BoxGeometry(10, 0.1, 8),
-  new THREE.MeshStandardMaterial({ color: 0x5a4a3a, roughness: 0.9 }),
-);
-floor.position.y = -0.05;
-floor.receiveShadow = true;
-scene.add(floor);
-
-const counter = new THREE.Mesh(
-  new THREE.BoxGeometry(3.2, 1.0, 1.0),
-  new THREE.MeshStandardMaterial({ color: 0x8a6a4a, roughness: 0.7 }),
-);
-counter.position.set(-1.5, 0.5, -2.4);
-counter.castShadow = true;
-scene.add(counter);
-
-const table = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.55, 0.55, 0.08, 24),
-  new THREE.MeshStandardMaterial({ color: 0x7a5a3a, roughness: 0.8 }),
-);
-table.position.set(2.4, 0.6, 0.5);
-table.castShadow = true;
-scene.add(table);
-
-// --- Timeline / era switching ---------------------------------------------
-
-let currentEra: EraYear = ERAS[0];
-
-async function switchEra(era: EraYear): Promise<void> {
-  currentEra = era;
-  const registration = getEraRegistration(era);
+function syncTimelineUI(): void {
+  const era = manager.activeEra;
+  if (!era) return;
+  const index = manager.eraSteps.indexOf(era);
+  const position = manager.timelineSteps[index] ?? 0;
+  if (timeline) timeline.value = String(position);
+  if (timelineYear) timelineYear.textContent = String(era);
   if (eraLabel) {
-    eraLabel.textContent = registration
-      ? `Era ${era} — ${registration.fragments.length} scene fragments registered`
-      : `Era ${era} — not yet registered`;
+    eraLabel.textContent = `Era ${era} — ${manager.activeEraGroup.children.length} fragment groups mounted`;
   }
 }
 
-// --- Animation loop ---------------------------------------------------------
+if (timeline) {
+  timeline.addEventListener('input', () => {
+    manager.snapToTimeline(Number(timeline.value));
+    syncTimelineUI();
+  });
+}
+
+// --- Transition hooks ---------------------------------------------------------
+// Future phases plug the cross-fade controller into these hooks. For now the
+// hooks observe the swap so the label reflects the freshly mounted era.
+
+manager.onBeforeTransition((next, previous) => {
+  if (eraLabel) {
+    eraLabel.textContent = previous
+      ? `Transitioning ${previous} → ${next}…`
+      : `Mounting ${next}…`;
+  }
+});
+
+manager.onAfterTransition((era) => {
+  if (eraLabel) {
+    eraLabel.textContent = `Era ${era} — ${manager.activeEraGroup.children.length} fragment groups mounted`;
+  }
+});
+
+// --- Animation loop -----------------------------------------------------------
 
 function animate(): void {
   requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene, camera);
-}
-
-async function init(): Promise<void> {
-  await registerAllEras();
-  await switchEra(currentEra);
-  animate();
+  manager.update();
+  manager.render();
 }
 
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  manager.resize();
 });
+
+async function init(): Promise<void> {
+  await registerAllEras();
+  manager.setActiveEra(manager.activeEra ?? (1945 as EraYear));
+  syncTimelineUI();
+  animate();
+}
 
 void init();
