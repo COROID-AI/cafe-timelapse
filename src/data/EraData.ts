@@ -68,6 +68,75 @@ export interface Patron {
   gadget: string;
 }
 
+/** Silhouette of a patron's hairstyle (built from primitives by the avatar system). */
+export type HairstyleKind =
+  | 'short'
+  | 'bob'
+  | 'beehive'
+  | 'beret'
+  | 'cap'
+  | 'ponytail'
+  | 'bun'
+  | 'braids'
+  | 'curls'
+  | 'waves'
+  | 'messy'
+  | 'buzz';
+
+/** Object a patron holds or wears (built from primitives by the avatar system). */
+export type AccessoryKind =
+  | 'book'
+  | 'purse'
+  | 'case'
+  | 'mirror'
+  | 'radio'
+  | 'walkman'
+  | 'calculator'
+  | 'phone'
+  | 'laptop'
+  | 'headphones'
+  | 'cup'
+  | 'glasses'
+  | 'wristband'
+  | 'none';
+
+/** Garment silhouette used to shape the avatar's torso. */
+export type OutfitStyle = 'shirt-pants' | 'dress' | 'poncho' | 'jumpsuit';
+
+/**
+ * PatronConfig — the structured per-era patron contract consumed by the shared
+ * CharacterAvatar system (src/world/characters/CharacterAvatar.ts).
+ *
+ * Unlike the descriptive {@link Patron} record (free-text outfit/hairstyle/
+ * gadget), PatronConfig is directly renderable: body palette colours, a
+ * hairstyle shape + colour, outfit garment colours, and a held/worn accessory.
+ * Era patron tasks author one config per seated patron; the shared system
+ * builds the stylised figure, animates it, and seats it at the café anchors.
+ */
+export interface PatronConfig {
+  /** Optional display name, e.g. "beatnik". */
+  name?: string;
+  /** Skin colour (CSS hex). */
+  skin: string;
+  /** Hairstyle shape and colour (CSS hex). */
+  hair: {
+    kind: HairstyleKind;
+    color: string;
+  };
+  /** Torso/upper garment colour (CSS hex). */
+  shirt: string;
+  /** Legs/lower garment colour (CSS hex). */
+  pants: string;
+  /** Footwear colour (CSS hex). */
+  shoes: string;
+  /** Garment silhouette. Defaults to 'shirt-pants'. */
+  style?: OutfitStyle;
+  /** Accent colour for accessories/trims (CSS hex). */
+  accent?: string;
+  /** Held or worn gadget/accessory. Defaults to 'none'. */
+  accessory?: AccessoryKind;
+}
+
 /**
  * The complete snapshot of one era. Every category from the brief is
  * represented so that future phases can turn these records into scene

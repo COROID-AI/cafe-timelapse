@@ -39,7 +39,12 @@ import {
 } from '../../world/layout';
 import type { SurfaceSlots } from '../../world/ArchitectureShell';
 import { era1965 } from '../../data/eras/1965';
+import type { PatronConfig } from '../../data/EraData';
 import { ERA_AUDIO_1965 } from '../../audio/eras/1965';
+import {
+  CharacterRoster,
+  counterStoolAnchors,
+} from '../../world/characters';
 import { populate1965Surfaces } from './surfaces';
 
 /** Shared 1965 surface materials (factory-cached per kind). */
@@ -614,97 +619,50 @@ export function build1965CounterTechnology(target: THREE.Object3D): void {
 // patrons
 // ---------------------------------------------------------------------------
 
-interface PatronLook {
-  torso: THREE.Material;
-  legs: THREE.Material;
-  skin: THREE.Material;
-  hair: THREE.Material;
-  hat?: THREE.Material | null;
-  beehive?: boolean;
-  prop?: 'book' | 'mirror' | 'radio';
-}
+/** 1965 patron configs consumed by the shared CharacterAvatar system. */
+const PATRON_CONFIGS_1965: PatronConfig[] = [
+  {
+    name: 'beatnik',
+    skin: '#C88B5A',
+    hair: { kind: 'beret', color: '#101010' },
+    shirt: '#1A1A1A',
+    pants: '#3A322A',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    accessory: 'book',
+  },
+  {
+    name: 'mod-woman',
+    skin: '#C88B5A',
+    hair: { kind: 'beehive', color: '#EFE3B6' },
+    shirt: '#D94F8F',
+    pants: '#EFE3B6',
+    shoes: '#101010',
+    style: 'dress',
+    accessory: 'mirror',
+  },
+  {
+    name: 'sweater-man',
+    skin: '#C88B5A',
+    hair: { kind: 'short', color: '#2A1E14' },
+    shirt: '#EFE3B6',
+    pants: '#3A322A',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    accessory: 'radio',
+  },
+];
 
-/** One stylised sixties patron, rooted at the floor, facing +z. */
-function buildPatron(target: THREE.Object3D, name: string, x: number, z: number, look: PatronLook): void {
-  const group = new THREE.Group();
-  group.name = `patron-${name}`;
-  const legH = 0.8;
-  const torsoH = 0.7;
-  const torsoY = legH + torsoH / 2;
-  const headR = 0.11;
-  const headY = torsoY + torsoH / 2 + headR;
-
-  // Legs.
-  box(group, look.legs, 0.11, legH, 0.12, -0.07, legH / 2, 0, 'patron-leg');
-  box(group, look.legs, 0.11, legH, 0.12, 0.07, legH / 2, 0, 'patron-leg');
-  // Torso.
-  box(group, look.torso, 0.34, torsoH, 0.22, 0, torsoY, 0, 'patron-torso');
-  // Head.
-  sphere(group, look.skin, headR, 0, headY, 0, 'patron-head');
-
-  if (look.beehive) {
-    sphere(group, look.hair, 0.09, 0, headY + 0.09, 0, 'patron-hair');
-    sphere(group, look.hair, 0.07, 0, headY + 0.17, 0, 'patron-hair');
-  } else if (look.hat) {
-    sphere(group, look.hat, 0.125, 0, headY + 0.045, 0, 'patron-hat', 0.6);
-  } else {
-    sphere(group, look.hair, 0.115, 0, headY + 0.035, -0.02, 'patron-hair');
-  }
-
-  // Prop.
-  if (look.prop === 'book') {
-    box(group, look.legs, 0.16, 0.05, 0.12, 0.26, torsoY - 0.15, 0.18, 'patron-prop');
-  } else if (look.prop === 'mirror') {
-    cylinder(group, M.chrome(), 0.035, 0.035, 0.015, 0.24, torsoY - 0.05, 0.2, 'patron-prop', { x: Math.PI / 2 });
-  } else if (look.prop === 'radio') {
-    box(group, look.legs, 0.14, 0.08, 0.05, -0.24, torsoY - 0.1, 0.18, 'patron-prop');
-  }
-
-  // Face toward the room centre.
-  group.rotation.y = Math.atan2(-x, -z);
-  group.position.set(x, 0, z);
-  target.add(group);
-}
-
-/** Beatnik, mod, and sweater-wearing sixties patrons. */
+/** Beatnik, mod, and sweater-wearing sixties patrons via the shared roster. */
 export function build1965Patrons(target: THREE.Object3D): void {
-  const dark = materialFromSpec({ color: '#1A1A1A', roughness: 0.85 });
-  const dress = materialFromSpec({ color: '#D94F8F', roughness: 0.7 });
-  const dressAccent = materialFromSpec({ color: '#EFE3B6', roughness: 0.7 });
-  const sweater = materialFromSpec({ color: '#EFE3B6', roughness: 0.85 });
-  const pants = materialFromSpec({ color: '#3A322A', roughness: 0.85 });
-  const skin = materialFromSpec({ color: '#C88B5A', roughness: 0.6 });
-  const hair = materialFromSpec({ color: '#2A1E14', roughness: 0.8 });
-  const beret = materialFromSpec({ color: '#101010', roughness: 0.9 });
-
-  // Beatnik near the west seating table.
-  buildPatron(target, 'beatnik', -3.0, 2.6, {
-    torso: dark,
-    legs: pants,
-    skin,
-    hair,
-    hat: beret,
-    prop: 'book',
+  const roster = new CharacterRoster({
+    parent: target,
+    tables: ANCHORS.seatingTables,
+    stools: counterStoolAnchors(),
   });
-  // Mod woman (geometric shift dress + beehive) near the centre table.
-  buildPatron(target, 'mod-woman', 0.6, 3.1, {
-    torso: dress,
-    legs: dressAccent,
-    skin,
-    hair: dressAccent,
-    hat: null,
-    beehive: true,
-    prop: 'mirror',
-  });
-  // Sweater man near the east seating table.
-  buildPatron(target, 'sweater-man', 2.7, 2.4, {
-    torso: sweater,
-    legs: pants,
-    skin,
-    hair,
-    hat: null,
-    prop: 'radio',
-  });
+  roster.mount(1965, PATRON_CONFIGS_1965);
+  // The roster group is kept on the fragment so the shared animation driver
+  // (updateCharacterAnimations) can find and update the mounted avatars.
 }
 
 // ---------------------------------------------------------------------------

@@ -43,7 +43,12 @@ import {
 } from '../../world/layout';
 import type { SurfaceSlots } from '../../world/ArchitectureShell';
 import { era2025 } from '../../data/eras/2025';
+import type { PatronConfig } from '../../data/EraData';
 import { ERA_AUDIO_2025 } from '../../audio/eras/2025';
+import {
+  CharacterRoster,
+  counterStoolAnchors,
+} from '../../world/characters';
 import { populate2025Surfaces } from './surfaces';
 
 /** Shared 2025 surface materials (factory-cached per kind). */
@@ -763,79 +768,60 @@ export function build2025CounterTechnology(target: THREE.Object3D): void {
 // patrons
 // ---------------------------------------------------------------------------
 
-interface PatronLook {
-  torso: THREE.Material;
-  legs: THREE.Material;
-  skin: THREE.Material;
-  hair: THREE.Material;
-  prop?: 'phone' | 'laptop' | 'headphones';
-}
+/** 2025 patron configs consumed by the shared CharacterAvatar system. */
+const PATRON_CONFIGS_2025: PatronConfig[] = [
+  {
+    name: 'laptop-nomad',
+    skin: '#C88B5A',
+    hair: { kind: 'curls', color: '#3A2418' },
+    shirt: '#C9B9A6',
+    pants: '#2E2A26',
+    shoes: '#1C1410',
+    style: 'shirt-pants',
+    accessory: 'laptop',
+  },
+  {
+    name: 'phone-scroller',
+    skin: '#C88B5A',
+    hair: { kind: 'messy', color: '#1C1410' },
+    shirt: '#D8CFC0',
+    pants: '#6E6A62',
+    shoes: '#2E2A26',
+    style: 'shirt-pants',
+    accessory: 'phone',
+  },
+  {
+    name: 'headphone-listen',
+    skin: '#C88B5A',
+    hair: { kind: 'bob', color: '#3A2418' },
+    shirt: '#3A3A3E',
+    pants: '#2E2A26',
+    shoes: '#1C1410',
+    style: 'shirt-pants',
+    accessory: 'headphones',
+  },
+  {
+    name: 'barista',
+    skin: '#C88B5A',
+    hair: { kind: 'bun', color: '#1C1410' },
+    shirt: '#2E2A26',
+    pants: '#2E2A26',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    accessory: 'cup',
+  },
+];
 
-/** One stylised 2025 laptop-nomad patron, rooted at the floor, facing +z. */
-function buildPatron(target: THREE.Object3D, name: string, x: number, z: number, look: PatronLook): void {
-  const group = new THREE.Group();
-  group.name = `patron-${name}`;
-  const legH = 0.8;
-  const torsoH = 0.7;
-  const torsoY = legH + torsoH / 2;
-  const headR = 0.11;
-  const headY = torsoY + torsoH / 2 + headR;
-
-  box(group, look.legs, 0.11, legH, 0.12, -0.07, legH / 2, 0, 'patron-leg');
-  box(group, look.legs, 0.11, legH, 0.12, 0.07, legH / 2, 0, 'patron-leg');
-  box(group, look.torso, 0.34, torsoH, 0.22, 0, torsoY, 0, 'patron-torso');
-  sphere(group, look.skin, headR, 0, headY, 0, 'patron-head');
-  sphere(group, look.hair, 0.115, 0, headY + 0.035, -0.02, 'patron-hair');
-
-  if (look.prop === 'phone') {
-    box(group, look.legs, 0.05, 0.1, 0.01, 0.22, torsoY - 0.1, 0.16, 'patron-prop-phone');
-  } else if (look.prop === 'laptop') {
-    box(group, look.legs, 0.26, 0.02, 0.18, 0.1, torsoY - 0.2, 0.22, 'patron-prop-laptop');
-  } else if (look.prop === 'headphones') {
-    const band = new THREE.Mesh(new THREE.TorusGeometry(0.07, 0.012, 8, 16), look.legs);
-    band.position.set(0, headY + 0.06, -0.01);
-    band.rotation.x = Math.PI / 2;
-    band.name = 'patron-prop-headphones';
-    group.add(band);
-  }
-
-  group.rotation.y = Math.atan2(-x, -z);
-  group.position.set(x, 0, z);
-  target.add(group);
-}
-
-/** Third-wave laptop-nomad patrons around the seating tables. */
+/** Third-wave laptop-nomad patrons via the shared roster (tables + stools). */
 export function build2025Patrons(target: THREE.Object3D): void {
-  const beige = materialFromSpec({ color: '#C9B9A6', roughness: 0.8 });
-  const coat = materialFromSpec({ color: '#D8CFC0', roughness: 0.7 });
-  const tee = materialFromSpec({ color: '#3A3A3E', roughness: 0.8 });
-  const cargo = materialFromSpec({ color: '#6E6A62', roughness: 0.85 });
-  const pants = materialFromSpec({ color: '#2E2A26', roughness: 0.85 });
-  const skin = materialFromSpec({ color: '#C88B5A', roughness: 0.6 });
-  const hair = materialFromSpec({ color: '#3A2418', roughness: 0.8 });
-  const hairDark = materialFromSpec({ color: '#1C1410', roughness: 0.8 });
-
-  buildPatron(target, 'laptop-nomad', -2.8, 2.6, {
-    torso: beige,
-    legs: pants,
-    skin,
-    hair,
-    prop: 'laptop',
+  const roster = new CharacterRoster({
+    parent: target,
+    tables: ANCHORS.seatingTables,
+    stools: counterStoolAnchors(),
   });
-  buildPatron(target, 'phone-scroller', 0.6, 3.1, {
-    torso: coat,
-    legs: cargo,
-    skin,
-    hair: hairDark,
-    prop: 'phone',
-  });
-  buildPatron(target, 'headphone-listen', 2.7, 2.4, {
-    torso: tee,
-    legs: pants,
-    skin,
-    hair,
-    prop: 'headphones',
-  });
+  roster.mount(2025, PATRON_CONFIGS_2025);
+  // The roster group is kept on the fragment so the shared animation driver
+  // (updateCharacterAnimations) can find and update the mounted avatars.
 }
 
 // ---------------------------------------------------------------------------

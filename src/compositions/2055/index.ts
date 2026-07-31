@@ -45,7 +45,12 @@ import {
 } from '../../world/layout';
 import type { SurfaceSlots } from '../../world/ArchitectureShell';
 import { era2055 } from '../../data/eras/2055';
+import type { PatronConfig } from '../../data/EraData';
 import { ERA_AUDIO_2055 } from '../../audio/eras/2055';
+import {
+  CharacterRoster,
+  counterStoolAnchors,
+} from '../../world/characters';
 import { populate2055Surfaces } from './surfaces';
 
 /** Shared 2055 surface materials (factory-cached per kind). */
@@ -804,79 +809,53 @@ export function build2055CounterTechnology(target: THREE.Object3D): void {
 // patrons
 // ---------------------------------------------------------------------------
 
-interface PatronLook2055 {
-  torso: THREE.Material;
-  legs: THREE.Material;
-  skin: THREE.Material;
-  hair: THREE.Material;
-  accent: THREE.Material;
-  prop: 'holo-band' | 'ar-glasses' | 'neural-cup';
-}
+/** 2055 patron configs consumed by the shared CharacterAvatar system. */
+const PATRON_CONFIGS_2055: PatronConfig[] = [
+  {
+    name: 'poncho',
+    skin: '#C88B5A',
+    hair: { kind: 'braids', color: '#14181E' },
+    shirt: '#3D4F5C',
+    pants: '#1A1F26',
+    shoes: '#14181E',
+    style: 'poncho',
+    accent: '#46D9C2',
+    accessory: 'wristband',
+  },
+  {
+    name: 'jumpsuit',
+    skin: '#C88B5A',
+    hair: { kind: 'buzz', color: '#14181E' },
+    shirt: '#D6D9DC',
+    pants: '#D6D9DC',
+    shoes: '#14181E',
+    style: 'jumpsuit',
+    accent: '#63E6FF',
+    accessory: 'glasses',
+  },
+  {
+    name: 'holo-drinker',
+    skin: '#C88B5A',
+    hair: { kind: 'ponytail', color: '#3D4F5C' },
+    shirt: '#1A1F26',
+    pants: '#14181E',
+    shoes: '#14181E',
+    style: 'shirt-pants',
+    accent: '#46D9C2',
+    accessory: 'cup',
+  },
+];
 
-/** One stylised 2055 patron, rooted at the floor, facing +z. */
-function buildPatron2055(target: THREE.Object3D, name: string, x: number, z: number, look: PatronLook2055): void {
-  const group = new THREE.Group();
-  group.name = `patron-${name}`;
-  const legH = 0.8;
-  const torsoH = 0.7;
-  const torsoY = legH + torsoH / 2;
-  const headR = 0.11;
-  const headY = torsoY + torsoH / 2 + headR;
-
-  // Legs + torso.
-  box(group, look.legs, 0.11, legH, 0.12, -0.07, legH / 2, 0, 'patron-leg');
-  box(group, look.legs, 0.11, legH, 0.12, 0.07, legH / 2, 0, 'patron-leg');
-  box(group, look.torso, 0.34, torsoH, 0.22, 0, torsoY, 0, 'patron-torso');
-  sphere(group, look.skin, headR, 0, headY, 0, 'patron-head');
-
-  // Futuristic hair: nanofiber braids / holo dye threads.
-  sphere(group, look.hair, 0.115, 0, headY + 0.035, -0.02, 'patron-hair');
-  cylinder(group, look.accent, 0.008, 0.008, 0.22, -0.11, headY - 0.02, 0.02, 'patron-thread', { x: 0.25 });
-  cylinder(group, look.accent, 0.008, 0.008, 0.22, 0.11, headY - 0.02, 0.02, 'patron-thread', { x: 0.25 });
-
-  // Prop.
-  if (look.prop === 'holo-band') {
-    cylinder(group, look.accent, 0.03, 0.03, 0.015, 0.22, torsoY - 0.05, 0.18, 'patron-prop', { x: Math.PI / 2 });
-  } else if (look.prop === 'ar-glasses') {
-    box(group, look.accent, 0.16, 0.012, 0.03, 0, headY + 0.02, 0.1, 'patron-prop');
-  } else {
-    cylinder(group, look.accent, 0.035, 0.03, 0.09, 0.24, torsoY - 0.12, 0.18, 'patron-prop');
-  }
-
-  // Face toward the room centre.
-  group.rotation.y = Math.atan2(-x, -z);
-  group.position.set(x, 0, z);
-  target.add(group);
-}
-
-/** Poncho and jumpsuit-wearing 2055 patrons. */
+/** Poncho, jumpsuit and holo-drinking 2055 patrons via the shared roster. */
 export function build2055Patrons(target: THREE.Object3D): void {
-  const poncho = materialFromSpec({ color: '#3D4F5C', roughness: 0.35, clearcoat: 0.4 });
-  const ponchoAccent = materialFromSpec({ color: '#46D9C2', roughness: 0.3 });
-  const jumpsuit = materialFromSpec({ color: '#D6D9DC', roughness: 0.25, metalness: 0.7 });
-  const jumpsuitAccent = materialFromSpec({ color: '#63E6FF', roughness: 0.2 });
-  const dark = materialFromSpec({ color: '#1A1F26', roughness: 0.8 });
-  const skin = materialFromSpec({ color: '#C88B5A', roughness: 0.6 });
-  const hairDark = materialFromSpec({ color: '#14181E', roughness: 0.7 });
-
-  // Smart-fabric poncho patron near the west seating table.
-  buildPatron2055(target, 'poncho', -3.0, 2.6, {
-    torso: poncho,
-    legs: dark,
-    skin,
-    hair: hairDark,
-    accent: ponchoAccent,
-    prop: 'holo-band',
+  const roster = new CharacterRoster({
+    parent: target,
+    tables: ANCHORS.seatingTables,
+    stools: counterStoolAnchors([-2.4, -0.6, 1.2]),
   });
-  // Reflective jumpsuit patron near the east seating table.
-  buildPatron2055(target, 'jumpsuit', 2.7, 2.4, {
-    torso: jumpsuit,
-    legs: jumpsuit,
-    skin,
-    hair: hairDark,
-    accent: jumpsuitAccent,
-    prop: 'ar-glasses',
-  });
+  roster.mount(2055, PATRON_CONFIGS_2055);
+  // The roster group is kept on the fragment so the shared animation driver
+  // (updateCharacterAnimations) can find and update the mounted avatars.
 }
 
 // ---------------------------------------------------------------------------

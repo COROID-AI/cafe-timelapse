@@ -22,6 +22,7 @@ import {
   TimelineSlider,
   ERA_CHANGE_EVENT,
 } from './ui/TimelineSlider';
+import { updateCharacterAnimations } from './world/characters';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 const eraLabel = document.querySelector<HTMLParagraphElement>('#era-label');
@@ -245,6 +246,9 @@ function animate(now: number): void {
   lastTime = now;
   navigation.update(dt);
   transition.update(dt);
+
+  // Shared character idle loop: breathing, head turns, occasional sips.
+  updateCharacterAnimations(scene, dt, now / 1000);
 
   // 2055 bioluminescent pulse: subtle rim-light intensity breathing.
   const config = transition.activeEra ? ERA_LIGHTING[transition.activeEra] : undefined;
