@@ -36,7 +36,7 @@ import {
   PlaneGeometry,
   SphereGeometry,
   TorusGeometry,
-  type Material,
+  type Texture,
   type Object3D,
 } from 'three';
 import {
@@ -88,7 +88,7 @@ export function applyEra1965ShellFinishes(shell: ArchitectureShell): void {
     roughness: 0.4,
     textured: false,
   });
-  (tileMat as unknown as { map: Material | null }).map = TextureFactory.get(
+  (tileMat as unknown as { map: Texture | null }).map = TextureFactory.get(
     'tile',
     ERA,
     { repeatX: 8, repeatY: 8 },
@@ -455,7 +455,7 @@ function buildMenuBoardFragment(): Object3D {
     items: ['Coffee', 'Cappuccino', 'Milkshake', 'Slice of Pie', 'Diner Fries'],
     prices: ['20¢', '30¢', '25¢', '30¢', '25¢'],
   });
-  (boardMat as unknown as { map: Material | null }).map = menuTex;
+  (boardMat as unknown as { map: Texture | null }).map = menuTex;
   boardMat.needsUpdate = true;
 
   const board = new Mesh(new PlaneGeometry(2.4, 1.2), boardMat);
