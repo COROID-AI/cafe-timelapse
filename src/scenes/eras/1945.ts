@@ -32,6 +32,11 @@ import {
   PropPrimitives,
   textureFactory,
 } from '../../assets';
+import type { PatronConfig } from '../../data/EraData';
+import {
+  CharacterRoster,
+  counterStoolAnchors,
+} from '../../world/characters';
 
 const P = PropPrimitives;
 
@@ -806,13 +811,71 @@ export function build1945CounterTechnology(target: THREE.Group, era: EraYear): v
 }
 
 // ---------------------------------------------------------------------------
-// Patrons — figures arrive in a later phase; EraData already describes them.
+// Patrons — 1945 post-war café clientele
 // ---------------------------------------------------------------------------
 
-export function build1945Patrons(_target: THREE.Group, _era: EraYear): void {
-  // Intentionally empty: the era data supplies outfits/hairstyles/gadgets, and
-  // the registry label/tags expose them. Simple stylised figures can be added
-  // without changing the fragment contract.
+/**
+ * 1945 patron configs consumed by the shared CharacterAvatar system.
+ *
+ * Post-war period accuracy: demob suits with fedoras, knee-length day dresses
+ * with padded shoulders, victory-roll / finger-wave hairstyles and the era's
+ * signature held gadget — a folded newspaper. The fourth patron mirrors the
+ * second descriptive entry from EraData (ration book in a handbag) with a
+ * mid-century outfit.
+ */
+const PATRON_CONFIGS_1945: PatronConfig[] = [
+  {
+    name: 'demob-soldier',
+    skin: '#C88B5A',
+    hair: { kind: 'fedora', color: '#33261C' },
+    shirt: '#3A4A4E',
+    pants: '#2E2A26',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    accessory: 'newspaper',
+  },
+  {
+    name: 'day-dress-woman',
+    skin: '#C88B5A',
+    hair: { kind: 'victory-rolls', color: '#5A3A24' },
+    shirt: '#B5442E',
+    pants: '#B5442E',
+    shoes: '#2A1E14',
+    style: 'dress',
+    accessory: 'purse',
+  },
+  {
+    name: 'fedora-gentleman',
+    skin: '#C88B5A',
+    hair: { kind: 'fedora', color: '#1F1712' },
+    shirt: '#D8CFC0',
+    pants: '#3A322A',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    accessory: 'newspaper',
+  },
+  {
+    name: 'finger-wave-lady',
+    skin: '#C88B5A',
+    hair: { kind: 'finger-waves', color: '#4A2E1E' },
+    shirt: '#2F5D50',
+    pants: '#2F5D50',
+    shoes: '#2A1E14',
+    style: 'dress',
+    accessory: 'purse',
+  },
+];
+
+/** 1945 demob-suit/fedora and day-dress patrons via the shared roster. */
+export function build1945Patrons(target: THREE.Group, _era: EraYear): void {
+  const roster = new CharacterRoster({
+    parent: target,
+    tables: ANCHORS.seatingTables,
+    stools: counterStoolAnchors(),
+  });
+  roster.mount(1945, PATRON_CONFIGS_1945);
+  // The roster group is kept on the fragment so the shared animation driver
+  // (updateCharacterAnimations) can find and update the mounted avatars.
 }
 
 /** Build every 1945 fragment category into one group (convenience). */
