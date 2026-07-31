@@ -58,6 +58,11 @@ const SUIT_SHOULDER_W = 0.34;
 const SUIT_CHEST_H = 0.5;
 const DRESS_SHOULDER_W = 0.3;
 const DRESS_CHEST_H = 0.46;
+// 2025 athleisure/oversized fits — relaxed, roomier shoulder lines.
+const ATHLEISURE_SHOULDER_W = 0.36;
+const ATHLEISURE_CHEST_H = 0.5;
+const OVERSIZED_SHOULDER_W = 0.44;
+const OVERSIZED_CHEST_H = 0.52;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -153,6 +158,116 @@ function buildOutfit(outfit: OutfitConfig, root: Group): void {
       // Lower legs (calves) going down to the floor.
       const calf = part(
         new CapsuleGeometry(0.06, 0.32, 6, 12),
+        legMat,
+        root,
+        sx,
+        HIP_Y - 0.18,
+        0.36,
+      );
+      calf.castShadow = true;
+    }
+  } else if (outfit.type === 'athleisure') {
+    // 2025 athleisure — hoodie + joggers. Slightly roomier shoulders, a hood
+    // nub at the back of the neck, and a kangaroo-pocket accent on the front.
+    const torso = part(
+      new BoxGeometry(ATHLEISURE_SHOULDER_W, ATHLEISURE_CHEST_H, 0.24),
+      jacketMat,
+      root,
+      0,
+      (HIP_Y + TORSO_TOP_Y) / 2,
+      0,
+    );
+    torso.castShadow = true;
+
+    // Hood nub at the back of the neck.
+    part(
+      new SphereGeometry(0.07, 16, 12),
+      jacketMat,
+      root,
+      0,
+      TORSO_TOP_Y - 0.02,
+      -0.1,
+    );
+
+    // Kangaroo-pocket accent (a horizontal box on the lower front).
+    part(
+      new BoxGeometry(0.2, 0.08, 0.02),
+      accentMat,
+      root,
+      0,
+      HIP_Y + 0.06,
+      0.14,
+    );
+
+    // Jogger-clad legs — matching color, slightly looser calves.
+    const legMat = new MeshStandardMaterial({
+      color: outfit.color,
+      roughness: 0.88,
+      metalness: 0.0,
+    });
+    for (const sx of [-0.09, 0.09]) {
+      const thigh = part(
+        new CapsuleGeometry(0.075, 0.36, 6, 12),
+        legMat,
+        root,
+        sx,
+        HIP_Y,
+        0.16,
+      );
+      thigh.rotation.x = rad(90);
+      thigh.castShadow = true;
+      const calf = part(
+        new CapsuleGeometry(0.065, 0.32, 6, 12),
+        legMat,
+        root,
+        sx,
+        HIP_Y - 0.18,
+        0.36,
+      );
+      calf.castShadow = true;
+    }
+  } else if (outfit.type === 'oversized') {
+    // 2025 oversized — baggy drop-shoulder sweatshirt over wide legs. The
+    // widest shoulder line of any family; accent is a graphic chest print.
+    const torso = part(
+      new BoxGeometry(OVERSIZED_SHOULDER_W, OVERSIZED_CHEST_H, 0.28),
+      jacketMat,
+      root,
+      0,
+      (HIP_Y + TORSO_TOP_Y) / 2,
+      0,
+    );
+    torso.castShadow = true;
+
+    // Graphic chest-print accent (a square patch on the upper chest).
+    part(
+      new BoxGeometry(0.12, 0.12, 0.02),
+      accentMat,
+      root,
+      0,
+      TORSO_TOP_Y - 0.12,
+      0.15,
+    );
+
+    // Baggy legs — color matched to the sweatshirt (co-ord fit).
+    const legMat = new MeshStandardMaterial({
+      color: outfit.color,
+      roughness: 0.9,
+      metalness: 0.0,
+    });
+    for (const sx of [-0.1, 0.1]) {
+      const thigh = part(
+        new CapsuleGeometry(0.085, 0.36, 6, 12),
+        legMat,
+        root,
+        sx,
+        HIP_Y,
+        0.16,
+      );
+      thigh.rotation.x = rad(90);
+      thigh.castShadow = true;
+      const calf = part(
+        new CapsuleGeometry(0.075, 0.32, 6, 12),
         legMat,
         root,
         sx,
@@ -343,6 +458,30 @@ function buildHeadAndHair(
       cap.castShadow = true;
       break;
     }
+    case 'topKnot': {
+      // 2025 top-knot — hair pulled back and gathered into a small bun on top
+      // of the crown. A close-fitting base cap + a sphere "bun" on top.
+      const cap = part(
+        new SphereGeometry(HEAD_RADIUS + 0.01, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.6),
+        hairMat,
+        root,
+        0,
+        HEAD_CENTER_Y,
+        0,
+      );
+      cap.castShadow = true;
+      // The bun: a small sphere sitting on the crown, slightly toward the back.
+      const bun = part(
+        new SphereGeometry(0.045, 16, 12),
+        hairMat,
+        root,
+        0,
+        HEAD_CENTER_Y + 0.11,
+        -0.02,
+      );
+      bun.castShadow = true;
+      break;
+    }
   }
 }
 
@@ -437,6 +576,29 @@ function buildHat(hat: HatConfig, root: Group): void {
       crown.castShadow = true;
       break;
     }
+    case 'beanie': {
+      // 2025 beanie — a close-fitting knit cap covering the upper head, with a
+      // small folded cuff band at the bottom edge. No brim.
+      const crown = part(
+        new SphereGeometry(0.115, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.62),
+        hatMat,
+        root,
+        0,
+        HEAD_CENTER_Y + 0.01,
+        0,
+      );
+      crown.castShadow = true;
+      // Folded cuff band — a short cylinder ring at the lower edge.
+      part(
+        new CylinderGeometry(0.112, 0.112, 0.04, 20),
+        brimMat,
+        root,
+        0,
+        HEAD_CENTER_Y + 0.02,
+        0,
+      );
+      break;
+    }
   }
 }
 
@@ -503,6 +665,157 @@ function buildGadget(gadget: GadgetConfig, root: Group): void {
       );
       watch.rotation.x = rad(90);
       watch.castShadow = true;
+      break;
+    }
+    case 'smartphone': {
+      // A smartphone held upright in the hands. Thin dark slab with a lighter
+      // screen face, tilted slightly toward the patron's eyes.
+      const bodyMat = new MeshStandardMaterial({
+        color: 0x1a1a1e,
+        roughness: 0.4,
+        metalness: 0.7,
+      });
+      const screenMat = new MeshStandardMaterial({
+        color: gadget.color ?? 0x2b3a55,
+        roughness: 0.25,
+        metalness: 0.1,
+      });
+      const phone = part(
+        new BoxGeometry(0.075, 0.14, 0.01),
+        bodyMat,
+        root,
+        0,
+        handsY + 0.06,
+        handsZ,
+      );
+      phone.rotation.x = rad(-12);
+      phone.castShadow = true;
+      // Screen face on the +Z side.
+      part(
+        new BoxGeometry(0.066, 0.13, 0.005),
+        screenMat,
+        root,
+        0,
+        handsY + 0.06,
+        handsZ + 0.008,
+      ).rotation.x = rad(-12);
+      break;
+    }
+    case 'openLaptop': {
+      // A small open laptop on the table in front of the patron: a base slab
+      // (keyboard deck) lying flat + an upright screen.
+      const bodyMat = new MeshStandardMaterial({
+        color: 0x2a2a30,
+        roughness: 0.5,
+        metalness: 0.5,
+      });
+      const screenMat = new MeshStandardMaterial({
+        color: gadget.color ?? 0x223044,
+        roughness: 0.25,
+        metalness: 0.1,
+      });
+      // Keyboard deck lying flat on the lap/table.
+      part(
+        new BoxGeometry(0.3, 0.015, 0.2),
+        bodyMat,
+        root,
+        0,
+        handsY,
+        handsZ + 0.04,
+      ).castShadow = true;
+      // Upright screen at the back edge of the deck.
+      part(
+        new BoxGeometry(0.3, 0.2, 0.012),
+        screenMat,
+        root,
+        0,
+        handsY + 0.1,
+        handsZ - 0.04,
+      ).castShadow = true;
+      break;
+    }
+    case 'earbuds': {
+      // Wireless earbuds — a small open charging case on the table plus a
+      // subtle stem visible at each ear. The case is the in-hands prop; the
+      // stems read as the earbuds worn in-ear.
+      const caseMat = new MeshStandardMaterial({
+        color: gadget.color ?? 0xf2f2f2,
+        roughness: 0.3,
+        metalness: 0.1,
+      });
+      const budMat = new MeshStandardMaterial({
+        color: 0xf2f2f2,
+        roughness: 0.35,
+        metalness: 0.1,
+      });
+      // Open charging case on the table.
+      part(
+        new BoxGeometry(0.05, 0.025, 0.04),
+        caseMat,
+        root,
+        0,
+        handsY,
+        handsZ,
+      ).castShadow = true;
+      // Two short stems at ear level, one per side of the head.
+      for (const sx of [-0.13, 0.13]) {
+        const stem = part(
+          new CylinderGeometry(0.012, 0.012, 0.05, 10),
+          budMat,
+          root,
+          sx,
+          HEAD_CENTER_Y,
+          0.08,
+        );
+        stem.castShadow = true;
+      }
+      break;
+    }
+    case 'reusableCup': {
+      // A reusable travel cup (keep-cup) held in the hands: a tapered cylinder
+      // body with a silicone sleeve accent band and a flat lid.
+      const cupMat = new MeshStandardMaterial({
+        color: gadget.color ?? 0xeae3d6,
+        roughness: 0.6,
+        metalness: 0.0,
+      });
+      const sleeveMat = new MeshStandardMaterial({
+        color: 0x3a3a40,
+        roughness: 0.7,
+        metalness: 0.0,
+      });
+      const lidMat = new MeshStandardMaterial({
+        color: 0x2a2a30,
+        roughness: 0.5,
+        metalness: 0.1,
+      });
+      const cup = part(
+        new CylinderGeometry(0.045, 0.055, 0.16, 18),
+        cupMat,
+        root,
+        0,
+        handsY,
+        handsZ,
+      );
+      cup.castShadow = true;
+      // Silicone grip sleeve around the middle.
+      part(
+        new CylinderGeometry(0.052, 0.052, 0.04, 18),
+        sleeveMat,
+        root,
+        0,
+        handsY,
+        handsZ,
+      ).castShadow = true;
+      // Flat push-in lid with a small sipping hole nub.
+      part(
+        new CylinderGeometry(0.045, 0.045, 0.01, 18),
+        lidMat,
+        root,
+        0,
+        handsY + 0.085,
+        handsZ,
+      ).castShadow = true;
       break;
     }
   }

@@ -43,3 +43,4 @@ export {
 
 // Per-era population modules (side-effectful: importing populates the roster).
 export { PATRONS_1945, registerPatrons1945 } from './patrons1945.js';
+export { PATRONS_2025, registerPatrons2025 } from './patrons2025.js';

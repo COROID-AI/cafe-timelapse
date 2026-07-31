@@ -121,4 +121,59 @@ describe('buildSeatedPatron', () => {
       expect(meshCount(g)).toBeGreaterThan(6);
     }
   });
+
+  it('every 2025 patron config builds without throwing', async () => {
+    const { PATRONS_2025 } = await import('./patrons2025.js');
+    for (const cfg of PATRONS_2025) {
+      const anchor = ANCHORS[cfg.seat];
+      const g = buildSeatedPatron(cfg, [anchor.x, anchor.y, anchor.z]);
+      expect(meshCount(g)).toBeGreaterThan(6);
+    }
+  });
+
+  it('2025 athleisure/oversized outfits add more meshes than hat-less baseline', () => {
+    // A beanie adds at least one extra mesh over a hat-less config.
+    const withBeanie = meshCount(
+      buildAvatar({
+        id: 'b',
+        era: 2025,
+        outfit: { type: 'athleisure', color: 0x333333, accent: 0xeeeeee },
+        hat: { type: 'beanie', color: 0x333333 },
+        hair: { style: 'topKnot', color: 0x222222 },
+        gadget: { type: 'none' },
+        seat: 'seatingTableA',
+      }),
+    );
+    const noHat = meshCount(
+      buildAvatar({
+        id: 'b2',
+        era: 2025,
+        outfit: { type: 'athleisure', color: 0x333333, accent: 0xeeeeee },
+        hat: { type: 'none', color: 0x000000 },
+        hair: { style: 'topKnot', color: 0x222222 },
+        gadget: { type: 'none' },
+        seat: 'seatingTableA',
+      }),
+    );
+    expect(withBeanie).toBeGreaterThan(noHat);
+  });
+
+  it('2025 gadgets (smartphone, laptop, earbuds, reusable cup) all add meshes', () => {
+    const base = (gadget: PatronConfig['gadget']) =>
+      meshCount(
+        buildAvatar({
+          id: 'g',
+          era: 2025,
+          outfit: { type: 'athleisure', color: 0x333333, accent: 0xeeeeee },
+          hat: { type: 'none', color: 0x000000 },
+          hair: { style: 'topKnot', color: 0x222222 },
+          gadget,
+          seat: 'seatingTableA',
+        }),
+      );
+    const none = base({ type: 'none' });
+    for (const t of ['smartphone', 'openLaptop', 'earbuds', 'reusableCup'] as const) {
+      expect(base({ type: t })).toBeGreaterThan(none);
+    }
+  });
 });

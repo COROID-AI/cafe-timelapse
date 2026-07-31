@@ -20,8 +20,12 @@ import type { AnchorKey } from '../world/layout.js';
 // Outfit
 // -----------------------------------------------------------------------
 
-/** The two 1945-era garment families a patron can wear. */
-export type OutfitType = 'suit' | 'dayDress';
+/**
+ * Garment families a patron can wear. The 1945 era uses `suit` / `dayDress`;
+ * the 2025 era adds the relaxed `athleisure` (hoodie + joggers) and `oversized`
+ * (baggy drop-shoulder fit) families.
+ */
+export type OutfitType = 'suit' | 'dayDress' | 'athleisure' | 'oversized';
 
 /** Describes the patron's torso garment. */
 export interface OutfitConfig {
@@ -37,8 +41,12 @@ export interface OutfitConfig {
 // Hat
 // -----------------------------------------------------------------------
 
-/** Headwear families supported by the avatar builder. */
-export type HatType = 'fedora' | 'wideBrim' | 'cloche' | 'none';
+/**
+ * Headwear families supported by the avatar builder. The 1945 era uses
+ * `fedora` / `wideBrim` / `cloche`; the 2025 era adds the `beanie` (close-fitting
+ * knit cap).
+ */
+export type HatType = 'fedora' | 'wideBrim' | 'cloche' | 'beanie' | 'none';
 
 /** Describes the patron's hat. Use `{ type: 'none' }` for hat-less patrons. */
 export interface HatConfig {
@@ -53,13 +61,16 @@ export interface HatConfig {
 
 /**
  * Period hairstyle families. Each maps to a distinct procedural hair sculpt on
- * the avatar head.
+ * the avatar head. The 1945 era uses `victoryRolls` / `fingerWaves` /
+ * `slickedBack` / `pompadour`; the 2025 era adds `topKnot` (hair pulled into a
+ * bun on the crown — a contemporary gender-fluid style).
  */
 export type HairStyle =
   | 'victoryRolls' // 1940s voluminous rolled-updos (feminine)
   | 'fingerWaves' // 1930s–40s sculpted S-waves (feminine)
   | 'slickedBack' // classic short-back-and-sides (masculine)
-  | 'pompadour'; // volume-forward roll (masculine)
+  | 'pompadour' // volume-forward roll (masculine)
+  | 'topKnot'; // 2020s bun on the crown (gender-fluid)
 
 /** Describes the patron's hairstyle. */
 export interface HairConfig {
@@ -74,9 +85,17 @@ export interface HairConfig {
 
 /**
  * Held-prop families. The avatar builder places the gadget in the patron's
- * hands at table height.
+ * hands at table height. The 1945 era uses `newspaper` / `pocketWatch`; the
+ * 2025 era adds `smartphone`, `openLaptop`, `earbuds`, and `reusableCup`.
  */
-export type GadgetType = 'newspaper' | 'pocketWatch' | 'none';
+export type GadgetType =
+  | 'newspaper'
+  | 'pocketWatch'
+  | 'smartphone'
+  | 'openLaptop'
+  | 'earbuds'
+  | 'reusableCup'
+  | 'none';
 
 /** Describes the patron's held gadget. */
 export interface GadgetConfig {
