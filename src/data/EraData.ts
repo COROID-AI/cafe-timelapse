@@ -73,6 +73,7 @@ export type HairstyleKind =
   | 'short'
   | 'bob'
   | 'beehive'
+  | 'bouffant'
   | 'beret'
   | 'cap'
   | 'ponytail'
@@ -98,6 +99,8 @@ export type AccessoryKind =
   | 'cup'
   | 'glasses'
   | 'wristband'
+  | 'cigarette'
+  | 'tie'
   | 'none';
 
 /** Garment silhouette used to shape the avatar's torso. */

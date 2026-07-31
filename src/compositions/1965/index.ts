@@ -19,7 +19,9 @@
  *   - tableware         melamine diner mugs, glass creamers, sugar dispensers
  *   - signageLighting   glowing tube neon "COFFEE" + fluorescent ceiling tubes
  *   - counterTechnology early electric cash register
- *   - patrons           beatnik, mod, and sweater-wearing sixties patrons
+ *   - patrons           mod shift + beehive, bouffant dress + cigarette case,
+ *                       slim suit + narrow tie, and sweater + transistor
+ *                       radio sixties patrons
  *
  * All geometry is procedural and headless-safe (no WebGL required to build).
  */
@@ -622,16 +624,6 @@ export function build1965CounterTechnology(target: THREE.Object3D): void {
 /** 1965 patron configs consumed by the shared CharacterAvatar system. */
 const PATRON_CONFIGS_1965: PatronConfig[] = [
   {
-    name: 'beatnik',
-    skin: '#C88B5A',
-    hair: { kind: 'beret', color: '#101010' },
-    shirt: '#1A1A1A',
-    pants: '#3A322A',
-    shoes: '#101010',
-    style: 'shirt-pants',
-    accessory: 'book',
-  },
-  {
     name: 'mod-woman',
     skin: '#C88B5A',
     hair: { kind: 'beehive', color: '#EFE3B6' },
@@ -640,6 +632,28 @@ const PATRON_CONFIGS_1965: PatronConfig[] = [
     shoes: '#101010',
     style: 'dress',
     accessory: 'mirror',
+  },
+  {
+    name: 'bouffant-lady',
+    skin: '#C88B5A',
+    hair: { kind: 'bouffant', color: '#2A1E14' },
+    shirt: '#2F6B4F',
+    pants: '#EFE3B6',
+    shoes: '#101010',
+    style: 'dress',
+    accent: '#C9A227',
+    accessory: 'case',
+  },
+  {
+    name: 'slim-suit-man',
+    skin: '#C88B5A',
+    hair: { kind: 'short', color: '#1A1A1A' },
+    shirt: '#EFE3B6',
+    pants: '#3A322A',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    accent: '#8A1F2D',
+    accessory: 'tie',
   },
   {
     name: 'sweater-man',

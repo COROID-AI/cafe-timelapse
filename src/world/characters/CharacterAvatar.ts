@@ -207,6 +207,11 @@ function buildHair(parts: Part[], hair: THREE.Material, kind: HairstyleKind): vo
       add(sphere(0.09), 0, HEAD_R * 0.95, 0);
       add(sphere(0.07), 0, HEAD_R * 1.5, 0);
       break;
+    case 'bouffant':
+      add(cap(1, 0.85), 0, HEAD_R * 0.4, 0);
+      add(sphere(0.1), 0, HEAD_R * 0.9, 0);
+      add(sphere(0.08), 0, HEAD_R * 1.25, -HEAD_R * 0.1);
+      break;
     case 'beret': {
       add(cap(0.9, 0.55), 0, HEAD_R * 0.55, 0);
       add(cylinder(HEAD_R * 1.1, HEAD_R * 1.1, 0.02, 10), 0, HEAD_R * 0.35, 0);
@@ -330,6 +335,9 @@ function buildHandAccessory(
       break;
     case 'wristband':
       add(box(0.06, 0.03, 0.06), 0, -0.42, 0.03);
+      break;
+    case 'cigarette':
+      add(cylinder(0.008, 0.008, 0.1, 6), 0, -0.5, 0.09);
       break;
     case 'cup':
       add(cylinder(0.035, 0.028, 0.09, 10), 0, -0.6, 0.05);
@@ -482,6 +490,13 @@ export class CharacterAvatar {
     const torso = box(torsoW, TORSO_H, 0.22);
     torso.translate(0, torsoCenterY, 0);
     staticParts.push({ geometry: torso, material: shirt });
+
+    // Slim tie worn at the chest (1965 slim-suit patrons).
+    if (accessory === 'tie') {
+      const tie = box(0.05, 0.26, 0.02);
+      tie.translate(0, torsoCenterY - 0.04, 0.115);
+      staticParts.push({ geometry: tie, material: accent });
+    }
 
     if (this.config.style === 'dress') {
       const skirt = cylinder(0.2, 0.3, 0.3, 10);

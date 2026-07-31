@@ -11,7 +11,8 @@ import type { EraData } from '../EraData';
  * tabletop jukebox selector, mid-century modern + pop-art coffee ads,
  * melamine diner mugs and glass creamers, tube neon + fluorescent ceiling
  * tubes, an early electric cash register, checkerboard tile and wood
- * panelling, and beatnik patrons.
+ * panelling, and mid-sixties patrons (mod shift + beehive, bouffant dress,
+ * slim suit + narrow tie, sweater + transistor radio).
  */
 export const era1965: EraData = {
   year: 1965,
@@ -75,14 +76,19 @@ export const era1965: EraData = {
 
   patrons: [
     {
-      outfit: 'Black turtleneck and dark slacks (beatnik)',
-      hairstyle: 'Short crop under a black beret',
-      gadget: 'Paperback novel',
-    },
-    {
       outfit: 'Mod shift dress with geometric print',
       hairstyle: 'Beehive with backcombing',
       gadget: 'Compact mirror',
+    },
+    {
+      outfit: 'Slim sheath dress with bouffant styling',
+      hairstyle: 'Bouffant upsweep',
+      gadget: 'Cigarette case',
+    },
+    {
+      outfit: 'Slim-cut suit with narrow tie',
+      hairstyle: 'Slicked-back short crop',
+      gadget: 'Slim tie',
     },
     {
       outfit: 'Crew-neck sweater and slim trousers',

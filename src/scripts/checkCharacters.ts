@@ -96,6 +96,38 @@ function run(): void {
     'merged static body mesh exists (legs/torso/left arm/shoes)',
   );
 
+  // 1b. New 1965 accessory/hair shapes render headlessly.
+  console.log('\n[1965 period accessory shapes]');
+  const tieConfig: PatronConfig = {
+    name: 'slim-suit-man',
+    skin: '#C88B5A',
+    hair: { kind: 'short', color: '#1A1A1A' },
+    shirt: '#EFE3B6',
+    pants: '#3A322A',
+    shoes: '#101010',
+    accent: '#8A1F2D',
+    accessory: 'tie',
+  };
+  const tieAvatar = new CharacterAvatar({ config: tieConfig, posture: 'seated' });
+  assert(
+    countMeshes(tieAvatar.root) >= 2,
+    'slim-tie patron builds its figure meshes',
+  );
+  const cigaretteConfig: PatronConfig = {
+    name: 'smoker',
+    skin: '#C88B5A',
+    hair: { kind: 'bouffant', color: '#2A1E14' },
+    shirt: '#2F6B4F',
+    pants: '#EFE3B6',
+    shoes: '#101010',
+    accessory: 'cigarette',
+  };
+  const cigaretteAvatar = new CharacterAvatar({ config: cigaretteConfig, posture: 'seated' });
+  assert(
+    countMeshes(cigaretteAvatar.root) >= 2,
+    'bouffant + cigarette patron builds its figure meshes',
+  );
+
   // 2. Parameterization: changing config changes materials/shape.
   console.log('\n[PatronConfig parameterization]');
   const dressConfig: PatronConfig = {
