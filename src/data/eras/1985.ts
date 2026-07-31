@@ -64,14 +64,24 @@ export const era1985: EraData = {
 
   patrons: [
     {
-      outfit: 'Denim jacket over a band t-shirt',
-      hairstyle: 'Big perm with a side sweep',
-      gadget: 'Walkman personal stereo',
+      outfit: 'Shoulder-pad power blazer over a pencil skirt',
+      hairstyle: 'Big permed hair with a side sweep',
+      gadget: 'Sony Walkman headphones',
     },
     {
-      outfit: 'Neon tracksuit with white trainers',
-      hairstyle: 'High ponytail with scrunchie',
-      gadget: 'Pocket calculator',
+      outfit: 'Cobalt members-only jacket over a white tee',
+      hairstyle: 'Mullet with a feathered fringe',
+      gadget: 'Sony Walkman personal stereo',
+    },
+    {
+      outfit: 'Neon leotard with leg warmers over tights',
+      hairstyle: 'High ponytail with a scrunchie',
+      gadget: 'Wrist sweatband',
+    },
+    {
+      outfit: 'Pastel oversized blazer with rolled sleeves',
+      hairstyle: 'Big curly perm',
+      gadget: 'Cappuccino cup',
     },
   ],
 };

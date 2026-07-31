@@ -19,6 +19,7 @@
  */
 import * as THREE from 'three';
 import type { EraYear } from '../../data/eras';
+import type { PatronConfig } from '../../data/EraData';
 import { era1985 } from '../../data/eras/1985';
 import {
   ANCHORS,
@@ -28,6 +29,10 @@ import {
   ROOM_HEIGHT,
   ROOM_WIDTH,
 } from '../../world/layout';
+import {
+  CharacterRoster,
+  counterStoolAnchors,
+} from '../../world/characters';
 import {
   materialFactory,
   materialFromSpec,
@@ -914,13 +919,67 @@ export function build1985CounterTechnology(target: THREE.Group, era: EraYear): v
 }
 
 // ---------------------------------------------------------------------------
-// Patrons — figures arrive in a later phase; EraData already describes them.
+// Patrons — eighties espresso-bar patrons via the shared CharacterRoster.
 // ---------------------------------------------------------------------------
 
-export function build1985Patrons(_target: THREE.Group, _era: EraYear): void {
-  // Intentionally empty: the era data supplies outfits/hairstyles/gadgets, and
-  // the registry label/tags expose them. Simple stylised figures can be added
-  // without changing the fragment contract.
+/** 1985 patron configs consumed by the shared CharacterAvatar system. */
+const PATRON_CONFIGS_1985: PatronConfig[] = [
+  {
+    name: 'power-blazer-woman',
+    skin: '#C88B5A',
+    hair: { kind: 'waves', color: '#C9A227' },
+    shirt: '#3A2A5C',
+    pants: '#241A38',
+    shoes: '#101010',
+    style: 'dress',
+    accent: '#C9A227',
+    accessory: 'headphones',
+  },
+  {
+    name: 'members-only-jacket',
+    skin: '#C88B5A',
+    hair: { kind: 'messy', color: '#2A1E14' },
+    shirt: '#1E3A5F',
+    pants: '#C9CDD2',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    accent: '#D94F8F',
+    accessory: 'walkman',
+  },
+  {
+    name: 'leg-warmers-aerobics',
+    skin: '#C88B5A',
+    hair: { kind: 'ponytail', color: '#2A1E14' },
+    shirt: '#D94F8F',
+    pants: '#2A1E3E',
+    shoes: '#F2F2F2',
+    style: 'shirt-pants',
+    accent: '#46D9C2',
+    accessory: 'wristband',
+  },
+  {
+    name: 'memphis-big-hair',
+    skin: '#C88B5A',
+    hair: { kind: 'curls', color: '#1C1410' },
+    shirt: '#5C7A99',
+    pants: '#EFE3B6',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    accent: '#46D9C2',
+    accessory: 'cup',
+  },
+];
+
+/** Power-dressing, members-only and aerobic eighties patrons via the shared roster. */
+export function build1985Patrons(target: THREE.Group, _era: EraYear): void {
+  const roster = new CharacterRoster({
+    parent: target,
+    tables: ANCHORS.seatingTables,
+    stools: counterStoolAnchors(),
+  });
+  roster.mount(1985, PATRON_CONFIGS_1985);
+  // The roster group stays on the fragment so the shared animation driver
+  // (updateCharacterAnimations) finds and updates the mounted avatars.
 }
 
 /** Build every 1985 fragment category into one group (convenience). */
