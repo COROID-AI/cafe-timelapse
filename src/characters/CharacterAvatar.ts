@@ -161,7 +161,7 @@ function buildOutfit(outfit: OutfitConfig, root: Group): void {
       );
       calf.castShadow = true;
     }
-  } else {
+  } else if (outfit.type === 'dayDress') {
     // dayDress — slightly narrower shoulders, A-line skirt over the lap.
     const torso = part(
       new BoxGeometry(DRESS_SHOULDER_W, DRESS_CHEST_H, 0.2),
@@ -216,6 +216,84 @@ function buildOutfit(outfit: OutfitConfig, root: Group): void {
         0.34,
       );
       calf.castShadow = true;
+    }
+  } else if (outfit.type === 'bootcutJeans') {
+    // 2005-era casual: layered top (accent-coloured shirt) with bootcut denim
+    // jeans. The `color` field is the denim wash; `accent` is the layered top.
+    const denimMat = new MeshStandardMaterial({
+      color: outfit.color,
+      roughness: 0.9,
+      metalness: 0.0,
+    });
+    const topMat = new MeshStandardMaterial({
+      color: outfit.accent,
+      roughness: 0.82,
+      metalness: 0.0,
+    });
+
+    // Layered torso: a slightly wider, softer-shoulder block (open shirt).
+    const torso = part(
+      new BoxGeometry(0.32, 0.46, 0.22),
+      topMat,
+      root,
+      0,
+      (HIP_Y + TORSO_TOP_Y) / 2,
+      0,
+    );
+    torso.castShadow = true;
+
+    // Inner tee peeking at the neckline (narrow white strip).
+    const teeMat = new MeshStandardMaterial({
+      color: 0xeeeeee,
+      roughness: 0.85,
+      metalness: 0.0,
+    });
+    part(
+      new BoxGeometry(0.1, 0.14, 0.02),
+      teeMat,
+      root,
+      0,
+      TORSO_TOP_Y - 0.06,
+      0.12,
+    );
+
+    // Two seated thighs in denim (slightly wider than the suit to evoke
+    // bootcut jeans).
+    for (const sx of [-0.1, 0.1]) {
+      const thigh = part(
+        new CapsuleGeometry(0.075, 0.36, 6, 12),
+        denimMat,
+        root,
+        sx,
+        HIP_Y,
+        0.16,
+      );
+      thigh.rotation.x = rad(90);
+      thigh.castShadow = true;
+      // Lower legs in denim.
+      const calf = part(
+        new CapsuleGeometry(0.07, 0.3, 6, 12),
+        denimMat,
+        root,
+        sx,
+        HIP_Y - 0.18,
+        0.36,
+      );
+      calf.castShadow = true;
+      // Boot shoe at the ankle.
+      const shoeMat = new MeshStandardMaterial({
+        color: 0x3a2a1a,
+        roughness: 0.6,
+        metalness: 0.05,
+      });
+      part(
+        new BoxGeometry(0.09, 0.06, 0.16),
+        shoeMat,
+        root,
+        sx,
+        HIP_Y - 0.34,
+        0.42,
+      );
     }
   }
 }
@@ -343,6 +421,75 @@ function buildHeadAndHair(
       cap.castShadow = true;
       break;
     }
+    case 'sideSweptBangs': {
+      // 2000s side-fringe: a hair cap with a diagonal sweep of fringe across
+      // the forehead, parted to one side.
+      const cap = part(
+        new SphereGeometry(HEAD_RADIUS + 0.014, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.62),
+        hairMat,
+        root,
+        0,
+        HEAD_CENTER_Y,
+        0,
+      );
+      cap.castShadow = true;
+      // Diagonal fringe panel swept to the left side of the forehead.
+      const fringe = part(
+        new BoxGeometry(0.16, 0.045, 0.08),
+        hairMat,
+        root,
+        -0.03,
+        HEAD_CENTER_Y + 0.02,
+        0.08,
+      );
+      fringe.rotation.z = rad(18);
+      fringe.castShadow = true;
+      // Longer side panels framing the face.
+      for (const sx of [-0.11, 0.11]) {
+        const panel = part(
+          new BoxGeometry(0.04, 0.14, 0.1),
+          hairMat,
+          root,
+          sx,
+          HEAD_CENTER_Y - 0.04,
+          0.04,
+        );
+        panel.castShadow = true;
+      }
+      break;
+    }
+    case 'spiky': {
+      // 2000s gelled spikes: a close cap with several short cones sticking up.
+      const cap = part(
+        new SphereGeometry(HEAD_RADIUS + 0.012, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.6),
+        hairMat,
+        root,
+        0,
+        HEAD_CENTER_Y,
+        0,
+      );
+      cap.castShadow = true;
+      // Several short spikes across the top of the head.
+      const spikePositions: readonly [number, number][] = [
+        [-0.06, 0.1],
+        [0.06, 0.1],
+        [0.0, 0.12],
+        [-0.03, 0.07],
+        [0.03, 0.07],
+      ];
+      for (const [sx, sz] of spikePositions) {
+        const spike = part(
+          new ConeGeometry(0.028, 0.07, 10),
+          hairMat,
+          root,
+          sx,
+          HEAD_CENTER_Y + 0.1,
+          sz,
+        );
+        spike.castShadow = true;
+      }
+      break;
+    }
   }
 }
 
@@ -437,6 +584,30 @@ function buildHat(hat: HatConfig, root: Group): void {
       crown.castShadow = true;
       break;
     }
+    case 'beanie': {
+      // 2000s knitted beanie: a snug ribbed cap sitting on the crown with a
+      // turned-up cuff brim.
+      const crown = part(
+        new SphereGeometry(0.118, 20, 16, 0, Math.PI * 2, 0, Math.PI * 0.55),
+        hatMat,
+        root,
+        0,
+        HEAD_CENTER_Y + 0.01,
+        0,
+      );
+      crown.castShadow = true;
+      // Turned-up cuff (torus ring at the base of the beanie).
+      const cuff = part(
+        new TorusGeometry(0.11, 0.022, 10, 20),
+        hatMat,
+        root,
+        0,
+        HEAD_CENTER_Y + HEAD_RADIUS - 0.01,
+        0,
+      );
+      cuff.castShadow = true;
+      break;
+    }
   }
 }
 
@@ -503,6 +674,143 @@ function buildGadget(gadget: GadgetConfig, root: Group): void {
       );
       watch.rotation.x = rad(90);
       watch.castShadow = true;
+      break;
+    }
+    case 'flipPhone': {
+      // 2000s clamshell phone: two hinged halves held open in the hand.
+      const phoneMat = new MeshStandardMaterial({
+        color: gadget.color ?? 0x2a2a32,
+        roughness: 0.35,
+        metalness: 0.4,
+      });
+      const screenMat = new MeshStandardMaterial({
+        color: 0x1a3a5a,
+        roughness: 0.2,
+        metalness: 0.6,
+      });
+      // Lower half (keypad) in the hands.
+      const lower = part(
+        new BoxGeometry(0.05, 0.1, 0.015),
+        phoneMat,
+        root,
+        0.1,
+        handsY,
+        handsZ,
+      );
+      lower.castShadow = true;
+      // Upper half (screen) angled open.
+      const upper = part(
+        new BoxGeometry(0.05, 0.1, 0.015),
+        phoneMat,
+        root,
+        0.1,
+        handsY + 0.09,
+        handsZ - 0.02,
+      );
+      upper.rotation.x = rad(25);
+      upper.castShadow = true;
+      // Screen panel on the upper half.
+      const screen = part(
+        new BoxGeometry(0.038, 0.07, 0.004),
+        screenMat,
+        root,
+        0.1,
+        handsY + 0.09,
+        handsZ - 0.012,
+      );
+      screen.rotation.x = rad(25);
+      break;
+    }
+    case 'iPod': {
+      // 2000s portable music player: a small rounded slab with a click-wheel.
+      const bodyMat = new MeshStandardMaterial({
+        color: gadget.color ?? 0xe8e8ec,
+        roughness: 0.3,
+        metalness: 0.5,
+      });
+      const wheelMat = new MeshStandardMaterial({
+        color: 0xd8d8dc,
+        roughness: 0.4,
+        metalness: 0.3,
+      });
+      const body = part(
+        new BoxGeometry(0.05, 0.09, 0.012),
+        bodyMat,
+        root,
+        0.1,
+        handsY,
+        handsZ,
+      );
+      body.castShadow = true;
+      // Click wheel (flat cylinder on the front face).
+      const wheel = part(
+        new CylinderGeometry(0.022, 0.022, 0.003, 20),
+        wheelMat,
+        root,
+        0.1,
+        handsY - 0.015,
+        handsZ + 0.008,
+      );
+      wheel.rotation.x = rad(90);
+      // Screen strip at the top.
+      const screenMat = new MeshStandardMaterial({
+        color: 0x3a6a9a,
+        roughness: 0.15,
+        metalness: 0.5,
+      });
+      part(
+        new BoxGeometry(0.04, 0.022, 0.004),
+        screenMat,
+        root,
+        0.1,
+        handsY + 0.028,
+        handsZ + 0.008,
+      );
+      break;
+    }
+    case 'laptop': {
+      // 2000s open notebook computer on the table in front of the patron.
+      const bodyMat = new MeshStandardMaterial({
+        color: gadget.color ?? 0xc8c8cc,
+        roughness: 0.35,
+        metalness: 0.5,
+      });
+      const screenMat = new MeshStandardMaterial({
+        color: 0x2a4a6a,
+        roughness: 0.15,
+        metalness: 0.4,
+      });
+      // Base resting on the table.
+      const base = part(
+        new BoxGeometry(0.28, 0.02, 0.2),
+        bodyMat,
+        root,
+        0,
+        handsY - 0.05,
+        handsZ + 0.06,
+      );
+      base.castShadow = true;
+      // Lid angled open.
+      const lid = part(
+        new BoxGeometry(0.28, 0.2, 0.012),
+        bodyMat,
+        root,
+        0,
+        handsY + 0.05,
+        handsZ - 0.02,
+      );
+      lid.rotation.x = rad(-15);
+      lid.castShadow = true;
+      // Display panel on the inside of the lid.
+      const display = part(
+        new BoxGeometry(0.24, 0.16, 0.004),
+        screenMat,
+        root,
+        0,
+        handsY + 0.05,
+        handsZ - 0.014,
+      );
+      display.rotation.x = rad(-15);
       break;
     }
   }

@@ -20,8 +20,8 @@ import type { AnchorKey } from '../world/layout.js';
 // Outfit
 // -----------------------------------------------------------------------
 
-/** The two 1945-era garment families a patron can wear. */
-export type OutfitType = 'suit' | 'dayDress';
+/** Garment families a patron can wear. 1945: suit / dayDress. 2005: bootcutJeans. */
+export type OutfitType = 'suit' | 'dayDress' | 'bootcutJeans';
 
 /** Describes the patron's torso garment. */
 export interface OutfitConfig {
@@ -38,7 +38,7 @@ export interface OutfitConfig {
 // -----------------------------------------------------------------------
 
 /** Headwear families supported by the avatar builder. */
-export type HatType = 'fedora' | 'wideBrim' | 'cloche' | 'none';
+export type HatType = 'fedora' | 'wideBrim' | 'cloche' | 'beanie' | 'none';
 
 /** Describes the patron's hat. Use `{ type: 'none' }` for hat-less patrons. */
 export interface HatConfig {
@@ -59,7 +59,9 @@ export type HairStyle =
   | 'victoryRolls' // 1940s voluminous rolled-updos (feminine)
   | 'fingerWaves' // 1930s–40s sculpted S-waves (feminine)
   | 'slickedBack' // classic short-back-and-sides (masculine)
-  | 'pompadour'; // volume-forward roll (masculine)
+  | 'pompadour' // volume-forward roll (masculine)
+  | 'sideSweptBangs' // 2000s side-fringe sweep (feminine)
+  | 'spiky'; // 2000s gelled spikes (masculine)
 
 /** Describes the patron's hairstyle. */
 export interface HairConfig {
@@ -76,7 +78,13 @@ export interface HairConfig {
  * Held-prop families. The avatar builder places the gadget in the patron's
  * hands at table height.
  */
-export type GadgetType = 'newspaper' | 'pocketWatch' | 'none';
+export type GadgetType =
+  | 'newspaper'
+  | 'pocketWatch'
+  | 'flipPhone' // 2000s clamshell mobile
+  | 'iPod' // 2000s portable music player
+  | 'laptop' // 2000s open notebook computer
+  | 'none';
 
 /** Describes the patron's held gadget. */
 export interface GadgetConfig {
