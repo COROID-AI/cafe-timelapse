@@ -9,10 +9,10 @@ import { characterRoster } from './CharacterRoster.js';
 import { assetRegistry } from '../registry/AssetRegistry.js';
 import { ANCHORS } from '../world/layout.js';
 import { ERA_YEARS, type EraYear } from '../data/EraData.js';
-import type { PatronConfig } from './PatronConfig.js';
+import type { StructuredPatronConfig } from './PatronConfig.js';
 
 /** Build a throwaway 1945 patron for isolated roster tests. */
-function makePatron(id: string, era: EraYear = 1945): PatronConfig {
+function makePatron(id: string, era: EraYear = 1945): StructuredPatronConfig {
   return {
     id,
     era,
@@ -134,7 +134,8 @@ describe('1945 population module integration', () => {
     characterRoster.clearEra(1945);
     registerPatrons1945();
     for (const p of characterRoster.getForEra(1945)) {
-      expect(ANCHORS[p.seat]).toBeDefined();
+      const s = p as StructuredPatronConfig;
+      expect(ANCHORS[s.seat]).toBeDefined();
     }
   });
 });

@@ -12,11 +12,22 @@
  *
  *   import { characterRoster, type PatronConfig } from '../characters/index.js';
  *   characterRoster.register([{ id, era, outfit, hat, hair, gadget, seat }]);
+ *
+ * Consumers (era fragment builders, scene controller, slider wiring, tests)
+ * import from this barrel so the internal module layout can evolve without
+ * breaking imports.
+ *
+ * The character system separates *data* (PatronConfig — what a patron is)
+ * from *registry* (CharacterRoster — which era a patron belongs to) from
+ * *render* (CharacterAvatar — how a patron looks). Per-era patron
+ * populations live in their own modules (`patrons1945`, `patrons1965`, …) and
+ * register with the roster on import.
  */
 export {
   DEFAULT_SEAT_OFFSET,
   DEFAULT_SKIN_TONE,
   SEATING_ANCHORS,
+  isPatronConfig,
   type GadgetType,
   type GadgetConfig,
   type HairConfig,
@@ -26,10 +37,15 @@ export {
   type OutfitConfig,
   type OutfitType,
   type PatronConfig,
+  type PatronGadget,
+  type PatronHairstyle,
+  type PatronOutfit,
 } from './PatronConfig.js';
 
 export {
   buildAvatar,
+  buildCharacterAvatar,
+  buildCharacterAvatars,
   buildSeatedPatron,
   placeAvatar,
 } from './CharacterAvatar.js';
@@ -44,3 +60,4 @@ export {
 // Per-era population modules (side-effectful: importing populates the roster).
 export { PATRONS_1945, registerPatrons1945 } from './patrons1945.js';
 export { PATRONS_2005, registerPatrons2005 } from './patrons2005.js';
+export { getPatrons1965, registerPatrons1965 } from './patrons1965.js';

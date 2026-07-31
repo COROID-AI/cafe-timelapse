@@ -6,11 +6,12 @@
 import { describe, expect, it } from 'vitest';
 import { Mesh, Group } from 'three';
 import { buildAvatar, buildSeatedPatron, placeAvatar } from './CharacterAvatar.js';
-import type { PatronConfig } from './PatronConfig.js';
+import type { StructuredPatronConfig } from './PatronConfig.js';
+import type { StructuredPatronConfig as _StructuredPatronConfig } from './PatronConfig.js';
 import { ANCHORS } from '../world/layout.js';
 
 /** A representative config covering the suit/fedora/newspaper family. */
-function gentConfig(): PatronConfig {
+function gentConfig(): StructuredPatronConfig {
   return {
     id: 'gent',
     era: 1945,
@@ -23,7 +24,7 @@ function gentConfig(): PatronConfig {
 }
 
 /** A representative config covering the dress/victory-rolls family. */
-function ladyConfig(): PatronConfig {
+function ladyConfig(): StructuredPatronConfig {
   return {
     id: 'lady',
     era: 1945,
@@ -72,14 +73,22 @@ describe('buildAvatar', () => {
     // A fedora adds a crown cylinder + brim cylinder + band = 3 extra meshes
     // beyond the hat-less baseline.
     const withHat = meshCount(g);
-    const noHat = meshCount(buildAvatar({ ...gentConfig(), hat: { type: 'none', color: 0 } }));
+    const noHat = meshCount(
+      buildAvatar({
+        ...gentConfig(),
+        hat: { type: 'none', color: 0 },
+      } satisfies StructuredPatronConfig),
+    );
     expect(withHat).toBeGreaterThan(noHat);
   });
 
   it('adds a newspaper gadget when configured', () => {
     const withNews = meshCount(buildAvatar(gentConfig()));
     const noGadget = meshCount(
-      buildAvatar({ ...gentConfig(), gadget: { type: 'none' } }),
+      buildAvatar({
+        ...gentConfig(),
+        gadget: { type: 'none' },
+      } satisfies StructuredPatronConfig),
     );
     expect(withNews).toBeGreaterThan(noGadget);
   });
@@ -116,8 +125,9 @@ describe('buildSeatedPatron', () => {
   it('every 1945 patron config builds without throwing', async () => {
     const { PATRONS_1945 } = await import('./patrons1945.js');
     for (const cfg of PATRONS_1945) {
-      const anchor = ANCHORS[cfg.seat];
-      const g = buildSeatedPatron(cfg, [anchor.x, anchor.y, anchor.z]);
+      const s = cfg as StructuredPatronConfig;
+      const anchor = ANCHORS[s.seat];
+      const g = buildSeatedPatron(s, [anchor.x, anchor.y, anchor.z]);
       expect(meshCount(g)).toBeGreaterThan(6);
     }
   });
