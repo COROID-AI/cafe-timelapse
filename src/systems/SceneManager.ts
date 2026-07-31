@@ -42,6 +42,7 @@ import type { EraYear, LightingCategory } from '../data/EraData.js';
 import { assetRegistry } from '../registry/AssetRegistry.js';
 import { getEra, isEraYear } from '../data/eras.js';
 import { ArchitectureShell } from '../world/ArchitectureShell.js';
+import { characterRoster } from '../characters/CharacterRoster.js';
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -502,6 +503,13 @@ export class SceneManager {
     group.name = `era:${year}`;
     for (const fragment of assetRegistry.buildFragmentsForEra(year)) {
       group.add(fragment);
+    }
+    // Mount the era's patron avatars (seated at layout anchors) into the era
+    // group. The CharacterRoster is era-scoped — it returns patrons only for
+    // the queried era — so a 1985 patron lives exclusively in the 1985 group
+    // and is physically absent from every other era's scene graph.
+    for (const avatar of characterRoster.buildAvatarsForEra(year)) {
+      group.add(avatar);
     }
     this.groups.set(year, group);
     return group;

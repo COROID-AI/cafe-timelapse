@@ -24,6 +24,9 @@ import { getAudioEngine } from './systems/AudioEngine.js';
 import { mountAudioControls } from './ui/AudioControls.js';
 import { Navigation } from './systems/Navigation.js';
 import { INTERIOR_BOUNDS } from './world/layout.js';
+// Side-effectful: populates the shared CharacterRoster with the 1985-era
+// patron population before the SceneManager mounts the first era group.
+import './characters/patrons1985.js';
 
 function bootstrap(): void {
   const container =
