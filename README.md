@@ -29,6 +29,7 @@ npm run check:navigation # QA gate: camera stays inside the interior collision b
 npm run check:transitions # QA gate: cross-fade / dolly / interruption safety
 npm run check:scene # QA gate: every era's fragments mount/unmount correctly
 npm run check:timeline # QA gate: timeline slider stops, drag/keyboard, ARIA, eraChange
+npm run check:shell # QA gate: persistent café shell + spatial contract + slots
 npm run check      # all QA gates + typecheck
 ```
 
@@ -65,12 +66,26 @@ npm run check      # all QA gates + typecheck
   close" mode (F key / button), arrow-key + WASD movement, smooth damping, and
   interior collision clamping so the camera can never clip through the café
   shell (walls / floor / ceiling).
-- `src/systems/cafeShell.ts` — the canonical interior bounding volume and the
-  placeholder shell meshes that make it visible.
+- `src/world/layout.ts` — the canonical spatial contract: room dimensions
+  (`ROOM_WIDTH` / `ROOM_DEPTH` / `ROOM_HEIGHT`), the interior bounding box
+  (`ROOM_BOUNDS`) consumed by Navigation, named anchor points (`ANCHORS`:
+  counter position, machine slot, menu-board wall, poster walls, seating table
+  positions, entrance, lighting mounts), wall-face geometry (`WALLS`) and
+  interior zones (`ZONES`: counter / seating / entrance).
+- `src/world/ArchitectureShell.ts` — the persistent (non-era) café room shell:
+  floor, back wall, side walls, ceiling, and a storefront window wall with a
+  door (real openings extruded from the layout anchors), plus a counter zone
+  and seating zone. Era-neutral geometry only; era tasks dress it through the
+  `SurfaceSlots` (wall slots, floor slot, ceiling/light slot) instead of
+  rebuilding architecture. `src/systems/cafeShell.ts` is a compatibility shim
+  re-exporting the same names for earlier phases.
 - `src/systems/SceneHost.ts` — the mount/unmount hook contract the transition
   controller coordinates with, plus the reference `EraGroupHost` that mounts
   era fragments from the AssetRegistry, clones per-group materials, and
   disposes geometries/materials on unmount.
+- `src/systems/SceneManager.ts` — mounts the persistent architecture shell as a
+  direct scene child (a persistent layer beneath the per-era groups) through
+  `mountArchitectureShell`, and disposes it on `dispose()`.
 - `src/systems/TransitionController.ts` — the cross-fade controller: when the
   era changes it mounts the incoming era group, cross-fades the outgoing and
   incoming groups (configurable duration and easing, optional camera dolly),
@@ -92,6 +107,11 @@ npm run check      # all QA gates + typecheck
 - `src/scripts/checkNavigation.ts` — the `check:navigation` QA gate: headless
   assertions that the rig keeps the camera inside the interior bounds under
   orbit, zoom, pan, walk and keyboard input.
+- `src/scripts/checkShell.ts` — the `check:shell` QA gate: headless assertions
+  that the persistent shell builds every room element from the layout contract,
+  exposes era surface slots (and `setMaterial`), keeps the shell era-neutral,
+  mounts as a persistent scene layer, and that `ROOM_BOUNDS` keeps Navigation
+  inside the interior.
 - `src/scripts/checkTransitions.ts` — the `check:transitions` QA gate: headless
   assertions that cross-fades animate with the configured duration/easing, the
   outgoing group is disposed only after the fade, the optional dolly lerps, and

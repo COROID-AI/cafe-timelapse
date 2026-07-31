@@ -9,6 +9,10 @@ import {
   ERA_LIGHTING,
   type EraLightingConfig,
 } from './lighting';
+import {
+  buildArchitectureShell,
+  type SurfaceSlots,
+} from '../world/ArchitectureShell';
 
 /**
  * SceneManager — the era-managed scene controller.
@@ -38,7 +42,7 @@ export interface SceneManagerOptions {
   initialEra?: EraYear;
   /** Vertical clearance (metres) kept above furniture inside the room. */
   headroom?: number;
-  /** Disable the placeholder fallback scene when no registration exists. */
+  /** Disable the persistent architecture shell layer when no registration exists. */
   disableFallback?: boolean;
 }
 
@@ -90,45 +94,33 @@ export interface SceneManagerHandle {
 }
 
 /**
- * Build the interior shell (floor, counter, table) used as the fallback scene.
- * Kept out of the per-era groups so it stays present while every era's
- * fragment geometry is still being built by later phases.
+ * Mount the persistent (non-era) café architecture shell directly into
+ * `scene`. The shell group becomes a direct child of the scene — a persistent
+ * layer beneath the per-era groups that are added/removed on era switches.
+ *
+ * Pure object-graph work (no WebGL required), so the QA gate can verify the
+ * integration headlessly.
  */
-function buildFallbackScene(scene: THREE.Scene): THREE.Group {
-  const shell = new THREE.Group();
-  shell.name = 'placeholder-shell';
+export function mountArchitectureShell(scene: THREE.Scene): {
+  shell: THREE.Group;
+  slots: SurfaceSlots;
+} {
+  const built = buildArchitectureShell(scene);
+  return { shell: built.group, slots: built.slots };
+}
 
-  const placeholderMaterial = new THREE.MeshStandardMaterial({
-    color: 0x5a4a3a,
-    roughness: 0.9,
+/**
+ * Dispose the persistent shell's geometries and its own placeholder materials.
+ * Era-populated slot materials are owned by the era groups and are disposed
+ * when those groups are disposed, so only the shell's own resources are
+ * released here.
+ */
+function disposeShellLayer(shell: THREE.Group, slots: SurfaceSlots): void {
+  shell.traverse((object) => {
+    const mesh = object as THREE.Mesh;
+    if (mesh.isMesh) mesh.geometry?.dispose();
   });
-
-  const floor = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 0.1, 8),
-    placeholderMaterial,
-  );
-  floor.position.y = -0.05;
-  floor.receiveShadow = true;
-  shell.add(floor);
-
-  const counter = new THREE.Mesh(
-    new THREE.BoxGeometry(3.2, 1.0, 1.0),
-    placeholderMaterial,
-  );
-  counter.position.set(-1.5, 0.5, -2.4);
-  counter.castShadow = true;
-  shell.add(counter);
-
-  const table = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.55, 0.55, 0.08, 24),
-    placeholderMaterial,
-  );
-  table.position.set(2.4, 0.6, 0.5);
-  table.castShadow = true;
-  shell.add(table);
-
-  scene.add(shell);
-  return shell;
+  slots.dispose();
 }
 
 /** Dispose every heavy resource (geometry, material, texture) in a group. */
@@ -229,8 +221,17 @@ export function createSceneManager(options: SceneManagerOptions): SceneManagerHa
   keyLight.castShadow = true;
   scene.add(ambientLight, keyLight);
 
-  // --- Fallback shell -------------------------------------------------------
-  const fallback = disableFallback ? undefined : buildFallbackScene(scene);
+  // --- Persistent architecture shell (non-era layer) ------------------------
+  // The café room shell is mounted once, beneath every per-era group. Era
+  // groups are added/removed on era switches; the shell persists for the app
+  // lifetime and era tasks dress it through its surface slots.
+  let shell: THREE.Group | undefined;
+  let shellSlots: SurfaceSlots | undefined;
+  if (!disableFallback) {
+    const mounted = mountArchitectureShell(scene);
+    shell = mounted.shell;
+    shellSlots = mounted.slots;
+  }
 
   // --- Per-era lighting lights ---------------------------------------------
   const fillLight = new THREE.DirectionalLight(0xbfd4ff, 0.25);
@@ -367,8 +368,10 @@ export function createSceneManager(options: SceneManagerOptions): SceneManagerHa
       if (currentGroup) {
         disposeGroupDeep(currentGroup);
       }
-      if (fallback) {
-        disposeGroupDeep(fallback);
+      // The shell layer is persistent and separate from the era groups, so it
+      // is disposed explicitly (its geometry + own placeholder materials).
+      if (shell && shellSlots) {
+        disposeShellLayer(shell, shellSlots);
       }
       scene.clear();
       controls.dispose();

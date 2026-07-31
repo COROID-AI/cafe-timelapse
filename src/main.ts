@@ -7,7 +7,8 @@ import {
   type SceneManagerHandle,
 } from './systems/SceneManager';
 import { Navigation, type NavigationMode } from './systems/Navigation';
-import { buildCaféShell, CAFÉ_BOUNDS } from './systems/cafeShell';
+import { buildArchitectureShell } from './world/ArchitectureShell';
+import { ROOM_BOUNDS } from './world/layout';
 import { EraGroupHost } from './systems/SceneHost';
 import { TransitionController } from './systems/TransitionController';
 import { ERA_LIGHTING } from './systems/lighting';
@@ -90,13 +91,16 @@ function applyEraLighting(era: EraYear): void {
   }
 }
 
-// --- Café shell + placeholder scene ------------------------------------------
-// The shell defines the interior collision volume the navigation rig clamps
-// against. A stand-in café room keeps the interior visible until era fragments
-// build real geometry (Phase 3+).
+// --- Persistent café architecture shell --------------------------------------
+// The shell is the era-neutral room (floor, walls, ceiling, storefront window
+// wall + door, counter zone, seating zone) built from the canonical spatial
+// contract (src/world/layout.ts). It defines the interior collision volume the
+// navigation rig clamps against and stays mounted beneath the per-era groups;
+// era tasks dress it through its surface slots (wallSlots / floorSlot /
+// ceilingSlot) rather than rebuilding architecture.
 
 const shellGroup = new THREE.Group();
-buildCaféShell(shellGroup);
+buildArchitectureShell(shellGroup);
 scene.add(shellGroup);
 
 // --- Era host + transition controller -----------------------------------------
@@ -139,7 +143,7 @@ const transition = new TransitionController({
 const modeButton = document.querySelector<HTMLButtonElement>('#mode-toggle');
 
 const navigation = new Navigation(camera, renderer.domElement, {
-  bounds: CAFÉ_BOUNDS,
+  bounds: ROOM_BOUNDS,
   collisionMargin: 0.25,
   initialTarget: new THREE.Vector3(0, 1.4, 0),
   initialRadius: 6.5,
