@@ -68,5 +68,15 @@ export const era2055: EraData = {
       hairstyle: 'Shaved sides with holographic dye',
       gadget: 'AR glasses',
     },
+    {
+      outfit: 'Sleek minimalist techwear with magnetic closures',
+      hairstyle: 'Low-swept ponytail with subtle holo sheen',
+      gadget: 'Adaptive self-heating cup',
+    },
+    {
+      outfit: 'Minimalist techwear shell with a holo-collar',
+      hairstyle: 'Sleek undercut with holo-dyed fringe',
+      gadget: 'Floating holo-interface panel',
+    },
   ],
 };

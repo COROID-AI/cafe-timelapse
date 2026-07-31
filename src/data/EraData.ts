@@ -108,6 +108,7 @@ export type AccessoryKind =
   | 'cigarette'
   | 'tie'
   | 'newspaper'
+  | 'holo-panel'
   | 'none';
 
 /** Garment silhouette used to shape the avatar's torso. */

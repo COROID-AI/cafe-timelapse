@@ -30,8 +30,11 @@ import {
   build2055SignageLighting,
   build2055CounterTechnology,
   build2055Patrons,
+  PATRON_CONFIGS_2055,
   ERA_AUDIO_2055,
 } from '../compositions';
+import type { PatronConfig } from '../data/EraData';
+import { era2055 } from '../data/eras/2055';
 import { createArchitectureShell } from '../world/ArchitectureShell';
 import { ANCHORS, ROOM_BOUNDS, ROOM_WIDTH, ROOM_DEPTH } from '../world/layout';
 
@@ -54,6 +57,17 @@ function countMeshes(group: THREE.Object3D): number {
     if ((object as THREE.Mesh).isMesh) n += 1;
   });
   return n;
+}
+
+function collectPatronConfigs(group: THREE.Object3D): PatronConfig[] {
+  const configs: PatronConfig[] = [];
+  group.traverse((object) => {
+    const avatar = (object as THREE.Group).userData?.characterAvatar as
+      | { config?: PatronConfig }
+      | undefined;
+    if (avatar?.config) configs.push(avatar.config);
+  });
+  return configs;
 }
 
 function run(): void {
@@ -138,6 +152,82 @@ function run(): void {
   assert(ANCHORS.posterWalls.length >= 4, 'poster walls provide four+ mounting points');
   assert(ANCHORS.seatingTables.length >= 4, 'seating tables provide four+ positions');
   assert(ROOM_WIDTH > 0 && ROOM_DEPTH > 0, 'room dimensions are sane');
+
+  // 6. Era patrons: the shared roster mounts 3-4 speculative near-future
+  //    PatronConfigs (techwear silhouettes, AR/smart glasses, futuristic
+  //    hair, wearable devices, holographic-interface gadgets), seated at the
+  //    anchors inside the room (era-scoped visibility).
+  console.log('\n[2055 patrons]');
+  const patronGroup = new THREE.Group();
+  build2055Patrons(patronGroup);
+  const patronConfigs = collectPatronConfigs(patronGroup);
+  assert(
+    patronConfigs.length >= 3 && patronConfigs.length <= 4,
+    `roster mounts 3-4 patrons via PatronConfig (got ${patronConfigs.length})`,
+  );
+  assert(
+    patronConfigs.length === PATRON_CONFIGS_2055.length,
+    'roster mounts exactly the 2055 PatronConfig set',
+  );
+  assert(
+    patronConfigs.length === era2055.patrons.length,
+    'roster patron count matches the 2055 EraData patron records',
+  );
+  // Sleek minimalist techwear / futuristic silhouettes (no 20th-century cut).
+  assert(
+    patronConfigs.some((config) => config.style === 'jumpsuit'),
+    'a patron wears the reflective futuristic jumpsuit',
+  );
+  assert(
+    patronConfigs.some((config) => config.style === 'poncho'),
+    'a patron wears the smart-fabric poncho',
+  );
+  // AR/smart glasses and holographic-interface gadgets.
+  assert(
+    patronConfigs.some((config) => config.accessory === 'glasses'),
+    'a patron wears AR/smart glasses',
+  );
+  assert(
+    patronConfigs.some((config) => config.accessory === 'holo-panel'),
+    'a patron carries a holographic-interface gadget',
+  );
+  // Subtle futuristic hairstyles: braids with light threads, holographic
+  // dye / sheen rather than 20th-century period styles.
+  const futuristicHair = new Set(['braids', 'buzz', 'ponytail', 'bob']);
+  assert(
+    patronConfigs.some((config) => futuristicHair.has(config.hair.kind)),
+    'patrons include subtle futuristic hairstyles',
+  );
+  for (const config of patronConfigs) {
+    assert(
+      (config.hair.kind as string) !== 'fedora' &&
+        (config.hair.kind as string) !== 'victory-rolls' &&
+        (config.hair.kind as string) !== 'finger-waves',
+      `patron "${config.name ?? 'anonymous'}" uses 2055 future styling`,
+    );
+  }
+  // Era-scoped visibility: the mounted avatars are discoverable on the
+  // fragment so they toggle with era changes.
+  let avatarCount = 0;
+  patronGroup.traverse((object) => {
+    if ((object as THREE.Group).userData?.characterAvatar) avatarCount += 1;
+  });
+  assert(
+    avatarCount === patronConfigs.length,
+    `mounted avatars are discoverable for the era-scoped animation driver (${avatarCount})`,
+  );
+  patronGroup.traverse((object) => {
+    const avatar = (object as THREE.Group).userData?.characterAvatar as
+      | { root?: THREE.Object3D }
+      | undefined;
+    if (!avatar?.root) return;
+    const pos = avatar.root.position;
+    assert(
+      pos.x >= ROOM_BOUNDS.minX && pos.x <= ROOM_BOUNDS.maxX &&
+        pos.z >= ROOM_BOUNDS.minZ && pos.z <= ROOM_BOUNDS.maxZ,
+      `patron (${pos.x.toFixed(2)}, ${pos.z.toFixed(2)}) is seated inside the room`,
+    );
+  });
 
   if (failures > 0) {
     console.error(`\n2055 composition check FAILED with ${failures} failure(s).`);
