@@ -265,6 +265,40 @@ function buildHair(parts: Part[], hair: THREE.Material, kind: HairstyleKind): vo
       add(top, 0.03, HEAD_R * 0.85, 0);
       break;
     }
+    case 'fedora': {
+      // Classic 1940s fedora: tapered crown, wide flat brim, pinched top.
+      add(cap(1, 0.5), 0, HEAD_R * 0.5, 0);
+      add(cylinder(HEAD_R * 1.06, HEAD_R * 0.86, 0.17, 12), 0, HEAD_R * 0.72, 0);
+      const brim = cylinder(HEAD_R * 1.5, HEAD_R * 1.5, 0.022, 16);
+      add(brim, 0, HEAD_R * 0.6, 0);
+      add(box(0.12, 0.035, 0.03), 0, HEAD_R * 0.88, -HEAD_R * 0.3);
+      break;
+    }
+    case 'victory-rolls': {
+      // 1940s rolled-up front sections above the brow, swept back.
+      add(cap(1, 0.85), 0, HEAD_R * 0.4, 0);
+      const roll = (side: number): void => {
+        const g = cylinder(0.034, 0.034, 0.13, 8);
+        g.rotateZ(-side * 0.45);
+        add(g, side * HEAD_R * 0.72, HEAD_R * 0.62, HEAD_R * 0.42);
+      };
+      roll(-1);
+      roll(1);
+      add(box(0.09, 0.05, 0.03), 0, HEAD_R * 0.66, HEAD_R * 0.52);
+      break;
+    }
+    case 'finger-waves': {
+      // Sleek waved ridges close to the scalp (1930s–40s finger waves).
+      add(cap(1, 0.8), 0, HEAD_R * 0.4, 0);
+      for (let i = 0; i < 3; i += 1) {
+        const y = HEAD_R * (0.34 + i * 0.22);
+        const z = HEAD_R * (0.14 + i * 0.08);
+        add(sphere(0.034), -HEAD_R * 0.92, y, z);
+        add(sphere(0.034), HEAD_R * 0.92, y, z);
+      }
+      add(box(0.05, 0.03, 0.03), 0, HEAD_R * 0.5, HEAD_R * 0.58);
+      break;
+    }
     default:
       add(cap(1, 0.8), 0, HEAD_R * 0.4, 0);
       break;
@@ -341,6 +375,11 @@ function buildHandAccessory(
       break;
     case 'cup':
       add(cylinder(0.035, 0.028, 0.09, 10), 0, -0.6, 0.05);
+      break;
+    case 'newspaper':
+      // Folded broadsheet held in front of the chest: two thin folded halves.
+      add(box(0.24, 0.04, 0.18), 0, -0.5, 0.12);
+      add(box(0.24, 0.02, 0.18), 0, -0.43, 0.12);
       break;
     default:
       break;
