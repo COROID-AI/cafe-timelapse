@@ -27,14 +27,17 @@ export const era2025: EraData = {
   menuBoard: {
     title: 'Specialty Coffee',
     items: [
-      { name: 'Flat white', price: '£3.40' },
-      { name: 'Oat latte', price: '£3.80' },
-      { name: 'Sourdough toast', price: '£5.50' },
-      { name: 'Cinnamon bun', price: '£3.20' },
+      { name: 'Flat white', price: '$5.00' },
+      { name: 'Oat latte', price: '$5.50' },
+      { name: 'Sourdough toast', price: '$6.00' },
+      { name: 'Cinnamon bun', price: '$4.50' },
     ],
   },
 
-  musicSource: { kind: 'streaming-speaker', label: 'Smart speaker streaming a lo-fi playlist' },
+  musicSource: {
+    kind: 'streaming-speaker',
+    label: 'Smartphone + Bluetooth speaker (Sonos-style) streaming a lo-fi playlist',
+  },
 
   posters: [
     { title: 'Single Origin Map', description: 'Minimal print of the coffee-growing world' },
@@ -42,9 +45,9 @@ export const era2025: EraData = {
   ],
 
   tableware: [
-    { name: 'Speckled stoneware cup', material: 'ceramic' },
-    { name: 'Tumbler with lid', material: 'recycled plastic' },
-    { name: 'Flatware set', material: 'stainless steel' },
+    { name: 'Artisan speckled stoneware cup', material: 'ceramic' },
+    { name: 'Hand-blown glass water tumbler', material: 'glass' },
+    { name: 'Compostable to-go cup with bamboo lid', material: 'plant-based fibre' },
   ],
 
   signageLighting: {

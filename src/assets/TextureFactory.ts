@@ -35,7 +35,8 @@ export type TextureKind =
   | 'chalkboard'
   | 'letterboard'
   | 'poster'
-  | 'brick';
+  | 'brick'
+  | 'digitalMenu';
 
 /** Draw options shared by every texture kind. */
 export interface TextureSpec {
@@ -437,6 +438,47 @@ function drawLetterboard(
   ctx.strokeRect(size * 0.03, size * 0.03, size * 0.94, size * 0.94);
 }
 
+function drawDigitalMenu(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  spec: TextureSpec,
+): void {
+  const screen = hexToCss(spec.color ?? '#0B0E14');
+  const text = hexToCss(spec.color2 ?? '#FFE3B8');
+  const lines = spec.lines && spec.lines.length > 0 ? spec.lines : ['FLAT WHITE $5.00', 'OAT LATTE $5.50', 'SOURDOUGH TOAST $6.00', 'CINNAMON BUN $4.50'];
+  // Dark digital panel with a soft vertical glow (backlit screen).
+  const gradient = ctx.createLinearGradient(0, 0, 0, size);
+  gradient.addColorStop(0, shadeHex(screen, 0.1));
+  gradient.addColorStop(0.5, screen);
+  gradient.addColorStop(1, shadeHex(screen, 0.06));
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  // Rounded screen bezel highlight.
+  ctx.strokeStyle = shadeHex(text, -0.2);
+  ctx.globalAlpha = 0.5;
+  ctx.lineWidth = Math.max(1, size / 180);
+  ctx.strokeRect(size * 0.02, size * 0.02, size * 0.96, size * 0.96);
+  // Header title.
+  ctx.fillStyle = text;
+  ctx.globalAlpha = 1;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `bold ${Math.max(10, size / 9)}px Arial, sans-serif`;
+  ctx.fillText(spec.title ?? 'SPECIALTY COFFEE', size / 2, size * 0.1);
+  // Menu rows with a price column aligned right.
+  const rowGap = size / (lines.length + 2);
+  ctx.font = `bold ${Math.max(8, size / (lines.length * 2.6))}px Arial, sans-serif`;
+  lines.forEach((line, index) => {
+    const y = (index + 1.5) * rowGap;
+    ctx.fillText(line, size / 2, y);
+  });
+  // Faint scan-line shimmer so it reads as a digital screen.
+  ctx.fillStyle = '#FFFFFF';
+  ctx.globalAlpha = 0.04;
+  ctx.fillRect(0, size * 0.72, size, Math.max(1, size / 60));
+  ctx.globalAlpha = 1;
+}
+
 function drawPoster(
   ctx: CanvasRenderingContext2D,
   size: number,
@@ -540,6 +582,9 @@ export function drawTexture(ctx: CanvasRenderingContext2D, size: number, spec: T
       break;
     case 'letterboard':
       drawLetterboard(ctx, size, spec);
+      break;
+    case 'digitalMenu':
+      drawDigitalMenu(ctx, size, spec);
       break;
     case 'poster':
       drawPoster(ctx, size, spec);

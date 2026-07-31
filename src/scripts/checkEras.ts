@@ -16,6 +16,7 @@ import {
 } from '../registry/AssetRegistry';
 import { validateRegistration, summarizeCoverage } from '../registry/coverage';
 import { ERA_AUDIO_1965 } from '../audio/eras/1965';
+import { ERA_AUDIO_2025 } from '../audio/eras/2025';
 // Static side-effect imports register every era into the registry.
 import '../registry/eras/1945';
 import '../registry/eras/1965';
@@ -29,6 +30,7 @@ const REQUIRED_CATEGORY_COUNT = 10;
 /** Every composed era must also supply an era audio config (Phase 4). */
 const ERA_AUDIO_CONFIGS: Record<number, unknown> = {
   1965: ERA_AUDIO_1965,
+  2025: ERA_AUDIO_2025,
 };
 
 function missing<T>(list: T[], expected: T[]): T[] {
@@ -58,24 +60,26 @@ function run(): void {
   }
 
   // 3b. Composed eras must supply their era audio config (generative bed,
-  //     jukebox character, urn hiss) per the Phase 4 brief.
+  //     music-source character, machine hiss) per the Phase 4 brief.
   for (const [year, config] of Object.entries(ERA_AUDIO_CONFIGS)) {
     const audio = config as {
       era?: number;
       generativeBed?: unknown[];
       jukeboxCharacter?: unknown;
       urnHiss?: unknown;
+      phoneBtSpeakerCharacter?: unknown;
+      steamWandHiss?: unknown;
     };
     if (!audio || audio.era !== Number(year)) {
       errors.push(`Era ${year}: era audio config is missing or has the wrong era.`);
     } else if (
       !Array.isArray(audio.generativeBed) ||
       audio.generativeBed.length === 0 ||
-      !audio.jukeboxCharacter ||
-      !audio.urnHiss
+      (year === '1965' && (!audio.jukeboxCharacter || !audio.urnHiss)) ||
+      (year === '2025' && (!audio.phoneBtSpeakerCharacter || !audio.steamWandHiss))
     ) {
       errors.push(
-        `Era ${year}: era audio config must supply a generative bed, jukebox character and urn hiss.`,
+        `Era ${year}: era audio config must supply a generative bed, music-source character and machine hiss.`,
       );
     }
   }
