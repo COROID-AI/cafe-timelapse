@@ -22,6 +22,18 @@
     "check:2055": "tsx src/scripts/check2055.ts",
     "check:characters": "tsx src/scripts/checkCharacters.ts",
     "check:integration": "tsx src/scripts/checkIntegration.ts",
-    "check": "npm run check:eras && npm run check:navigation && npm run check:transitions && npm run check:scene && npm run check:assets && npm run check:timeline && npm run check:shell && npm run check:1965 && npm run check:1985 && npm run check:2005 && npm run check:2025 && npm run check:2055 && npm run check:characters && npm run check:integration && npm run typecheck"
+    "check:stress": "tsx src/scripts/checkStress.ts",
+    "check": "npm run check:eras && npm run check:navigation && npm run check:transitions && npm run check:scene && npm run check:assets && npm run check:timeline && npm run check:shell && npm run check:1965 && npm run check:1985 && npm run check:2005 && npm run check:2025 && npm run check:2055 && npm run check:characters && npm run check:integration && npm run check:stress && npm run typecheck"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/three": "^0.185.1",
+    "happy-dom": "^20.11.1",
+    "tsx": "^4.23.1",
+    "typescript": "~5.9.3",
+    "vite": "^8.2.0"
   }
 }

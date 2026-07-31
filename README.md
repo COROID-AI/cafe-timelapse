@@ -31,6 +31,7 @@ npm run check:scene # QA gate: every era's fragments mount/unmount correctly
 npm run check:timeline # QA gate: timeline slider stops, drag/keyboard, ARIA, eraChange
 npm run check:shell # QA gate: persistent café shell + spatial contract + slots
 npm run check:integration # QA gate: AudioEngine unlock/era-swap/spatialization, onboarding, HUD
+npm run check:stress # QA gate: 24+ era switches through the transition pipeline, no resource leaks
 npm run check      # all QA gates + typecheck
 ```
 
@@ -137,6 +138,14 @@ npm run check      # all QA gates + typecheck
   Audio stub), the onboarding screen drives the enter click to audio unlock,
   the HUD updates era/mute/mode, and the TransitionController leaves exactly
   one era group mounted.
+- `src/scripts/checkStress.ts` — the `check:stress` QA gate (Phase 8 final QA):
+  headless stress + leak verification of the era-switch pipeline. Performs 24+
+  era switches through the real TransitionController + EraGroupHost path
+  (including mid-transition retargets), asserts mount discipline (≤2 groups
+  mid-fade, exactly 1 after each switch, 0 after dispose), instruments
+  `THREE.BufferGeometry` / `THREE.Material` dispose to prove every observed
+  geometry and material was disposed (no resource leaks), and asserts each
+  era's live mesh footprint stays stable across cycles.
 
 ### Adding a new era
 
