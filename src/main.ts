@@ -1,10 +1,12 @@
 import './style.css';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { ERAS, type EraYear } from './data/eras';
 import { registerAllEras, getEraRegistration } from './registry';
+import { Navigation, type NavigationMode } from './systems/Navigation';
+import { buildCaféShell } from './systems/cafeShell';
 
 const eraLabel = document.querySelector<HTMLParagraphElement>('#era-label');
+const modeLabel = document.querySelector<HTMLSpanElement>('#mode-label');
 
 // --- Scene, camera, renderer ---------------------------------------------
 
@@ -27,10 +29,6 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 document.querySelector('#app')?.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.target.set(0, 1, 0);
-
 // --- Lights ----------------------------------------------------------------
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.55));
@@ -39,9 +37,14 @@ keyLight.position.set(6, 10, 6);
 keyLight.castShadow = true;
 scene.add(keyLight);
 
-// --- Placeholder scene -----------------------------------------------------
-// A stand-in café floor so `npm run dev` visibly renders before era fragment
+// --- Café shell + placeholder scene ----------------------------------------
+// The shell defines the interior collision volume the navigation rig clamps
+// against. A stand-in café floor makes the room visible before era fragment
 // geometry is built in later phases.
+
+const shellGroup = new THREE.Group();
+buildCaféShell(shellGroup);
+scene.add(shellGroup);
 
 const floor = new THREE.Mesh(
   new THREE.BoxGeometry(10, 0.1, 8),
@@ -67,6 +70,36 @@ table.position.set(2.4, 0.6, 0.5);
 table.castShadow = true;
 scene.add(table);
 
+// --- Navigation -------------------------------------------------------------
+// Orbit (left-drag rotate, right/middle-drag pan, wheel/pinch zoom), a walk-up
+// close mode (F key / button), arrow-key + WASD support, smooth damping, and
+// collision clamping to the café shell.
+
+const modeButton = document.querySelector<HTMLButtonElement>('#mode-toggle');
+
+const navigation = new Navigation(camera, renderer.domElement, {
+  bounds: {
+    minX: -7,
+    maxX: 7,
+    minY: 0,
+    maxY: 4,
+    minZ: -5.5,
+    maxZ: 5.5,
+  },
+  collisionMargin: 0.25,
+  initialTarget: new THREE.Vector3(0, 1.4, 0),
+  initialRadius: 6.5,
+  onModeChange: (mode: NavigationMode) => {
+    if (modeLabel) modeLabel.textContent = mode === 'orbit' ? 'Orbit' : 'Walk';
+    if (modeButton) modeButton.textContent = mode === 'orbit' ? 'Walk up close (F)' : 'Orbit (F)';
+  },
+});
+
+modeButton?.addEventListener('click', () => {
+  navigation.toggleMode();
+  navigation.focus();
+});
+
 // --- Timeline / era switching ---------------------------------------------
 
 let currentEra: EraYear = ERAS[0];
@@ -83,16 +116,21 @@ async function switchEra(era: EraYear): Promise<void> {
 
 // --- Animation loop ---------------------------------------------------------
 
-function animate(): void {
+let lastTime = performance.now();
+
+function animate(now: number): void {
   requestAnimationFrame(animate);
-  controls.update();
+  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
+  navigation.update(dt);
   renderer.render(scene, camera);
 }
 
 async function init(): Promise<void> {
   await registerAllEras();
   await switchEra(currentEra);
-  animate();
+  navigation.focus();
+  requestAnimationFrame(animate);
 }
 
 window.addEventListener('resize', () => {

@@ -43,3 +43,34 @@ body {
   font-size: 12px;
   opacity: 0.75;
 }
+
+#ui p.hint {
+  margin-top: 8px;
+  max-width: 420px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+#mode-toggle {
+  pointer-events: auto;
+  cursor: pointer;
+  margin-left: 2px;
+  padding: 3px 8px;
+  border: 1px solid rgba(242, 234, 216, 0.45);
+  border-radius: 6px;
+  background: rgba(27, 27, 34, 0.55);
+  color: #f2ead8;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+#mode-toggle:hover {
+  border-color: #f2ead8;
+  background: rgba(242, 234, 216, 0.12);
+}
+
+#mode-toggle:focus-visible {
+  outline: 2px solid #f2ead8;
+  outline-offset: 2px;
+}

@@ -14,8 +14,8 @@ This must be a polished high end scene with SFX (period-appropriate music, the m
 ## Phase 1 — Shared Scaffold, Build System & Era Contract
 
 This repository currently contains the runnable foundation: a Vite + TypeScript +
-Three.js project with the canonical era data contract and the per-era asset
-registry.
+Three.js project with the canonical era data contract, the per-era asset
+registry, and the shared runtime navigation rig.
 
 ### Getting started
 
@@ -24,13 +24,14 @@ npm install
 npm run dev        # start the Vite dev server (shows the placeholder café canvas)
 npm run build      # type-check + produce the dist bundle
 npm run check:eras # QA gate: every era supplies every required category
-npm run check      # check:eras + typecheck
+npm run check:navigation # QA gate: camera stays inside the interior collision bounds
+npm run check      # check:eras + check:navigation + typecheck
 ```
 
 ### Project structure
 
-- `src/main.ts` — entrypoint: Three.js renderer, scene, camera, OrbitControls,
-  placeholder café geometry and the animation loop.
+- `src/main.ts` — entrypoint: Three.js renderer, scene, camera, the Navigation
+  rig, the café shell placeholder geometry and the animation loop.
 - `src/data/EraData.ts` — the canonical `EraData` type covering every brief
   category: architecture (walls/floor/ceiling/trim), furniture & decor, coffee
   machines & brewing equipment, menu board & prices, music source (wireless
@@ -45,8 +46,18 @@ npm run check      # check:eras + typecheck
   Three.js geometry.
 - `src/registry/eras/*.ts` — the per-era registrations (loaded by
   `src/registry/loadEras.ts`).
+- `src/systems/Navigation.ts` — the shared camera rig: orbit (drag rotate),
+  pan (right-drag / two-finger), zoom (scroll / pinch), a first-person "walk up
+  close" mode (F key / button), arrow-key + WASD movement, smooth damping, and
+  interior collision clamping so the camera can never clip through the café
+  shell (walls / floor / ceiling).
+- `src/systems/cafeShell.ts` — the canonical interior bounding volume and the
+  placeholder shell meshes that make it visible.
 - `src/scripts/checkEras.ts` — the `check:eras` QA gate: asserts every canonical
   era is registered and supplies all required fragment categories.
+- `src/scripts/checkNavigation.ts` — the `check:navigation` QA gate: headless
+  assertions that the rig keeps the camera inside the interior bounds under
+  orbit, zoom, pan, walk and keyboard input.
 
 ### Adding a new era
 

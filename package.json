@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "check:eras": "tsx src/scripts/checkEras.ts",
-    "check": "npm run check:eras && npm run typecheck"
+    "check:navigation": "tsx src/scripts/checkNavigation.ts",
+    "check": "npm run check:eras && npm run check:navigation && npm run typecheck"
   },
   "dependencies": {
     "three": "^0.185.1"
