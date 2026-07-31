@@ -34,7 +34,8 @@ export type TextureKind =
   | 'neon'
   | 'chalkboard'
   | 'letterboard'
-  | 'poster';
+  | 'poster'
+  | 'brick';
 
 /** Draw options shared by every texture kind. */
 export interface TextureSpec {
@@ -482,6 +483,40 @@ function drawPoster(
   ctx.fillText(spec.title ?? 'POSTER', size / 2, size * 0.09);
 }
 
+function drawBrick(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  spec: TextureSpec,
+): void {
+  const brick = hexToCss(spec.color ?? '#8A4A3A');
+  const mortar = hexToCss(spec.color2 ?? '#C9B8A8');
+  const courses = Math.max(3, Math.round(spec.repeats ?? 5));
+  const random = mulberry32(normalizeHex(brick) ^ normalizeHex(mortar));
+  ctx.fillStyle = mortar;
+  ctx.fillRect(0, 0, size, size);
+  const courseHeight = size / courses;
+  const mortarThickness = Math.max(1, courseHeight / 8);
+  const bricksPerCourse = Math.max(2, Math.round(courses * 1.6));
+  const brickWidth = size / bricksPerCourse;
+  // Running bond: each course is offset by half a brick, with per-brick
+  // colour jitter for a worn second-wave brick wall.
+  for (let row = 0; row < courses; row += 1) {
+    const y = row * courseHeight;
+    const offset = row % 2 === 0 ? 0 : brickWidth / 2;
+    for (let col = -1; col < bricksPerCourse + 1; col += 1) {
+      const jitterX = (random() - 0.5) * brickWidth * 0.12;
+      const jitterY = (random() - 0.5) * courseHeight * 0.12;
+      ctx.fillStyle = shadeHex(brick, (random() - 0.5) * 0.2);
+      ctx.fillRect(
+        col * brickWidth + offset + jitterX,
+        y + jitterY,
+        brickWidth - mortarThickness,
+        courseHeight - mortarThickness,
+      );
+    }
+  }
+}
+
 /** Draw a texture kind into a prepared 2D context. */
 export function drawTexture(ctx: CanvasRenderingContext2D, size: number, spec: TextureSpec): void {
   switch (spec.kind) {
@@ -508,6 +543,9 @@ export function drawTexture(ctx: CanvasRenderingContext2D, size: number, spec: T
       break;
     case 'poster':
       drawPoster(ctx, size, spec);
+      break;
+    case 'brick':
+      drawBrick(ctx, size, spec);
       break;
   }
 }

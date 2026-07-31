@@ -69,7 +69,7 @@ export interface MaterialSpec {
    * texture is present it tints the map with `color`.
    */
   texture?: THREE.Texture | {
-    kind: 'woodGrain' | 'tile' | 'wallpaper' | 'geometric' | 'neon' | 'chalkboard' | 'letterboard' | 'poster';
+    kind: 'woodGrain' | 'tile' | 'wallpaper' | 'geometric' | 'neon' | 'chalkboard' | 'letterboard' | 'poster' | 'brick';
     color?: string;
     color2?: string;
     size?: number;
