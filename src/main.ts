@@ -24,6 +24,9 @@ import { getAudioEngine } from './systems/AudioEngine.js';
 import { mountAudioControls } from './ui/AudioControls.js';
 import { Navigation } from './systems/Navigation.js';
 import { INTERIOR_BOUNDS } from './world/layout.js';
+// Era-population modules MUST be imported before registerEraFragments() so their
+// detailed patron factories win the AssetRegistry slot over the placeholder stub.
+import './characters/patrons1945.js';
 
 function bootstrap(): void {
   const container =
