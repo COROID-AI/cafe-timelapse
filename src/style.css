@@ -1,0 +1,45 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #1b1b22;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+#app canvas {
+  display: block;
+}
+
+#ui {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  color: #f2ead8;
+  font-family: system-ui, -apple-system, sans-serif;
+  pointer-events: none;
+  user-select: none;
+}
+
+#ui h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+#ui p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  opacity: 0.75;
+}
