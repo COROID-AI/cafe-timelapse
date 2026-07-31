@@ -7,9 +7,13 @@
  * filtered noise loops, spoken or granular murmur, machine hiss) — no audio
  * files are bundled.
  *
- * The 1945 profile is grounded in the era record (src/data/eras/1945.ts):
- * a valve wireless playing a big-band/swing-evocative generative bed, the
- * gentle murmur of patrons, and the hiss of the lever espresso machine.
+ * Profiles are grounded in the era records (src/data/eras/*.ts):
+ *  - 1945: a valve wireless playing a big-band/swing-evocative generative
+ *    bed, the gentle murmur of patrons, and the hiss of the lever espresso
+ *    machine.
+ *  - 1985: a boombox/ghetto-blaster playing a synth-pop/new-wave-evocative
+ *    generative bed (cassette hiss + tape wobble character), the churn of
+ *    the grinder doser, and the hiss of the commercial espresso machine.
  */
 export interface EraAudioLayer {
   /** Stable identifier for the layer (engine hook / debugging). */
@@ -20,6 +24,9 @@ export interface EraAudioLayer {
   kind:
     | 'radio-static'
     | 'swing-bed'
+    | 'synth-bed'
+    | 'cassette-hiss'
+    | 'grinder-clatter'
     | 'murmur'
     | 'machine-hiss'
     | 'ambient-room'
@@ -88,9 +95,65 @@ export const ERA_AUDIO_1945: EraAudioConfig = {
   },
 };
 
+/** The 1985 espresso-bar audio bed. */
+export const ERA_AUDIO_1985: EraAudioConfig = {
+  era: 1985,
+  label: '1985 — boombox synth-pop bed, grinder clatter, espresso hiss',
+  layers: [
+    {
+      id: 'synth-bed',
+      label: 'Synth-pop / new-wave-evocative generative bed',
+      kind: 'synth-bed',
+      gain: 0.42,
+      note: 'bass-synth pulse, gated snare, shimmering pads, 4/4 at ~112 bpm',
+    },
+    {
+      id: 'cassette-hiss',
+      label: 'Boombox cassette character',
+      kind: 'cassette-hiss',
+      gain: 0.08,
+      note: 'soft tape hiss and slow wow/flutter wobble, stereo speakers',
+    },
+    {
+      id: 'grinder-clatter',
+      label: 'Coffee grinder doser clatter',
+      kind: 'grinder-clatter',
+      gain: 0.14,
+      note: 'short whirr + bean rattle bursts as doses are ground',
+    },
+    {
+      id: 'machine-hiss',
+      label: 'Commercial espresso machine hiss',
+      kind: 'machine-hiss',
+      gain: 0.1,
+      note: 'pump pressure whoosh and brief steam wand hiss',
+    },
+    {
+      id: 'murmur',
+      label: 'Patron conversation murmur',
+      kind: 'murmur',
+      gain: 0.12,
+      note: 'low-passed speech-like granular noise, gentle swell',
+    },
+    {
+      id: 'ambient-room',
+      label: 'Room tone',
+      kind: 'ambient-room',
+      gain: 0.08,
+      note: 'cool fluorescent room tone with distant street noise',
+    },
+  ],
+  meta: {
+    tempo: '112 bpm',
+    mode: 'generative-loop',
+    masterGain: '0.4',
+  },
+};
+
 /** Registry of era audio configs by year (extend as later era tasks land). */
 export const ERA_AUDIO_CONFIGS: Record<number, EraAudioConfig> = {
   1945: ERA_AUDIO_1945,
+  1985: ERA_AUDIO_1985,
 };
 
 /** Return the audio config for an era (falls back to a silent bed). */

@@ -1,60 +1,65 @@
 import type { EraData } from '../EraData';
 
-/** 1985 — eighties: bold colours, smoked glass, microwave snacks and MTV. */
+/**
+ * 1985 — eighties espresso bar: tubular chrome, pastel Memphis accents,
+ * mirrored walls, neon and synth-wave energy.
+ */
 export const era1985: EraData = {
   year: 1985,
 
   architecture: {
-    walls: 'Peach wallpapered plaster with a stencilled border',
-    floor: 'Grey carpet tiles with burgundy flecks',
-    ceiling: 'Suspended ceiling with fluorescent panels',
-    trim: 'Brass-effect skirting and door furniture',
+    walls: 'Peach walls with chrome-framed mirror panels',
+    floor: 'Terrazzo tiles with pink and grey flecks',
+    ceiling: 'Suspended ceiling with white acoustic panels',
+    trim: 'Chrome and brass-effect trim',
   },
 
   furnitureDecor: [
-    'Oak-effect laminate tables with brass trim',
-    'Plush burgundy upholstered chairs',
-    'A smoked-glass counter with tiled front',
-    'Ficus plant in a terracotta pot',
-    'Laminated menu stand on every table',
+    'Tubular chrome tables with pastel Memphis tops',
+    'Memphis-pattern chairs with pastel upholstered seats',
+    'Mirrored wall panels and chrome rails',
+    'Pastel geometric wall clock',
+    'Neon coffee sign by the door',
   ],
 
   coffeeMachines: [
-    { name: 'La Cimbali commercial espresso machine', method: 'electric pump group, steam wand' },
-    { name: 'Filter coffee machine', method: 'batch drip brew on a hotplate' },
+    { name: 'Commercial espresso machine', method: 'electric pump group, steam wand, cup warmer' },
+    { name: 'Coffee grinder doser', method: 'dosed grounds straight into the portafilter' },
+    { name: 'Glass decanters on warmers', method: 'batch brews kept hot on electric warmers' },
   ],
 
   menuBoard: {
     title: 'Today’s Menu',
     items: [
-      { name: 'Espresso', price: '60p' },
-      { name: 'Latte', price: '85p' },
-      { name: 'Jacket potato', price: '£1.20' },
-      { name: 'Black Forest gateau', price: '95p' },
+      { name: 'Espresso', price: '$1.00' },
+      { name: 'Cappuccino', price: '$1.25' },
+      { name: 'Latte', price: '$1.50' },
+      { name: 'Danish', price: '$1.10' },
     ],
   },
 
   musicSource: { kind: 'boombox', label: 'Ghetto blaster on the counter' },
 
   posters: [
-    { title: 'Live Aid', description: 'Concert poster with bold typography' },
-    { title: 'New Wave Nights', description: 'Club night flyer in neon colours' },
+    { title: 'Neon Nights Coffee', description: 'Synth-wave ad with pink and cyan grids' },
+    { title: 'Cappuccino After Dark', description: 'Retro neon poster with a geometric sun' },
+    { title: 'Espresso Chrome', description: 'Chrome-cup ad with a pastel sunset' },
+    { title: 'Miami Blend', description: 'Palm-and-grid synth-wave coffee advertisement' },
   ],
 
   tableware: [
-    { name: 'Brown ceramic mug', material: 'stoneware' },
-    { name: 'Melamine saucer', material: 'melamine' },
-    { name: 'Plastic stirrer', material: 'polystyrene' },
+    { name: 'Stoneware cappuccino cup', material: 'stoneware' },
+    { name: 'Glass demitasse', material: 'glass' },
   ],
 
   signageLighting: {
-    sign: 'Backlit "The Coffee Shop" sign with chrome letters',
-    lighting: 'Fluorescent panels and a brass pendant over the counter',
+    sign: 'Pink neon "ESPRESSO BAR" sign',
+    lighting: 'Track lighting with warm spots and blue neon accents',
   },
 
   counterTechnology: {
-    device: 'Electronic cash register',
-    method: 'Programmed price keys, thermal receipts',
+    device: 'Electronic LED cash register',
+    method: 'Programmed price keys, LED display, thermal receipts',
   },
 
   patrons: [
