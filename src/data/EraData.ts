@@ -85,7 +85,9 @@ export type HairstyleKind =
   | 'buzz'
   | 'fedora'
   | 'victory-rolls'
-  | 'finger-waves';
+  | 'finger-waves'
+  | 'beanie'
+  | 'top-knot';
 
 /** Object a patron holds or wears (built from primitives by the avatar system). */
 export type AccessoryKind =
@@ -99,6 +101,7 @@ export type AccessoryKind =
   | 'phone'
   | 'laptop'
   | 'headphones'
+  | 'earbuds'
   | 'cup'
   | 'glasses'
   | 'wristband'
@@ -108,7 +111,12 @@ export type AccessoryKind =
   | 'none';
 
 /** Garment silhouette used to shape the avatar's torso. */
-export type OutfitStyle = 'shirt-pants' | 'dress' | 'poncho' | 'jumpsuit';
+export type OutfitStyle =
+  | 'shirt-pants'
+  | 'dress'
+  | 'poncho'
+  | 'jumpsuit'
+  | 'oversized';
 
 /**
  * PatronConfig — the structured per-era patron contract consumed by the shared

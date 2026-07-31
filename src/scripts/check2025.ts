@@ -35,6 +35,8 @@ import {
 } from '../compositions';
 import { createArchitectureShell } from '../world/ArchitectureShell';
 import { ANCHORS, ROOM_BOUNDS, ROOM_WIDTH, ROOM_DEPTH } from '../world/layout';
+import type { PatronConfig } from '../data/EraData';
+import { era2025 } from '../data/eras/2025';
 
 const REQUIRED_CATEGORIES = [
   'architecture',
@@ -55,6 +57,17 @@ function countMeshes(group: THREE.Object3D): number {
     if ((object as THREE.Mesh).isMesh) n += 1;
   });
   return n;
+}
+
+function collectPatronConfigs(group: THREE.Object3D): PatronConfig[] {
+  const configs: PatronConfig[] = [];
+  group.traverse((object) => {
+    const avatar = (object as THREE.Group).userData?.characterAvatar as
+      | { config?: PatronConfig }
+      | undefined;
+    if (avatar?.config) configs.push(avatar.config);
+  });
+  return configs;
 }
 
 function run(): void {
@@ -136,6 +149,55 @@ function run(): void {
   assert(ANCHORS.posterWalls.length >= 4, 'poster walls provide four+ mounting points');
   assert(ANCHORS.seatingTables.length >= 4, 'seating tables provide four+ positions');
   assert(ROOM_WIDTH > 0 && ROOM_DEPTH > 0, 'room dimensions are sane');
+
+  // 6. Era patrons: the shared roster mounts 3-4 period-styled patrons and
+  // seats them at the anchors inside the room (era-scoped visibility).
+  console.log('\n[2025 patrons]');
+  const patronGroup = new THREE.Group();
+  build2025Patrons(patronGroup);
+  const patronConfigs = collectPatronConfigs(patronGroup);
+  assert(
+    patronConfigs.length >= 3 && patronConfigs.length <= 4,
+    `roster mounts 3-4 patrons via PatronConfig (got ${patronConfigs.length})`,
+  );
+  assert(
+    patronConfigs.length === era2025.patrons.length,
+    'roster patron count matches the 2025 EraData patron records',
+  );
+  assert(
+    patronConfigs.some((config) => config.hair.kind === 'beanie') &&
+      patronConfigs.some((config) => config.hair.kind === 'top-knot'),
+    'patrons include beanies and top-knots (2025 period hair)',
+  );
+  assert(
+    patronConfigs.some((config) => config.accessory === 'earbuds') &&
+      patronConfigs.some((config) => config.accessory === 'phone') &&
+      patronConfigs.some((config) => config.accessory === 'laptop') &&
+      patronConfigs.some((config) => config.accessory === 'cup'),
+    'patrons carry earbuds, smartphones, an open laptop and a reusable cup',
+  );
+  assert(
+    patronConfigs.some((config) => config.style === 'oversized'),
+    'patrons include athleisure / oversized fits',
+  );
+  for (const config of patronConfigs) {
+    assert(
+      config.style === 'oversized' || config.style === 'shirt-pants',
+      `patron "${config.name ?? 'anonymous'}" uses a 2025 period silhouette`,
+    );
+  }
+  patronGroup.traverse((object) => {
+    const avatar = (object as THREE.Group).userData?.characterAvatar as
+      | { root?: THREE.Object3D }
+      | undefined;
+    if (!avatar?.root) return;
+    const pos = avatar.root.position;
+    assert(
+      pos.x >= ROOM_BOUNDS.minX && pos.x <= ROOM_BOUNDS.maxX &&
+        pos.z >= ROOM_BOUNDS.minZ && pos.z <= ROOM_BOUNDS.maxZ,
+      `patron (${pos.x.toFixed(2)}, ${pos.z.toFixed(2)}) is seated inside the room`,
+    );
+  });
 
   if (failures > 0) {
     console.error(`\n2025 composition check FAILED with ${failures} failure(s).`);

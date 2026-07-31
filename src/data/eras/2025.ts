@@ -62,14 +62,24 @@ export const era2025: EraData = {
 
   patrons: [
     {
-      outfit: 'Oversized beige coat and dad trainers',
-      hairstyle: 'Curtain fringe',
+      outfit: 'Oversized grey hoodie, joggers and dad trainers',
+      hairstyle: 'Top-knot bun',
+      gadget: 'Open laptop on the table',
+    },
+    {
+      outfit: 'Athleisure track suit with running shoes',
+      hairstyle: 'Knit beanie',
       gadget: 'Smartphone with magnetic wallet',
     },
     {
-      outfit: 'Graphic tee and cargo trousers',
-      hairstyle: 'Tied-back curls',
-      gadget: 'Laptop and noise-cancelling headphones',
+      outfit: 'Oversized cream knit and wide-leg trousers',
+      hairstyle: 'High top-knot',
+      gadget: 'Wireless earbuds',
+    },
+    {
+      outfit: 'Oversized apron over a hoodie',
+      hairstyle: 'Messy bun',
+      gadget: 'Reusable cup with bamboo lid',
     },
   ],
 };

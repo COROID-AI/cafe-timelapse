@@ -299,13 +299,29 @@ function buildHair(parts: Part[], hair: THREE.Material, kind: HairstyleKind): vo
       add(box(0.05, 0.03, 0.03), 0, HEAD_R * 0.5, HEAD_R * 0.58);
       break;
     }
+    case 'beanie': {
+      // 2020s knit beanie: snug ribbed cap pulled down over the crown.
+      add(cap(0.97, 0.5), 0, HEAD_R * 0.42, 0);
+      const cuff = cylinder(HEAD_R * 1.02, HEAD_R * 1.02, 0.045, 12);
+      add(cuff, 0, HEAD_R * 0.3, 0);
+      add(sphere(0.028), 0, HEAD_R * 0.98, 0);
+      break;
+    }
+    case 'top-knot': {
+      // 2020s top-knot: gathered bun on top of the head, loose sides.
+      add(cap(1, 0.82), 0, HEAD_R * 0.4, 0);
+      add(sphere(0.055), 0, HEAD_R * 1.05, 0);
+      add(sphere(0.04), -HEAD_R * 0.55, HEAD_R * 0.85, 0);
+      add(sphere(0.04), HEAD_R * 0.55, HEAD_R * 0.85, 0);
+      break;
+    }
     default:
       add(cap(1, 0.8), 0, HEAD_R * 0.4, 0);
       break;
   }
 }
 
-/** Head-worn accessories (glasses, headphones) ride the head pivot. */
+/** Head-worn accessories (glasses, headphones, earbuds) ride the head pivot. */
 function buildHeadAccessory(
   parts: Part[],
   accent: THREE.Material,
@@ -323,6 +339,14 @@ function buildHeadAccessory(
     add(band, 0, 0.03, 0);
     add(box(0.03, 0.06, 0.02), -HEAD_R * 0.85, -0.04, 0);
     add(box(0.03, 0.06, 0.02), HEAD_R * 0.85, -0.04, 0);
+  } else if (accessory === 'earbuds') {
+    // Wireless in-ear buds with a thin stem tucked at each ear.
+    const bud = (side: number): void => {
+      add(sphere(0.022), side * HEAD_R * 0.88, -0.02, 0);
+      add(box(0.012, 0.04, 0.012), side * HEAD_R * 0.9, -0.055, 0);
+    };
+    bud(-1);
+    bud(1);
   }
 }
 
@@ -525,9 +549,11 @@ export class CharacterAvatar {
       staticParts.push({ geometry: shoe, material: shoes });
     }
 
-    const torsoW = this.config.style === 'poncho' ? 0.44 : 0.34;
-    const torso = box(torsoW, TORSO_H, 0.22);
-    torso.translate(0, torsoCenterY, 0);
+    const oversized = this.config.style === 'oversized';
+    const torsoW = this.config.style === 'poncho' || oversized ? 0.44 : 0.34;
+    const torsoH = oversized ? TORSO_H + 0.16 : TORSO_H;
+    const torso = box(torsoW, torsoH, oversized ? 0.26 : 0.22);
+    torso.translate(0, oversized ? torsoCenterY - 0.06 : torsoCenterY, 0);
     staticParts.push({ geometry: torso, material: shirt });
 
     // Slim tie worn at the chest (1965 slim-suit patrons).
@@ -549,6 +575,11 @@ export class CharacterAvatar {
       const belt = box(0.36, 0.04, 0.24);
       belt.translate(0, hipY + 0.03, 0);
       staticParts.push({ geometry: belt, material: accent });
+    } else if (oversized) {
+      // Dropped-hem hoodie / oversized coat hem over the hips.
+      const hem = cylinder(0.23, 0.26, 0.12, 10);
+      hem.translate(0, hipY + 0.06, 0);
+      staticParts.push({ geometry: hem, material: shirt });
     }
 
     const neck = box(0.07, 0.09, 0.07);
@@ -556,7 +587,7 @@ export class CharacterAvatar {
     staticParts.push({ geometry: neck, material: skin });
 
     // Left arm + both hands (the right arm is animated separately below).
-    const leftArm = box(0.1, 0.55, 0.11);
+    const leftArm = box(oversized ? 0.13 : 0.1, oversized ? 0.62 : 0.55, oversized ? 0.13 : 0.11);
     leftArm.translate(-0.24, shoulderY - 0.275, 0);
     staticParts.push({ geometry: leftArm, material: shirt });
 
@@ -582,7 +613,7 @@ export class CharacterAvatar {
     this.armPivot.name = 'avatar-arm-right';
     this.armPivot.position.set(0.24, shoulderY, 0);
     const armParts: Part[] = [];
-    const rightArm = box(0.1, 0.55, 0.11);
+    const rightArm = box(oversized ? 0.13 : 0.1, oversized ? 0.62 : 0.55, oversized ? 0.13 : 0.11);
     rightArm.translate(0, -0.275, 0);
     armParts.push({ geometry: rightArm, material: shirt });
     const rightHand = sphere(0.045);

@@ -768,51 +768,58 @@ export function build2025CounterTechnology(target: THREE.Object3D): void {
 // patrons
 // ---------------------------------------------------------------------------
 
-/** 2025 patron configs consumed by the shared CharacterAvatar system. */
+/**
+ * 2025 patron configs consumed by the shared CharacterAvatar system.
+ * Period styling: athleisure / oversized fits (hoodies, joggers, dad
+ * trainers), beanies / top-knots, and modern gadgets — wireless earbuds,
+ * smartphones, open laptops and reusable cups.
+ */
 const PATRON_CONFIGS_2025: PatronConfig[] = [
   {
-    name: 'laptop-nomad',
+    name: 'hoodie-nomad',
     skin: '#C88B5A',
-    hair: { kind: 'curls', color: '#3A2418' },
-    shirt: '#C9B9A6',
-    pants: '#2E2A26',
-    shoes: '#1C1410',
-    style: 'shirt-pants',
+    hair: { kind: 'top-knot', color: '#2A1E14' },
+    shirt: '#8A8F98',
+    pants: '#23262B',
+    shoes: '#D8D4CC',
+    style: 'oversized',
     accessory: 'laptop',
   },
   {
-    name: 'phone-scroller',
-    skin: '#C88B5A',
-    hair: { kind: 'messy', color: '#1C1410' },
-    shirt: '#D8CFC0',
-    pants: '#6E6A62',
-    shoes: '#2E2A26',
-    style: 'shirt-pants',
+    name: 'athleisure-runner',
+    skin: '#A9744F',
+    hair: { kind: 'beanie', color: '#3A3F45' },
+    shirt: '#4C6B57',
+    pants: '#2B2F36',
+    shoes: '#E8E6E0',
+    style: 'oversized',
     accessory: 'phone',
   },
   {
-    name: 'headphone-listen',
-    skin: '#C88B5A',
-    hair: { kind: 'bob', color: '#3A2418' },
-    shirt: '#3A3A3E',
-    pants: '#2E2A26',
-    shoes: '#1C1410',
-    style: 'shirt-pants',
-    accessory: 'headphones',
+    name: 'podcast-earbuds',
+    skin: '#D19A6A',
+    hair: { kind: 'top-knot', color: '#1C1410' },
+    shirt: '#B8B2A8',
+    pants: '#464A50',
+    shoes: '#20242A',
+    style: 'oversized',
+    accent: '#E8E6E0',
+    accessory: 'earbuds',
   },
   {
-    name: 'barista',
-    skin: '#C88B5A',
+    name: 'barista-topknot',
+    skin: '#B98A5E',
     hair: { kind: 'bun', color: '#1C1410' },
-    shirt: '#2E2A26',
-    pants: '#2E2A26',
-    shoes: '#101010',
-    style: 'shirt-pants',
+    shirt: '#6B4F3A',
+    pants: '#3A332C',
+    shoes: '#1A1A1A',
+    style: 'oversized',
+    accent: '#D8D4CC',
     accessory: 'cup',
   },
 ];
 
-/** Third-wave laptop-nomad patrons via the shared roster (tables + stools). */
+/** 2025 third-wave patrons via the shared roster (tables + stools). */
 export function build2025Patrons(target: THREE.Object3D): void {
   const roster = new CharacterRoster({
     parent: target,
