@@ -20,6 +20,7 @@
 import * as THREE from 'three';
 import type { EraYear } from '../../data/eras';
 import { era2005 } from '../../data/eras/2005';
+import type { PatronConfig } from '../../data/EraData';
 import {
   ANCHORS,
   ROOM_BOUNDS,
@@ -27,6 +28,10 @@ import {
   ROOM_HEIGHT,
   ROOM_WIDTH,
 } from '../../world/layout';
+import {
+  CharacterRoster,
+  counterStoolAnchors,
+} from '../../world/characters';
 import {
   materialFactory,
   materialFromSpec,
@@ -897,13 +902,74 @@ export function build2005CounterTechnology(target: THREE.Group, era: EraYear): v
 }
 
 // ---------------------------------------------------------------------------
-// Patrons — figures arrive in a later phase; EraData already describes them.
+// Patrons — 2005 noughties café patrons via the shared CharacterRoster.
 // ---------------------------------------------------------------------------
 
-export function build2005Patrons(_target: THREE.Group, _era: EraYear): void {
-  // Intentionally empty: the era data supplies outfits/hairstyles/gadgets, and
-  // the registry label/tags expose them. Simple stylised figures can be added
-  // without changing the fragment contract.
+/**
+ * 2005 patron configs consumed by the shared CharacterAvatar system.
+ * Period styling: bootcut jeans, layered tops, side-swept bangs / spiky hair,
+ * flip phones, early iPods and open laptops as gadgets.
+ */
+const PATRON_CONFIGS_2005: PatronConfig[] = [
+  {
+    name: 'flip-phone-girl',
+    skin: '#C88B5A',
+    hair: { kind: 'side-swept', color: '#3A2418' },
+    shirt: '#D94F8F',
+    pants: '#3A4A8A',
+    shoes: '#2E2A26',
+    style: 'shirt-pants',
+    legStyle: 'bootcut',
+    accent: '#C9A227',
+    accessory: 'flip-phone',
+  },
+  {
+    name: 'ipod-listen',
+    skin: '#C88B5A',
+    hair: { kind: 'bob', color: '#2A1E14' },
+    shirt: '#E8E4DC',
+    pants: '#1C1410',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    legStyle: 'bootcut',
+    accent: '#9AA0A6',
+    accessory: 'ipod',
+  },
+  {
+    name: 'laptop-blogger',
+    skin: '#C88B5A',
+    hair: { kind: 'messy', color: '#1C1410' },
+    shirt: '#5A7A5A',
+    pants: '#6E6A62',
+    shoes: '#2E2A26',
+    style: 'shirt-pants',
+    accent: '#9AA0A6',
+    accessory: 'laptop',
+  },
+  {
+    name: 'spiky-skater',
+    skin: '#C88B5A',
+    hair: { kind: 'spiky', color: '#1A1A1A' },
+    shirt: '#3A3A3E',
+    pants: '#2E2A26',
+    shoes: '#101010',
+    style: 'shirt-pants',
+    legStyle: 'bootcut',
+    accent: '#C94F3D',
+    accessory: 'flip-phone',
+  },
+];
+
+/** 2005 noughties patrons (bootcut jeans, layered tops, flip phones / iPods / laptops). */
+export function build2005Patrons(target: THREE.Group, _era: EraYear): void {
+  const roster = new CharacterRoster({
+    parent: target,
+    tables: ANCHORS.seatingTables,
+    stools: counterStoolAnchors(),
+  });
+  roster.mount(2005, PATRON_CONFIGS_2005);
+  // The roster group is kept on the fragment so the shared animation driver
+  // (updateCharacterAnimations) can find and update the mounted avatars.
 }
 
 /** Build every 2005 fragment category into one group (convenience). */
