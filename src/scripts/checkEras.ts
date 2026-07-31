@@ -17,6 +17,7 @@ import {
 import { validateRegistration, summarizeCoverage } from '../registry/coverage';
 import { ERA_AUDIO_1965 } from '../audio/eras/1965';
 import { ERA_AUDIO_2025 } from '../audio/eras/2025';
+import { ERA_AUDIO_2055 } from '../audio/eras/2055';
 // Static side-effect imports register every era into the registry.
 import '../registry/eras/1945';
 import '../registry/eras/1965';
@@ -31,7 +32,25 @@ const REQUIRED_CATEGORY_COUNT = 10;
 const ERA_AUDIO_CONFIGS: Record<number, unknown> = {
   1965: ERA_AUDIO_1965,
   2025: ERA_AUDIO_2025,
+  2055: ERA_AUDIO_2055,
 };
+
+/**
+ * Per-era audio layer fields the gate checks. Every composed era must supply
+ * a non-empty generative bed plus its two character layers — the exact layer
+ * names differ per era (1965: jukebox + urn hiss; 2025: phone/BT speaker +
+ * steam wand hiss; 2055: holographic emitter + robotic brew).
+ */
+const ERA_AUDIO_GATES: Array<{
+  era: number;
+  config: unknown;
+  character: string;
+  machine: string;
+}> = [
+  { era: 1965, config: ERA_AUDIO_1965, character: 'jukeboxCharacter', machine: 'urnHiss' },
+  { era: 2025, config: ERA_AUDIO_2025, character: 'phoneBtSpeakerCharacter', machine: 'steamWandHiss' },
+  { era: 2055, config: ERA_AUDIO_2055, character: 'holographicEmitter', machine: 'roboticBrew' },
+];
 
 function missing<T>(list: T[], expected: T[]): T[] {
   return expected.filter((item) => !list.includes(item));
@@ -59,27 +78,24 @@ function run(): void {
     errors.push(...validateRegistration(registration));
   }
 
-  // 3b. Composed eras must supply their era audio config (generative bed,
-  //     music-source character, machine hiss) per the Phase 4 brief.
-  for (const [year, config] of Object.entries(ERA_AUDIO_CONFIGS)) {
+  // 3b. Composed eras must supply their era audio config (a generative bed,
+  //     music-source character and machine hiss per the Phase 4 brief; the
+  //     exact layer names differ per era).
+  for (const { era, config, character, machine } of ERA_AUDIO_GATES) {
     const audio = config as {
       era?: number;
       generativeBed?: unknown[];
-      jukeboxCharacter?: unknown;
-      urnHiss?: unknown;
-      phoneBtSpeakerCharacter?: unknown;
-      steamWandHiss?: unknown;
-    };
-    if (!audio || audio.era !== Number(year)) {
-      errors.push(`Era ${year}: era audio config is missing or has the wrong era.`);
+    } & Record<string, unknown>;
+    if (!audio || audio.era !== era) {
+      errors.push(`Era ${era}: era audio config is missing or has the wrong era.`);
     } else if (
       !Array.isArray(audio.generativeBed) ||
       audio.generativeBed.length === 0 ||
-      (year === '1965' && (!audio.jukeboxCharacter || !audio.urnHiss)) ||
-      (year === '2025' && (!audio.phoneBtSpeakerCharacter || !audio.steamWandHiss))
+      !audio[character] ||
+      !audio[machine]
     ) {
       errors.push(
-        `Era ${year}: era audio config must supply a generative bed, music-source character and machine hiss.`,
+        `Era ${era}: era audio config must supply a generative bed, ${character} and ${machine} layers.`,
       );
     }
   }

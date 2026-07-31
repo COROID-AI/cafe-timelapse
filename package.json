@@ -17,7 +17,8 @@
     "check:shell": "tsx src/scripts/checkShell.ts",
     "check:1965": "tsx src/scripts/check1965.ts",
     "check:2025": "tsx src/scripts/check2025.ts",
-    "check": "npm run check:eras && npm run check:navigation && npm run check:transitions && npm run check:scene && npm run check:assets && npm run check:timeline && npm run check:shell && npm run check:1965 && npm run check:2025 && npm run typecheck"
+    "check:2055": "tsx src/scripts/check2055.ts",
+    "check": "npm run check:eras && npm run check:navigation && npm run check:transitions && npm run check:scene && npm run check:assets && npm run check:timeline && npm run check:shell && npm run check:1965 && npm run check:2025 && npm run check:2055 && npm run typecheck"
   },
   "dependencies": {
     "three": "^0.185.1"
