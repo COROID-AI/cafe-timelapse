@@ -57,7 +57,7 @@ function mesh(
 // Table legs / frames
 // ---------------------------------------------------------------------------
 
-export interface TableLegOptions {
+export interface TableLegOptions extends PrimitiveOptions {
   /** Leg height in world units. Default 0.72. */
   height?: number;
   /** Leg cross-section size (square legs). Default 0.05. */
@@ -100,7 +100,7 @@ export function tableLeg(options: TableLegOptions = {}): THREE.Group {
   return applyOptions(group, options, 'table-leg');
 }
 
-export interface TableFrameOptions {
+export interface TableFrameOptions extends PrimitiveOptions {
   /** Distance between the two long sides (table width). Default 1.2. */
   width?: number;
   /** Distance between the two short sides (table depth). Default 0.8. */
@@ -151,7 +151,7 @@ export function tableFrame(options: TableFrameOptions = {}): THREE.Group {
   return applyOptions(group, options, 'table-frame');
 }
 
-export interface TableTopOptions {
+export interface TableTopOptions extends PrimitiveOptions {
   /** Table width. Default 1.2. */
   width?: number;
   /** Table depth. Default 0.8. */
@@ -188,7 +188,7 @@ export function tableTop(options: TableTopOptions = {}): THREE.Group {
 // Chairs
 // ---------------------------------------------------------------------------
 
-export interface ChairOptions {
+export interface ChairOptions extends PrimitiveOptions {
   /** Seat height above origin. Default 0.45. */
   seatY?: number;
   /** Overall chair scale. Default 1. */
@@ -266,7 +266,7 @@ export function chair(options: ChairOptions = {}): THREE.Group {
 // Cups
 // ---------------------------------------------------------------------------
 
-export interface CupOptions {
+export interface CupOptions extends PrimitiveOptions {
   /** Cup height. Default 0.08. */
   height?: number;
   /** Radius at the rim. Default 0.035. */
@@ -343,7 +343,7 @@ export function cup(options: CupOptions = {}): THREE.Group {
 // Machine shells
 // ---------------------------------------------------------------------------
 
-export interface MachineShellOptions {
+export interface MachineShellOptions extends PrimitiveOptions {
   /** Machine width. Default 0.6. */
   width?: number;
   /** Machine height. Default 0.5. */
@@ -436,7 +436,7 @@ export function machineShell(options: MachineShellOptions = {}): THREE.Group {
 // Frames (posters, photos, menu boards)
 // ---------------------------------------------------------------------------
 
-export interface FrameOptions {
+export interface FrameOptions extends PrimitiveOptions {
   /** Frame outer width. Default 0.5. */
   width?: number;
   /** Frame outer height. Default 0.7. */

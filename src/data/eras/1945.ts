@@ -1,6 +1,12 @@
 import type { EraData } from '../EraData';
 
-/** 1945 — post-war austerity: recycled materials, rationing, gentle optimism. */
+/**
+ * 1945 — post-war café: ration-era thrift, late-war optimism, warm tungsten.
+ *
+ * The composition (src/scenes/eras/1945.ts) reads this record for the menu
+ * board, posters, machines, tableware, signage and patrons, and the era audio
+ * profile (src/audio/eraAudioConfigs.ts) is grounded in these entries.
+ */
 export const era1945: EraData = {
   year: 1945,
 
@@ -12,8 +18,8 @@ export const era1945: EraData = {
   },
 
   furnitureDecor: [
-    'Bentwood café chairs with rattan seats',
-    'Small marble-topped bistro tables',
+    'Bentwood Thonet-style café chairs with rattan seats',
+    'Small round marble-topped bistro tables',
     'A tall walnut counter with brass fittings',
     'Lace doilies and a vase of dried flowers',
     'Curtained display cabinet for cakes',
@@ -21,40 +27,44 @@ export const era1945: EraData = {
 
   coffeeMachines: [
     { name: 'La Pavoni lever espresso machine', method: 'manual lever pressure over a gas burner' },
+    { name: 'Hand-cranked burr grinder', method: 'freshly ground by hand per shot' },
     { name: 'Cafetière / French press', method: 'plunger-brewed on the counter' },
   ],
 
   menuBoard: {
     title: 'Refreshments',
     items: [
-      { name: 'Coffee', price: '3d' },
-      { name: 'Tea', price: '2d' },
-      { name: 'Bread & dripping', price: '4d' },
-      { name: 'Jam tart', price: '3d' },
+      { name: 'Coffee', price: '5¢' },
+      { name: 'Tea', price: '5¢' },
+      { name: 'Cocoa', price: '10¢' },
+      { name: 'Doughnut', price: '5¢' },
+      { name: 'Ham sandwich', price: '15¢' },
     ],
   },
 
-  musicSource: { kind: 'wireless-set', label: 'Valve wireless set on the shelf' },
+  musicSource: { kind: 'wireless-set', label: 'Wooden tabletop wireless (valve radio) on the cabinet' },
 
   posters: [
     { title: 'Dig for Victory', description: 'Wartime vegetable campaign poster' },
+    { title: 'Rationing — Save Fats', description: 'Late-war ration-era kitchen notice' },
+    { title: 'Victory Loans', description: 'Victory bond drive advertisement' },
     { title: 'Visit the Seaside', description: 'Cheerful railway holiday advertisement' },
   ],
 
   tableware: [
-    { name: 'White porcelain cup and saucer', material: 'bone china' },
-    { name: 'Sugar bowl', material: 'stamped aluminium' },
+    { name: 'Thick white ceramic cup and saucer', material: 'heavy stoneware' },
+    { name: 'Glass sugar pourer', material: 'pressed glass' },
     { name: 'Cake fork', material: 'recycled steel' },
   ],
 
   signageLighting: {
-    sign: 'Hand-painted "The Corner Café" sign over the door',
-    lighting: 'Single warm tungsten pendant; dim in the corners',
+    sign: 'Neon "CAFÉ" sign over the door, hand-painted "The Corner Café" board inside',
+    lighting: 'Incandescent pendant lamps; warm tungsten glow',
   },
 
   counterTechnology: {
-    device: 'Brass cash register',
-    method: 'Manual keyed till, change counted by hand',
+    device: 'Brass manual cash register',
+    method: 'Mechanical keyed till, change counted by hand',
   },
 
   patrons: [

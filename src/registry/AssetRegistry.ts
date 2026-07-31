@@ -24,7 +24,9 @@ export type FragmentCategory =
  * A registered scene fragment for one era. The `build` function receives the
  * target Three.js group and the era year so fragments can be constructed
  * imperatively. The `label` and `tags` fields are data available to the QA
- * gate and future tooling without executing the build.
+ * gate and future tooling without executing the build. `audio` optionally
+ * carries the era's audio bed (consumed by the AudioEngine); it rides on the
+ * `musicSource` fragment.
  */
 export interface EraFragment {
   /** Category this fragment contributes to (required by the QA gate). */
@@ -33,6 +35,12 @@ export interface EraFragment {
   label: string;
   /** Optional keywords describing the fragment contents. */
   tags?: string[];
+  /**
+   * Optional era audio config (see src/audio/eraAudioConfigs.ts). Attached to
+   * the `musicSource` fragment so the AudioEngine can resolve an era's bed
+   * without a second lookup.
+   */
+  audio?: import('../audio/eraAudioConfigs').EraAudioConfig;
   /**
    * Builds the fragment's meshes into `target`.
    * Phase 1 registers fragments with `build` stubbed out; later phases
