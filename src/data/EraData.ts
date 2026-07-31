@@ -71,6 +71,7 @@ export interface Patron {
 /** Silhouette of a patron's hairstyle (built from primitives by the avatar system). */
 export type HairstyleKind =
   | 'short'
+  | 'side-swept'
   | 'bob'
   | 'beehive'
   | 'bouffant'
@@ -87,7 +88,8 @@ export type HairstyleKind =
   | 'victory-rolls'
   | 'finger-waves'
   | 'beanie'
-  | 'top-knot';
+  | 'top-knot'
+  | 'spiky';
 
 /** Object a patron holds or wears (built from primitives by the avatar system). */
 export type AccessoryKind =
@@ -97,6 +99,8 @@ export type AccessoryKind =
   | 'mirror'
   | 'radio'
   | 'walkman'
+  | 'ipod'
+  | 'flip-phone'
   | 'calculator'
   | 'phone'
   | 'laptop'
@@ -118,6 +122,9 @@ export type OutfitStyle =
   | 'poncho'
   | 'jumpsuit'
   | 'oversized';
+
+/** Leg silhouette used to shape the avatar's trousers/jeans. */
+export type LegStyle = 'straight' | 'bootcut';
 
 /**
  * PatronConfig — the structured per-era patron contract consumed by the shared
@@ -147,6 +154,8 @@ export interface PatronConfig {
   shoes: string;
   /** Garment silhouette. Defaults to 'shirt-pants'. */
   style?: OutfitStyle;
+  /** Leg silhouette. Defaults to 'straight'; 'bootcut' flares at the ankle. */
+  legStyle?: LegStyle;
   /** Accent colour for accessories/trims (CSS hex). */
   accent?: string;
   /** Held or worn gadget/accessory. Defaults to 'none'. */
