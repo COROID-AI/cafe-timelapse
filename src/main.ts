@@ -11,12 +11,15 @@ import { buildCaféShell, CAFÉ_BOUNDS } from './systems/cafeShell';
 import { EraGroupHost } from './systems/SceneHost';
 import { TransitionController } from './systems/TransitionController';
 import { ERA_LIGHTING } from './systems/lighting';
+import {
+  TimelineSlider,
+  ERA_CHANGE_EVENT,
+} from './ui/TimelineSlider';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 const eraLabel = document.querySelector<HTMLParagraphElement>('#era-label');
 const modeLabel = document.querySelector<HTMLSpanElement>('#mode-label');
-const timeline = document.querySelector<HTMLInputElement>('#timeline');
-const timelineYear = document.querySelector<HTMLSpanElement>('#timeline-year');
+const timelineWrap = document.querySelector<HTMLDivElement>('#timeline-wrap');
 
 if (!app) {
   throw new Error('#app container missing');
@@ -153,39 +156,29 @@ modeButton?.addEventListener('click', () => {
   navigation.focus();
 });
 
-// --- Timeline / era switching ---------------------------------------------------
-// The slider drives era selection; every position maps to the nearest era
-// step and triggers the TransitionController so changes are cross-faded and
-// interruption-safe (a new selection mid-transition retargets cleanly).
+// --- Timeline slider ----------------------------------------------------------
+// The top control bar renders six labeled stops (1945…2055) with a draggable
+// handle. Selecting a stop commits the era through the TransitionController
+// (which mounts/unmounts era groups via the SceneHost and reports through the
+// SceneManager hooks), and the slider mirrors external era changes.
 
-function eraForTimeline(value: number): EraYear {
-  const clamped = Math.min(1, Math.max(0, value));
-  let nearest = 0;
-  let nearestDistance = Infinity;
-  for (let i = 0; i < manager.timelineSteps.length; i += 1) {
-    const distance = Math.abs(manager.timelineSteps[i] - clamped);
-    if (distance < nearestDistance) {
-      nearestDistance = distance;
-      nearest = i;
-    }
-  }
-  return manager.eraSteps[nearest];
+const timelineSlider = timelineWrap
+  ? new TimelineSlider({ initialEra: manager.activeEra ?? ERAS[0] })
+  : undefined;
+
+if (timelineSlider) {
+  timelineWrap?.appendChild(timelineSlider.root);
+
+  timelineSlider.root.addEventListener(ERA_CHANGE_EVENT, ((event: Event) => {
+    const era = (event as CustomEvent<EraYear>).detail;
+    if (!era) return;
+    transition.goTo(era);
+  }) as EventListener);
 }
 
 function syncTimelineUI(): void {
   const era = transition.activeEra ?? manager.activeEra;
-  if (!era) return;
-  const index = manager.eraSteps.indexOf(era);
-  const position = manager.timelineSteps[index] ?? 0;
-  if (timeline) timeline.value = String(position);
-  if (timelineYear) timelineYear.textContent = String(era);
-}
-
-if (timeline) {
-  timeline.addEventListener('input', () => {
-    transition.goTo(eraForTimeline(Number(timeline.value)));
-    syncTimelineUI();
-  });
+  if (era && timelineSlider) timelineSlider.setEra(era);
 }
 
 // --- SceneManager transition hooks ----------------------------------------------
@@ -202,6 +195,9 @@ manager.onBeforeTransition((next, previous) => {
 
 manager.onAfterTransition((era) => {
   if (eraLabel) eraLabel.textContent = describeEra(era);
+  // Reflect external era changes (e.g. programmatic `setActiveEra`) back into
+  // the slider without re-emitting eraChange.
+  timelineSlider?.setEra(era);
 });
 
 // --- Animation loop ----------------------------------------------------------------

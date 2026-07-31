@@ -13,7 +13,8 @@
     "check:transitions": "tsx src/scripts/checkTransitions.ts",
     "check:scene": "tsx src/scripts/checkScene.ts",
     "check:assets": "tsx src/scripts/checkAssets.ts",
-    "check": "npm run check:eras && npm run check:navigation && npm run check:transitions && npm run check:scene && npm run check:assets && npm run typecheck"
+    "check:timeline": "tsx src/scripts/checkTimeline.ts",
+    "check": "npm run check:eras && npm run check:navigation && npm run check:transitions && npm run check:scene && npm run check:assets && npm run check:timeline && npm run typecheck"
   },
   "dependencies": {
     "three": "^0.185.1"
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@types/node": "^22.15.0",
     "@types/three": "^0.185.1",
+    "happy-dom": "^20.11.1",
     "tsx": "^4.23.1",
     "typescript": "~5.9.3",
     "vite": "^8.2.0"

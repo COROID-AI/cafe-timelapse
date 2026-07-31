@@ -28,6 +28,7 @@ npm run check:eras # QA gate: every era supplies every required category
 npm run check:navigation # QA gate: camera stays inside the interior collision bounds
 npm run check:transitions # QA gate: cross-fade / dolly / interruption safety
 npm run check:scene # QA gate: every era's fragments mount/unmount correctly
+npm run check:timeline # QA gate: timeline slider stops, drag/keyboard, ARIA, eraChange
 npm run check      # all QA gates + typecheck
 ```
 
@@ -78,6 +79,14 @@ npm run check      # all QA gates + typecheck
   snaps to completion). Call `update(dt)` each frame.
 - `src/systems/lighting.ts` — the per-era lighting config (background, ambient,
   key/fill/rim lights, fog), grounded in each era's canonical record.
+- `src/ui/TimelineSlider.ts` — the top timeline control bar: six labeled stops
+  (1945…2055), a draggable handle, era-name tooltips, keyboard-selectable stops
+  (radiogroup + slider roles with full ARIA), and an `eraChange` CustomEvent.
+  `src/ui/timelineData.ts` holds the DOM-free era names / keyboard math.
+- `src/scripts/checkTimeline.ts` — the `check:timeline` QA gate: headless
+  assertions that the slider renders the canonical stops, commits eras by
+  click / drag / keyboard, emits `eraChange`, and exposes the accessibility
+  surface (happy-dom based, no browser needed).
 - `src/scripts/checkEras.ts` — the `check:eras` QA gate: asserts every canonical
   era is registered and supplies all required fragment categories.
 - `src/scripts/checkNavigation.ts` — the `check:navigation` QA gate: headless
