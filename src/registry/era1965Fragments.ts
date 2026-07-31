@@ -45,6 +45,8 @@ import {
   TextureFactory,
   getEraPalette,
 } from '../assets/index.js';
+import { characterRoster, buildCharacterAvatars } from '../characters/index.js';
+import '../characters/patrons1965.js';
 import type { EraYear } from '../data/EraData.js';
 import { assetRegistry } from './AssetRegistry.js';
 import { registerShellFinisher } from './shellFinishers.js';
@@ -850,53 +852,26 @@ function buildCounterTechFragment(): Object3D {
 // ===========================================================================
 
 /**
- * Build simple stylized patron figures (era-neutral capsule silhouettes tinted
- * with the 1965 palette) to populate the seating zone. These are abstract
- * stand-ins; the era data carries the descriptive patron detail.
+ * Build the 1965 patron population via the character system.
+ *
+ * The 1965-era {@link PatronConfig}s (mod-shift dresses, slim suits, beehives
+ * / bouffant / bowl-cut hair, transistor-radio / cigarette / cigarette-case
+ * gadgets) are defined in {@link src/characters/patrons1965.js} and registered
+ * with the shared {@link characterRoster} for era 1965. This fragment builder
+ * queries the roster for the 1965 population and hands each config to
+ * {@link buildCharacterAvatars}, which seats every avatar at its configured
+ * layout anchor (seatingTableA/B/C) with a table-sharing offset and facing
+ * rotation. Because the roster is era-scoped, only 1965 patrons appear here —
+ * no other era's population leaks into this fragment.
  */
-function buildPatron(x: number, z: number, tint: number, rot = 0): Object3D {
-  const group = new Group();
-  group.name = `patron:${ERA}`;
-  group.position.set(x, 0, z);
-  group.rotation.y = rot;
-
-  const torsoMat = MaterialFactory.get('fabric', ERA, { color: tint });
-  const skinMat = MaterialFactory.get('ceramic', ERA, {
-    color: 0xe8c9a0,
-    roughness: 0.6,
-  });
-
-  // Torso.
-  const torso = new Mesh(new CylinderGeometry(0.16, 0.2, 0.7, 16), torsoMat);
-  torso.position.set(0, 1.0, 0);
-  torso.castShadow = true;
-  group.add(torso);
-  // Head.
-  const head = new Mesh(new SphereGeometry(0.12, 16, 12), skinMat);
-  head.position.set(0, 1.5, 0);
-  group.add(head);
-  // Legs.
-  for (const dx of [-0.07, 0.07]) {
-    const leg = new Mesh(
-      new CylinderGeometry(0.05, 0.05, 0.6, 10),
-      MaterialFactory.get('fabric', ERA, { color: 0x222222 }),
-    );
-    leg.position.set(dx, 0.3, 0);
-    group.add(leg);
-  }
-
-  return group;
-}
-
 function buildPatronsFragment(): Object3D {
   const group = new Group();
   group.name = `patrons:${ERA}`;
 
-  const palette = getEraPalette(ERA);
-  group.add(buildPatron(-2, 2.5, palette.primary, 0.4));
-  group.add(buildPatron(2, 3.5, palette.secondary, -0.6));
-  group.add(buildPatron(-3.5, 3.2, palette.accent, 1.0));
-  group.add(buildPatron(3.5, 2.2, palette.neon, -0.3));
+  const configs = characterRoster.getPatrons(ERA);
+  for (const avatar of buildCharacterAvatars(configs)) {
+    group.add(avatar);
+  }
 
   return group;
 }
