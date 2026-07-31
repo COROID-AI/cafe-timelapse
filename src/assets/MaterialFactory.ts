@@ -35,8 +35,12 @@ export type MaterialKind =
   | 'glass'
   | 'neon'
   | 'chalkboard'
+  | 'letterboard'
   | 'poster'
-  | 'fabric';
+  | 'fabric'
+  | 'wallpaper'
+  | 'geometric'
+  | 'woodPanel';
 
 /** Explicit material construction parameters. */
 export interface MaterialSpec {
@@ -65,13 +69,14 @@ export interface MaterialSpec {
    * texture is present it tints the map with `color`.
    */
   texture?: THREE.Texture | {
-    kind: 'woodGrain' | 'tile' | 'wallpaper' | 'neon' | 'chalkboard' | 'poster';
+    kind: 'woodGrain' | 'tile' | 'wallpaper' | 'geometric' | 'neon' | 'chalkboard' | 'letterboard' | 'poster';
     color?: string;
     color2?: string;
     size?: number;
     repeats?: number;
     rotation?: number;
     title?: string;
+    lines?: string[];
   };
   /** Multiply map texture strength in [0, 1]. Default 1. */
   mapStrength?: number;
@@ -130,6 +135,9 @@ const KIND_COLOR_FALLBACK: Record<MaterialKind, string> = {
   ceiling: '#B9B2A2',
   trim: '#4A3726',
   wood: '#5C4432',
+  wallpaper: '#EDE3CE',
+  geometric: '#EFE3B6',
+  woodPanel: '#8A6A4A',
   metal: '#B0B4B8',
   chrome: '#D6D9DC',
   brass: '#B08D57',
@@ -139,6 +147,7 @@ const KIND_COLOR_FALLBACK: Record<MaterialKind, string> = {
   glass: '#9FD8E8',
   neon: '#FF5AC8',
   chalkboard: '#2F3B31',
+  letterboard: '#1F2428',
   poster: '#C94F3D',
   fabric: '#E4DCC8',
 };
@@ -147,6 +156,9 @@ const KIND_COLOR_FALLBACK: Record<MaterialKind, string> = {
 export function eraMaterialSpecs(tokens: EraPaletteTokens): Record<MaterialKind, MaterialSpec> {
   return {
     wall: { kind: 'wall', color: tokens.walls, roughness: 0.92, texture: { kind: 'wallpaper', color: tokens.walls, color2: tokens.trim, size: 256, repeats: 3 } },
+    wallpaper: { kind: 'wallpaper', color: tokens.walls, roughness: 0.92, texture: { kind: 'wallpaper', color: tokens.walls, color2: tokens.accent, size: 256, repeats: 3 } },
+    geometric: { kind: 'geometric', color: tokens.walls, roughness: 0.92, texture: { kind: 'geometric', color: tokens.walls, color2: tokens.accent, size: 256, repeats: 3 } },
+    woodPanel: { kind: 'woodPanel', color: tokens.trim, roughness: 0.55, clearcoat: 0.25, texture: { kind: 'woodGrain', color: tokens.furniture, color2: tokens.trim, size: 256 } },
     floor: { kind: 'floor', color: tokens.floor, roughness: 0.85, texture: { kind: 'tile', color: tokens.floor, color2: tokens.trim, size: 256, repeats: 4 } },
     ceiling: { kind: 'ceiling', color: tokens.ceiling, roughness: 0.9 },
     trim: { kind: 'trim', color: tokens.trim, roughness: 0.6, metalness: 0.35 },
@@ -160,6 +172,7 @@ export function eraMaterialSpecs(tokens: EraPaletteTokens): Record<MaterialKind,
     glass: { kind: 'glass', color: tokens.neon, roughness: 0.08, transmission: 0.85, ior: 1.5, clearcoat: 0.6 },
     neon: { kind: 'neon', color: tokens.signage, roughness: 0.3, emissive: tokens.neon, emissiveIntensity: 2.2, texture: { kind: 'neon', color: tokens.neon, color2: tokens.signage, size: 256 } },
     chalkboard: { kind: 'chalkboard', color: tokens.signage, roughness: 0.85, texture: { kind: 'chalkboard', color: tokens.signage, color2: tokens.neon, size: 512, title: 'MENU' } },
+    letterboard: { kind: 'letterboard', color: tokens.signage, roughness: 0.7, clearcoat: 0.3, texture: { kind: 'letterboard', color: tokens.signage, color2: tokens.neon, size: 512, lines: ['COFFEE 20', 'ESPRESSO 25', 'CAPPUCCINO 30', 'DONUT 20', 'PIE 25'] } },
     poster: { kind: 'poster', color: tokens.accent, roughness: 0.85, texture: { kind: 'poster', color: tokens.accent, color2: tokens.neon, size: 512, title: 'POSTER' } },
     fabric: { kind: 'fabric', color: tokens.accent, roughness: 0.95, sheen: 0.6 },
   };

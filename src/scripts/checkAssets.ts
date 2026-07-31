@@ -85,7 +85,7 @@ function run(): void {
   console.log('\n[TextureFactory]');
   {
     const factory = new TextureFactory();
-    const kinds = ['woodGrain', 'tile', 'wallpaper', 'neon', 'chalkboard', 'poster'] as const;
+    const kinds = ['woodGrain', 'tile', 'wallpaper', 'geometric', 'neon', 'chalkboard', 'poster'] as const;
     for (const kind of kinds) {
       const result = factory.get({ kind, color: '#8a6a4a', color2: '#5a432e', size: 2048 });
       assert(result.texture instanceof THREE.CanvasTexture, `${kind} produces a CanvasTexture`);
@@ -115,7 +115,7 @@ function run(): void {
   console.log('\n[MaterialFactory]');
   {
     const factory = new MaterialFactory();
-    const kinds = ['wall', 'floor', 'ceiling', 'trim', 'wood', 'metal', 'chrome', 'brass', 'plastic', 'leather', 'ceramic', 'glass', 'neon', 'chalkboard', 'poster', 'fabric'] as const;
+    const kinds = ['wall', 'floor', 'ceiling', 'trim', 'wood', 'wallpaper', 'geometric', 'woodPanel', 'metal', 'chrome', 'brass', 'plastic', 'leather', 'ceramic', 'glass', 'neon', 'chalkboard', 'poster', 'fabric'] as const;
     for (const era of ERAS) {
       for (const kind of kinds) {
         const material = factory.forEra(era, kind);
