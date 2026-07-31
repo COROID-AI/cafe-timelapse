@@ -341,4 +341,9 @@ async function init(): Promise<void> {
   requestAnimationFrame(animate);
 }
 
+// Render one frame immediately so the canvas is never blank while the async
+// era registry loads (`init` starts the animation loop only after all eras are
+// registered). The QA gate samples the canvas right after boot.
+renderer.render(scene, camera);
+
 void init();

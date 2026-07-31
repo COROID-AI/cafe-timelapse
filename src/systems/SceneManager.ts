@@ -195,7 +195,13 @@ export function createSceneManager(options: SceneManagerOptions): SceneManagerHa
   camera.position.set(8, 6, 12);
   camera.lookAt(0, 0, 0);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  // `preserveDrawingBuffer` keeps the rendered frame in the drawing buffer
+  // after compositing, so external pixel sampling / screenshots observe the
+  // scene instead of a cleared (blank/transparent) buffer.
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    preserveDrawingBuffer: true,
+  });
   renderer.setSize(container.clientWidth || 1, container.clientHeight || 1);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
