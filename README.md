@@ -25,7 +25,8 @@ npm run dev        # start the Vite dev server (shows the placeholder café canv
 npm run build      # type-check + produce the dist bundle
 npm run check:eras # QA gate: every era supplies every required category
 npm run check:navigation # QA gate: camera stays inside the interior collision bounds
-npm run check      # check:eras + check:navigation + typecheck
+npm run check:audio # QA gate: procedural audio engine builds per-era beds, spatialises and crossfades
+npm run check      # check:eras + check:navigation + check:audio + typecheck
 ```
 
 ### Project structure
@@ -53,11 +54,29 @@ npm run check      # check:eras + check:navigation + typecheck
   shell (walls / floor / ceiling).
 - `src/systems/cafeShell.ts` — the canonical interior bounding volume and the
   placeholder shell meshes that make it visible.
+- `src/systems/audioProfiles.ts` — the canonical per-era audio configuration:
+  each era defines its music source object (wireless set → jukebox → boombox →
+  iPod → phone/speaker) with a generative character (tempo, scale, waveform,
+  filtering, hiss/crackle), plus coffee-machine hiss/clatter and conversation
+  murmur levels and the in-scene positions used for spatialisation.
+- `src/systems/AudioEngine.ts` — the procedural Web Audio engine: layered
+  ambient beds (conversation murmur loop, coffee machine hiss/clatter SFX,
+  period-appropriate generative music), spatialised coffee machine and music
+  source via PannerNodes positioned at their in-scene objects, layer
+  crossfades on era change, an autoplay-policy unlock on the first user
+  gesture (`unlock()`), a mute toggle (`setMuted()`), and per-frame `update()`
+  so the listener follows the camera. No audio files are shipped — everything
+  is synthesised from noise buffers and oscillator sequences.
 - `src/scripts/checkEras.ts` — the `check:eras` QA gate: asserts every canonical
   era is registered and supplies all required fragment categories.
 - `src/scripts/checkNavigation.ts` — the `check:navigation` QA gate: headless
   assertions that the rig keeps the camera inside the interior bounds under
   orbit, zoom, pan, walk and keyboard input.
+- `src/scripts/checkAudio.ts` — the `check:audio` QA gate: headless assertions
+  (via a fake AudioContext) that every era has a complete profile, the engine
+  unlocks on a simulated gesture, beds start, music/clatter schedule ahead,
+  layers crossfade on era change, spatialisers sit at the in-scene objects,
+  the mute toggle ramps the master gain, and dispose() stops everything.
 
 ### Adding a new era
 

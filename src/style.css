@@ -51,7 +51,8 @@ body {
   opacity: 0.9;
 }
 
-#mode-toggle {
+#mode-toggle,
+#mute-toggle {
   pointer-events: auto;
   cursor: pointer;
   margin-left: 2px;
@@ -65,12 +66,19 @@ body {
   line-height: 1.4;
 }
 
-#mode-toggle:hover {
+#mode-toggle:hover,
+#mute-toggle:hover:not(:disabled) {
   border-color: #f2ead8;
   background: rgba(242, 234, 216, 0.12);
 }
 
-#mode-toggle:focus-visible {
+#mode-toggle:focus-visible,
+#mute-toggle:focus-visible {
   outline: 2px solid #f2ead8;
   outline-offset: 2px;
+}
+
+#mute-toggle:disabled {
+  opacity: 0.45;
+  cursor: default;
 }

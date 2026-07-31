@@ -4,9 +4,12 @@ import { ERAS, type EraYear } from './data/eras';
 import { registerAllEras, getEraRegistration } from './registry';
 import { Navigation, type NavigationMode } from './systems/Navigation';
 import { buildCaféShell } from './systems/cafeShell';
+import { AudioEngine } from './systems/AudioEngine';
 
 const eraLabel = document.querySelector<HTMLParagraphElement>('#era-label');
 const modeLabel = document.querySelector<HTMLSpanElement>('#mode-label');
+const muteButton = document.querySelector<HTMLButtonElement>('#mute-toggle');
+const audioStatus = document.querySelector<HTMLParagraphElement>('#audio-status');
 
 // --- Scene, camera, renderer ---------------------------------------------
 
@@ -100,17 +103,53 @@ modeButton?.addEventListener('click', () => {
   navigation.focus();
 });
 
+// --- Audio engine ------------------------------------------------------------
+// Procedural ambient beds (conversation murmur, coffee hiss/clatter, per-era
+// generative music) spatialised at their in-scene objects. The AudioContext is
+// created lazily on the first user gesture to satisfy autoplay policies, then
+// the mute toggle ramps the master gain.
+
+const audio = new AudioEngine();
+
+const unlockAudio = (): void => {
+  void audio
+    .unlock()
+    .then(() => {
+      if (muteButton) muteButton.disabled = false;
+      if (audioStatus) {
+        audioStatus.textContent = `${audio.musicSourceLabel} · click “Sound” to mute`;
+      }
+    })
+    .catch(() => {
+      if (audioStatus) audioStatus.textContent = 'Audio unavailable in this browser';
+    });
+  window.removeEventListener('pointerdown', unlockAudio);
+  window.removeEventListener('keydown', unlockAudio);
+};
+window.addEventListener('pointerdown', unlockAudio);
+window.addEventListener('keydown', unlockAudio);
+
+muteButton?.addEventListener('click', () => {
+  const next = !audio.muted;
+  audio.setMuted(next);
+  if (muteButton) muteButton.textContent = next ? 'Sound: Muted' : 'Sound: On';
+});
+
 // --- Timeline / era switching ---------------------------------------------
 
 let currentEra: EraYear = ERAS[0];
 
 async function switchEra(era: EraYear): Promise<void> {
   currentEra = era;
+  audio.setEra(era);
   const registration = getEraRegistration(era);
   if (eraLabel) {
     eraLabel.textContent = registration
       ? `Era ${era} — ${registration.fragments.length} scene fragments registered`
       : `Era ${era} — not yet registered`;
+  }
+  if (audioStatus && audio.isUnlocked) {
+    audioStatus.textContent = `${audio.musicSourceLabel} · click “Sound” to mute`;
   }
 }
 
@@ -123,6 +162,11 @@ function animate(now: number): void {
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
   navigation.update(dt);
+  audio.update({
+    x: camera.position.x,
+    y: camera.position.y,
+    z: camera.position.z,
+  });
   renderer.render(scene, camera);
 }
 

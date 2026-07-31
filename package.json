@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "check:eras": "tsx src/scripts/checkEras.ts",
     "check:navigation": "tsx src/scripts/checkNavigation.ts",
-    "check": "npm run check:eras && npm run check:navigation && npm run typecheck"
+    "check:audio": "tsx src/scripts/checkAudio.ts",
+    "check": "npm run check:eras && npm run check:navigation && npm run check:audio && npm run typecheck"
   },
   "dependencies": {
     "three": "^0.185.1"
