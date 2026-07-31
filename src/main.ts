@@ -4,6 +4,8 @@ import { ERAS, type EraYear } from './data/eras';
 import { registerAllEras, getEraRegistration } from './registry';
 import { Navigation, type NavigationMode } from './systems/Navigation';
 import { buildCaféShell } from './systems/cafeShell';
+import { EraGroupHost } from './systems/SceneHost';
+import { TransitionController } from './systems/TransitionController';
 
 const eraLabel = document.querySelector<HTMLParagraphElement>('#era-label');
 const modeLabel = document.querySelector<HTMLSpanElement>('#mode-label');
@@ -39,8 +41,8 @@ scene.add(keyLight);
 
 // --- Café shell + placeholder scene ----------------------------------------
 // The shell defines the interior collision volume the navigation rig clamps
-// against. A stand-in café floor makes the room visible before era fragment
-// geometry is built in later phases.
+// against. A stand-in café floor/counter/table keeps the room visible until
+// era fragments build real geometry (Phase 3+).
 
 const shellGroup = new THREE.Group();
 buildCaféShell(shellGroup);
@@ -69,6 +71,36 @@ const table = new THREE.Mesh(
 table.position.set(2.4, 0.6, 0.5);
 table.castShadow = true;
 scene.add(table);
+
+// --- Era host + transition controller --------------------------------------
+// Era groups are mounted into `eraRoot` through the SceneHost hook. The
+// TransitionController cross-fades between era groups: the outgoing group
+// stays mounted (fading out) while the incoming group fades in, then the
+// outgoing group is unmounted/disposed.
+
+const eraRoot = new THREE.Group();
+scene.add(eraRoot);
+const eraHost = new EraGroupHost(eraRoot, { cloneMaterials: true });
+
+function describeEra(era: EraYear): string {
+  const registration = getEraRegistration(era);
+  return registration
+    ? `Era ${era} — ${registration.fragments.length} scene fragments registered`
+    : `Era ${era} — not yet registered`;
+}
+
+const transition = new TransitionController({
+  host: eraHost,
+  camera,
+  duration: 1.2,
+  easing: 'easeInOut',
+  onTransitionStart: (era) => {
+    if (eraLabel) eraLabel.textContent = `Era ${era} — fading in…`;
+  },
+  onTransitionEnd: (era) => {
+    if (eraLabel) eraLabel.textContent = describeEra(era);
+  },
+});
 
 // --- Navigation -------------------------------------------------------------
 // Orbit (left-drag rotate, right/middle-drag pan, wheel/pinch zoom), a walk-up
@@ -101,17 +133,12 @@ modeButton?.addEventListener('click', () => {
 });
 
 // --- Timeline / era switching ---------------------------------------------
+// Era selection is routed through the TransitionController so changes are
+// cross-faded and interruption-safe (a new selection mid-transition retargets
+// cleanly).
 
-let currentEra: EraYear = ERAS[0];
-
-async function switchEra(era: EraYear): Promise<void> {
-  currentEra = era;
-  const registration = getEraRegistration(era);
-  if (eraLabel) {
-    eraLabel.textContent = registration
-      ? `Era ${era} — ${registration.fragments.length} scene fragments registered`
-      : `Era ${era} — not yet registered`;
-  }
+function switchEra(era: EraYear): void {
+  transition.goTo(era);
 }
 
 // --- Animation loop ---------------------------------------------------------
@@ -123,12 +150,13 @@ function animate(now: number): void {
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
   navigation.update(dt);
+  transition.update(dt);
   renderer.render(scene, camera);
 }
 
 async function init(): Promise<void> {
   await registerAllEras();
-  await switchEra(currentEra);
+  switchEra(ERAS[0]);
   navigation.focus();
   requestAnimationFrame(animate);
 }

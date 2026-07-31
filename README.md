@@ -25,7 +25,8 @@ npm run dev        # start the Vite dev server (shows the placeholder café canv
 npm run build      # type-check + produce the dist bundle
 npm run check:eras # QA gate: every era supplies every required category
 npm run check:navigation # QA gate: camera stays inside the interior collision bounds
-npm run check      # check:eras + check:navigation + typecheck
+npm run check:transitions # QA gate: cross-fade / dolly / interruption safety
+npm run check      # check:eras + check:navigation + check:transitions + typecheck
 ```
 
 ### Project structure
@@ -53,11 +54,25 @@ npm run check      # check:eras + check:navigation + typecheck
   shell (walls / floor / ceiling).
 - `src/systems/cafeShell.ts` — the canonical interior bounding volume and the
   placeholder shell meshes that make it visible.
+- `src/systems/SceneHost.ts` — the mount/unmount hook contract the transition
+  controller coordinates with, plus the reference `EraGroupHost` that mounts
+  era fragments from the AssetRegistry, clones per-group materials, and
+  disposes geometries/materials on unmount.
+- `src/systems/TransitionController.ts` — the cross-fade controller: when the
+  era changes it mounts the incoming era group, cross-fades the outgoing and
+  incoming groups (configurable duration and easing, optional camera dolly),
+  then disposes the outgoing group through the SceneHost hook. Interruptions
+  resolve cleanly (new era mid-transition retargets; the era being revealed
+  snaps to completion). Call `update(dt)` each frame.
 - `src/scripts/checkEras.ts` — the `check:eras` QA gate: asserts every canonical
   era is registered and supplies all required fragment categories.
 - `src/scripts/checkNavigation.ts` — the `check:navigation` QA gate: headless
   assertions that the rig keeps the camera inside the interior bounds under
   orbit, zoom, pan, walk and keyboard input.
+- `src/scripts/checkTransitions.ts` — the `check:transitions` QA gate: headless
+  assertions that cross-fades animate with the configured duration/easing, the
+  outgoing group is disposed only after the fade, the optional dolly lerps, and
+  mid-transition interruptions retarget cleanly.
 
 ### Adding a new era
 
