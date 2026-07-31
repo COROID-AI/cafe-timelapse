@@ -12,6 +12,8 @@ import { ROOM_BOUNDS } from './world/layout';
 import { EraGroupHost } from './systems/SceneHost';
 import { TransitionController } from './systems/TransitionController';
 import { ERA_LIGHTING } from './systems/lighting';
+import { populate1965Surfaces } from './compositions';
+import type { SurfaceSlots } from './world/ArchitectureShell';
 import {
   TimelineSlider,
   ERA_CHANGE_EVENT,
@@ -100,8 +102,21 @@ function applyEraLighting(era: EraYear): void {
 // ceilingSlot) rather than rebuilding architecture.
 
 const shellGroup = new THREE.Group();
-buildArchitectureShell(shellGroup);
+const shellBuild = buildArchitectureShell(shellGroup);
+const shellSlots: SurfaceSlots = shellBuild.slots;
 scene.add(shellGroup);
+
+// The 1965 era dresses the shell's surface slots (checkerboard tile,
+// geometric wallpaper, plaster ceiling) through its composition. Eras that
+// are not yet composed keep the neutral placeholder finishes; the 1965
+// finishes are applied on first mount so the visible room matches the era.
+const shellSurfacesDressedFor = new Set<number>();
+function dressShellForEra(era: EraYear): void {
+  if (era === 1965 && !shellSurfacesDressedFor.has(era)) {
+    populate1965Surfaces(shellSlots);
+    shellSurfacesDressedFor.add(era);
+  }
+}
 
 // --- Era host + transition controller -----------------------------------------
 // Era groups are mounted into `eraRoot` through the SceneHost hook. The
@@ -127,6 +142,7 @@ const transition = new TransitionController({
   easing: 'easeInOut',
   onTransitionStart: (era) => {
     applyEraLighting(era);
+    dressShellForEra(era);
     if (eraLabel) eraLabel.textContent = `Era ${era} — fading in…`;
   },
   onTransitionEnd: (era) => {

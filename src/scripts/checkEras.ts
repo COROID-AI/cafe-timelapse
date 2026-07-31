@@ -2,10 +2,12 @@
  * QA gate: `npm run check:eras`
  *
  * Asserts that every era in the canonical timeline (src/data/eras.ts) is
- * registered in the AssetRegistry with every required EraData category, and
- * that every registered era is one of the canonical eras.
+ * registered in the AssetRegistry with every required EraData category, that
+ * every registered era is one of the canonical eras, and that composed eras
+ * supply their era audio config (Phase 4).
  *
- * Exits non-zero on any missing category, duplicate category, or unknown era.
+ * Exits non-zero on any missing category, duplicate category, unknown era, or
+ * missing audio config.
  */
 import { ERAS, type EraYear } from '../data/eras';
 import {
@@ -13,6 +15,7 @@ import {
   getRegisteredEraYears,
 } from '../registry/AssetRegistry';
 import { validateRegistration, summarizeCoverage } from '../registry/coverage';
+import { ERA_AUDIO_1965 } from '../audio/eras/1965';
 // Static side-effect imports register every era into the registry.
 import '../registry/eras/1945';
 import '../registry/eras/1965';
@@ -22,6 +25,11 @@ import '../registry/eras/2025';
 import '../registry/eras/2055';
 
 const REQUIRED_CATEGORY_COUNT = 10;
+
+/** Every composed era must also supply an era audio config (Phase 4). */
+const ERA_AUDIO_CONFIGS: Record<number, unknown> = {
+  1965: ERA_AUDIO_1965,
+};
 
 function missing<T>(list: T[], expected: T[]): T[] {
   return expected.filter((item) => !list.includes(item));
@@ -47,6 +55,29 @@ function run(): void {
   // 3. Every registration must supply all required fragment categories.
   for (const registration of registrations) {
     errors.push(...validateRegistration(registration));
+  }
+
+  // 3b. Composed eras must supply their era audio config (generative bed,
+  //     jukebox character, urn hiss) per the Phase 4 brief.
+  for (const [year, config] of Object.entries(ERA_AUDIO_CONFIGS)) {
+    const audio = config as {
+      era?: number;
+      generativeBed?: unknown[];
+      jukeboxCharacter?: unknown;
+      urnHiss?: unknown;
+    };
+    if (!audio || audio.era !== Number(year)) {
+      errors.push(`Era ${year}: era audio config is missing or has the wrong era.`);
+    } else if (
+      !Array.isArray(audio.generativeBed) ||
+      audio.generativeBed.length === 0 ||
+      !audio.jukeboxCharacter ||
+      !audio.urnHiss
+    ) {
+      errors.push(
+        `Era ${year}: era audio config must supply a generative bed, jukebox character and urn hiss.`,
+      );
+    }
   }
 
   // 4. Report the coverage summary.
@@ -82,6 +113,7 @@ function run(): void {
     process.exitCode = 1;
   } else {
     console.log('\nAll eras registered with all required categories.');
+    console.log(`Era audio configs present: ${Object.keys(ERA_AUDIO_CONFIGS).join(', ')}`);
   }
 }
 

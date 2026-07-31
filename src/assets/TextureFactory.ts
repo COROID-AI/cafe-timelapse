@@ -30,8 +30,10 @@ export type TextureKind =
   | 'woodGrain'
   | 'tile'
   | 'wallpaper'
+  | 'geometric'
   | 'neon'
   | 'chalkboard'
+  | 'letterboard'
   | 'poster';
 
 /** Draw options shared by every texture kind. */
@@ -49,6 +51,8 @@ export interface TextureSpec {
   rotation?: number;
   /** Title text for poster textures. Default 'POSTER'. */
   title?: string;
+  /** Rows of text for letterboard textures (plastic changeable-letter boards). */
+  lines?: string[];
 }
 
 export interface TextureResult {
@@ -83,6 +87,7 @@ function hashSpec(spec: TextureSpec): string {
     safe(spec.repeats),
     safe(spec.rotation),
     safe(spec.title),
+    safe(spec.lines?.join('\n')),
   ].join('|');
 }
 
@@ -281,6 +286,43 @@ function drawWallpaper(
   }
 }
 
+function drawGeometric(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  spec: TextureSpec,
+): void {
+  const base = hexToCss(spec.color ?? '#EFE3B6');
+  const motif = hexToCss(spec.color2 ?? '#C94F3D');
+  const repeats = Math.max(1, Math.round(spec.repeats ?? 3));
+  const cell = size / repeats;
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, size, size);
+  ctx.strokeStyle = motif;
+  ctx.lineWidth = Math.max(0.8, size / 260);
+  for (let row = 0; row < repeats; row += 1) {
+    for (let col = 0; col < repeats; col += 1) {
+      const cx = col * cell + cell / 2;
+      const cy = row * cell + cell / 2;
+      // Mid-century atomic starburst: an outer ring, eight rays and a dot.
+      ctx.beginPath();
+      ctx.arc(cx, cy, cell * 0.34, 0, Math.PI * 2);
+      ctx.stroke();
+      for (let ray = 0; ray < 8; ray += 1) {
+        const angle = (ray / 8) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(angle) * cell * 0.12, cy + Math.sin(angle) * cell * 0.12);
+        ctx.lineTo(cx + Math.cos(angle) * cell * 0.3, cy + Math.sin(angle) * cell * 0.3);
+        ctx.stroke();
+      }
+      ctx.fillStyle = motif;
+      ctx.beginPath();
+      ctx.arc(cx, cy, cell * 0.09, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = motif;
+    }
+  }
+}
+
 function drawNeon(
   ctx: CanvasRenderingContext2D,
   size: number,
@@ -359,6 +401,41 @@ function drawChalkboard(
   ctx.globalAlpha = 1;
 }
 
+function drawLetterboard(
+  ctx: CanvasRenderingContext2D,
+  size: number,
+  spec: TextureSpec,
+): void {
+  const board = hexToCss(spec.color ?? '#1F2428');
+  const letters = hexToCss(spec.color2 ?? '#FFFFFF');
+  const lines = spec.lines && spec.lines.length > 0 ? spec.lines : ['COFFEE 20', 'ESPRESSO 25', 'CAPPUCCINO 30', 'DONUT 20', 'PIE 25'];
+  ctx.fillStyle = board;
+  ctx.fillRect(0, 0, size, size);
+  // Grooves between the changeable-letter rows.
+  ctx.strokeStyle = shadeHex(board, 0.18);
+  ctx.lineWidth = Math.max(0.8, size / 240);
+  const rowGap = size / (lines.length + 1);
+  for (let i = 1; i < lines.length; i += 1) {
+    const y = i * rowGap;
+    ctx.beginPath();
+    ctx.moveTo(size * 0.06, y);
+    ctx.lineTo(size * 0.94, y);
+    ctx.stroke();
+  }
+  // Plastic changeable letters: uppercase sans-serif, centred per row.
+  ctx.fillStyle = letters;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `bold ${Math.max(9, size / (lines.length * 2.6))}px Arial, sans-serif`;
+  lines.forEach((line, index) => {
+    ctx.fillText(line, size / 2, (index + 0.5) * rowGap);
+  });
+  // Faint frame shadow around the board.
+  ctx.strokeStyle = shadeHex(board, 0.28);
+  ctx.lineWidth = Math.max(1.5, size / 140);
+  ctx.strokeRect(size * 0.03, size * 0.03, size * 0.94, size * 0.94);
+}
+
 function drawPoster(
   ctx: CanvasRenderingContext2D,
   size: number,
@@ -417,11 +494,17 @@ export function drawTexture(ctx: CanvasRenderingContext2D, size: number, spec: T
     case 'wallpaper':
       drawWallpaper(ctx, size, spec);
       break;
+    case 'geometric':
+      drawGeometric(ctx, size, spec);
+      break;
     case 'neon':
       drawNeon(ctx, size, spec);
       break;
     case 'chalkboard':
       drawChalkboard(ctx, size, spec);
+      break;
+    case 'letterboard':
+      drawLetterboard(ctx, size, spec);
       break;
     case 'poster':
       drawPoster(ctx, size, spec);
