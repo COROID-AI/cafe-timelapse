@@ -75,41 +75,203 @@ body {
   outline-offset: 2px;
 }
 
-/* Timeline slider — pinned to the top of the scene per the brief. */
+/* ---------------------------------------------------------------------------
+ * Timeline slider — the fixed top control bar.
+ *
+ * The bar overlays the WebGL canvas but only its own surface intercepts
+ * pointer events (`pointer-events: auto` on the bar, default `none` on the
+ * wrapper), so the scene keeps full orbit/pan/zoom everywhere else. Six
+ * labeled stops (1945…2055) are clickable; a draggable handle snaps between
+ * them; each stop shows a year label and an era-name tooltip on hover/focus.
+ * ------------------------------------------------------------------------- */
+
 #timeline-wrap {
   position: fixed;
   left: 50%;
   top: 14px;
   transform: translateX(-50%);
   z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  background: rgba(27, 27, 34, 0.82);
-  border: 1px solid rgba(242, 234, 216, 0.18);
-  color: #f2ead8;
-  font-family: system-ui, -apple-system, sans-serif;
-  font-size: 12px;
+  pointer-events: none;
   user-select: none;
 }
 
-#timeline-wrap label {
-  opacity: 0.7;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.timeline-bar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px 14px;
+  border-radius: 12px;
+  background: rgba(24, 24, 32, 0.82);
+  border: 1px solid rgba(242, 234, 216, 0.2);
+  color: #f2ead8;
+  font-family: system-ui, -apple-system, sans-serif;
+  backdrop-filter: blur(6px);
 }
 
-#timeline {
-  width: 260px;
-  accent-color: #d9a05b;
+.timeline-bar__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.timeline-bar__track {
+  position: relative;
+  width: 340px;
+  height: 30px;
+}
+
+/* The rail behind the stops + handle. */
+.timeline-bar__track::before {
+  content: '';
+  position: absolute;
+  left: 30px;
+  right: 30px;
+  top: 6px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(242, 234, 216, 0.22);
+}
+
+.timeline-bar__stops {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.timeline-stop {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   cursor: pointer;
 }
 
-#timeline-year {
-  min-width: 44px;
+/* Stop dot on the rail. */
+.timeline-stop::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  margin-top: 2px;
+  border-radius: 50%;
+  border: 2px solid rgba(242, 234, 216, 0.55);
+  background: #1b1b22;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.timeline-stop:hover::before,
+.timeline-stop:focus-visible::before {
+  border-color: #f2ead8;
+  transform: scale(1.25);
+}
+
+.timeline-stop.is-active::before {
+  border-color: #d9a05b;
+  background: #d9a05b;
+  transform: scale(1.15);
+}
+
+.timeline-stop__label {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+  transition: opacity 0.15s ease;
+}
+
+.timeline-stop.is-active .timeline-stop__label {
+  opacity: 1;
+  font-weight: 600;
+}
+
+/* The draggable handle. It rides the rail, snaps between the six stops and
+ * shows a year bubble while dragging / focused. */
+.timeline-handle {
+  position: absolute;
+  top: -1px;
+  z-index: 3;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  border-radius: 50%;
+  border: 2px solid #f2ead8;
+  background: #d9a05b;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  cursor: ew-resize;
+  touch-action: none;
+  transition: transform 0.15s ease;
+}
+
+.timeline-handle:hover,
+.timeline-handle:focus-visible,
+.timeline-handle.is-dragging {
+  transform: scale(1.2);
+}
+
+.timeline-handle:focus-visible {
+  outline: 2px solid #d9a05b;
+  outline-offset: 6px;
+}
+
+/* Year bubble above the handle while dragging / focused. */
+.timeline-handle__bubble {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  min-width: 40px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #d9a05b;
+  color: #17171c;
+  font-size: 12px;
+  font-weight: 700;
   text-align: center;
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.timeline-handle:hover .timeline-handle__bubble,
+.timeline-handle:focus-visible .timeline-handle__bubble,
+.timeline-handle.is-dragging .timeline-handle__bubble {
+  opacity: 1;
+}
+
+/* Era-name tooltip shown on hover / keyboard focus. */
+.timeline-stop__tip {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(10, 10, 14, 0.95);
+  border: 1px solid rgba(242, 234, 216, 0.25);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.timeline-stop:hover .timeline-stop__tip,
+.timeline-stop:focus-visible .timeline-stop__tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
