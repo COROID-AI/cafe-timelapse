@@ -25,6 +25,7 @@ import {
 } from './ui/TimelineSlider';
 import { OnboardingScreen } from './ui/OnboardingScreen';
 import { Hud } from './ui/Hud';
+import { FpsCounter, fpsFlagEnabled } from './ui/FpsCounter';
 import { updateCharacterAnimations } from './world/characters';
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -145,7 +146,12 @@ function dressShellForEra(era: EraYear): void {
 
 const eraRoot = new THREE.Group();
 scene.add(eraRoot);
-const eraHost = new EraGroupHost(eraRoot, { cloneMaterials: true });
+// The scene is a live texture root: composed shell finishes (2025/2055) are
+// applied outside the era root and must never be pruned while still in use.
+const eraHost = new EraGroupHost(eraRoot, {
+  cloneMaterials: true,
+  liveTextureRoots: [scene],
+});
 
 const transition = new TransitionController({
   host: eraHost,
@@ -178,6 +184,19 @@ const hud = hudWrap ? new Hud({}) : null;
 if (hud && hudWrap) {
   hudWrap.appendChild(hud.root);
 }
+
+// --- FPS counter (dev toggle) ------------------------------------------------
+// A small top-right FPS chip, enabled with ?fps=1, the P key, or
+// window.__toggleFps(). It samples the render loop and is dev-only.
+const fpsCounter = new FpsCounter({ enabled: fpsFlagEnabled() });
+(hudWrap ?? document.body).appendChild(fpsCounter.root);
+
+window.addEventListener('keydown', (event) => {
+  if (event.code === 'KeyP') fpsCounter.toggle();
+});
+(globalThis as typeof globalThis & { __toggleFps?: () => void }).__toggleFps = () => {
+  fpsCounter.toggle();
+};
 
 // --- Onboarding ---------------------------------------------------------------
 // Loading gate: shows while the async era registry prepares, then reveals a
@@ -277,6 +296,7 @@ function animate(now: number): void {
   requestAnimationFrame(animate);
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
+  fpsCounter.update(now);
   navigation.update(dt);
   transition.update(dt);
 

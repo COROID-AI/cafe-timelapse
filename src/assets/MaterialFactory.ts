@@ -220,6 +220,19 @@ export class MaterialFactory {
     this.cache.clear();
   }
 
+  /**
+   * Every texture referenced by a cached material (used by the resource
+   * cleanup pass to keep the shared TextureFactory cache bounded: textures
+   * still referenced by materials must not be pruned).
+   */
+  liveTextures(): Set<THREE.Texture> {
+    const textures = new Set<THREE.Texture>();
+    for (const material of this.cache.values()) {
+      if (material.map instanceof THREE.Texture) textures.add(material.map);
+    }
+    return textures;
+  }
+
   private create(era: EraYear, kind: MaterialKind): THREE.MeshPhysicalMaterial {
     const override = this.options.overrides?.[kind];
     if (override) return materialFromSpec({ ...override, kind: kind ?? override.kind });

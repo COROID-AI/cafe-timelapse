@@ -643,6 +643,25 @@ export class TextureFactory {
     this.cache.clear();
   }
 
+  /**
+   * Release every cached texture that is not present in `live`. Used by the
+   * resource cleanup pass after an era group is unmounted so procedural
+   * textures that are no longer referenced by any live root are disposed
+   * (the cache stays bounded across many era switches).
+   *
+   * Returns the number of textures disposed.
+   */
+  pruneUnused(live: ReadonlySet<THREE.Texture>): number {
+    let disposed = 0;
+    for (const [key, entry] of this.cache) {
+      if (live.has(entry.texture)) continue;
+      entry.texture.dispose();
+      this.cache.delete(key);
+      disposed += 1;
+    }
+    return disposed;
+  }
+
   private create(spec: TextureSpec): TextureResult {
     const size = clampTextureSize(spec.size ?? 256);
     const canvas = createCanvas(size);

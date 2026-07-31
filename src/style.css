@@ -378,3 +378,51 @@ body {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* ---------------------------------------------------------------------------
+ * FPS counter — dev toggle (top-right). Shows smoothed frames-per-second
+ * while active; hidden by default. Driven by ?fps=1, the P key, or
+ * window.__toggleFps().
+ * ------------------------------------------------------------------------- */
+
+.fps-counter {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgba(24, 24, 32, 0.82);
+  border: 1px solid rgba(242, 234, 216, 0.2);
+  color: #f2ead8;
+  font-family: system-ui, -apple-system, sans-serif;
+  pointer-events: none;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+
+.fps-counter__caption {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.fps-counter__value {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 2.2em;
+  text-align: right;
+}
+
+.fps-counter.is-warning .fps-counter__value {
+  color: #e0a24b;
+}
+
+.fps-counter.is-critical .fps-counter__value {
+  color: #e0705a;
+}

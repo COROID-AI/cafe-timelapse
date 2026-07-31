@@ -11,6 +11,7 @@
 import * as THREE from 'three';
 import type { EraYear } from '../data/eras';
 import { getEraRegistration } from '../registry/AssetRegistry';
+import { mergeStaticMeshes, pruneFactoryTextures } from './optimize';
 
 export interface SceneHost {
   /** The scene (or root group) era groups are mounted into. */
@@ -32,6 +33,21 @@ export interface EraGroupHostOptions {
    * Default: true.
    */
   cloneMaterials?: boolean;
+  /**
+   * Merge same-material static meshes inside each mounted era group into
+   * per-material draw calls (an easy draw-call win for furniture/tableware/
+   * lighting that share era palette materials). Animated CharacterAvatar
+   * subtrees, instanced meshes and non-uniform scaled meshes are preserved.
+   * Default: true.
+   */
+  mergeStaticMeshes?: boolean;
+  /**
+   * Extra roots whose materials keep the shared TextureFactory cache alive
+   * when an era group is unmounted. Pass the persistent scene (or shell
+   * group) so era finishes applied outside the era root (e.g. composed shell
+   * surface slots) are never pruned while still in use.
+   */
+  liveTextureRoots?: readonly THREE.Object3D[];
 }
 
 /**
@@ -47,10 +63,16 @@ export class EraGroupHost implements SceneHost {
   readonly root: THREE.Group;
   private activeEra: EraYear | null = null;
   private readonly cloneMaterials: boolean;
+  private readonly mergeStaticMeshes: boolean;
+  private readonly liveTextureRoots: readonly THREE.Object3D[];
+  /** Merged mesh count per mounted era (QA + diagnostics). */
+  readonly mergeStats = new Map<EraYear, { mergedMeshes: number; mergedGroups: number }>();
 
   constructor(root: THREE.Group = new THREE.Group(), options: EraGroupHostOptions = {}) {
     this.root = root;
     this.cloneMaterials = options.cloneMaterials ?? true;
+    this.mergeStaticMeshes = options.mergeStaticMeshes ?? true;
+    this.liveTextureRoots = options.liveTextureRoots ?? [];
   }
 
   getActiveEra(): EraYear | null {
@@ -71,6 +93,13 @@ export class EraGroupHost implements SceneHost {
       }
     }
     if (this.cloneMaterials) cloneGroupMaterials(group);
+    if (this.mergeStaticMeshes) {
+      const report = mergeStaticMeshes(group);
+      this.mergeStats.set(era, {
+        mergedMeshes: report.mergedMeshes,
+        mergedGroups: report.mergedGroups,
+      });
+    }
     this.root.add(group);
     return group;
   }
@@ -78,6 +107,10 @@ export class EraGroupHost implements SceneHost {
   unmount(group: THREE.Group): void {
     this.root.remove(group);
     disposeGroup(group);
+    // The outgoing group's procedural textures are no longer referenced by
+    // any live root; release them from the shared factory cache so texture
+    // memory stays bounded across many era switches.
+    pruneFactoryTextures([this.root, ...this.liveTextureRoots]);
   }
 }
 
