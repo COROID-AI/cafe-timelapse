@@ -317,6 +317,11 @@ function buildHeadAccessory(
   };
   if (accessory === 'glasses') {
     add(box(0.16, 0.014, 0.03), 0, 0.02, HEAD_R * 0.92);
+  } else if (accessory === 'holo-panel') {
+    // 2055 floating holographic interface: a thin emissive slab hovering in
+    // front of the wearer's face with a slim rim mount.
+    add(box(0.05, 0.05, 0.012), 0, 0.06, HEAD_R * 1.12);
+    add(box(0.012, 0.018, 0.012), 0, -0.01, HEAD_R * 0.86);
   } else if (accessory === 'headphones') {
     const band = torus(HEAD_R * 0.85, 0.014);
     band.rotateX(Math.PI / 2);

@@ -19,7 +19,10 @@ import {
  * Every fragment category is built from the shared asset library by the
  * 2055 composition (src/compositions/2055). Each `build` mounts only its own
  * category into the fragment group so the SceneManager's per-category groups
- * stay clean (no cross-category duplication).
+ * stay clean (no cross-category duplication). The patrons fragment mounts
+ * four PatronConfigs (smart-fabric poncho, reflective jumpsuit, minimalist
+ * techwear holo-drinker and holo-interface techwear) via the shared
+ * CharacterRoster, so they toggle with era changes.
  */
 registerEra({
   era: 2055,

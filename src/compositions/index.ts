@@ -58,6 +58,7 @@ export {
   build2055SignageLighting,
   build2055CounterTechnology,
   build2055Patrons,
+  PATRON_CONFIGS_2055,
   ERA_AUDIO_2055,
 } from './2055';
 export type { CompositionResult as CompositionResult2055 } from './2055';

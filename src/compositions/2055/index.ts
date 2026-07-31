@@ -25,7 +25,8 @@
  *                       "BREW//2055" signage
  *   - counterTechnology fully autonomous kiosk, biometric/contactless order
  *                       terminal, and a drone delivery hatch
- *   - patrons           poncho and jumpsuit-wearing 2055 patrons
+ *   - patrons           poncho, jumpsuit, techwear holo-drinker and
+ *                       holo-interface 2055 patrons
  *
  * All geometry is procedural and headless-safe (no WebGL required to build).
  */
@@ -810,7 +811,7 @@ export function build2055CounterTechnology(target: THREE.Object3D): void {
 // ---------------------------------------------------------------------------
 
 /** 2055 patron configs consumed by the shared CharacterAvatar system. */
-const PATRON_CONFIGS_2055: PatronConfig[] = [
+export const PATRON_CONFIGS_2055: PatronConfig[] = [
   {
     name: 'poncho',
     skin: '#C88B5A',
@@ -844,9 +845,20 @@ const PATRON_CONFIGS_2055: PatronConfig[] = [
     accent: '#46D9C2',
     accessory: 'cup',
   },
+  {
+    name: 'holo-interface',
+    skin: '#C88B5A',
+    hair: { kind: 'bob', color: '#46D9C2' },
+    shirt: '#14181E',
+    pants: '#232933',
+    shoes: '#14181E',
+    style: 'shirt-pants',
+    accent: '#63E6FF',
+    accessory: 'holo-panel',
+  },
 ];
 
-/** Poncho, jumpsuit and holo-drinking 2055 patrons via the shared roster. */
+/** Poncho, jumpsuit, holo-drinker and holo-interface 2055 patrons via the shared roster. */
 export function build2055Patrons(target: THREE.Object3D): void {
   const roster = new CharacterRoster({
     parent: target,
