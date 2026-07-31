@@ -81,7 +81,10 @@ export type HairstyleKind =
   | 'curls'
   | 'waves'
   | 'messy'
-  | 'buzz';
+  | 'buzz'
+  | 'fedora'
+  | 'victory-rolls'
+  | 'finger-waves';
 
 /** Object a patron holds or wears (built from primitives by the avatar system). */
 export type AccessoryKind =
@@ -98,6 +101,7 @@ export type AccessoryKind =
   | 'cup'
   | 'glasses'
   | 'wristband'
+  | 'newspaper'
   | 'none';
 
 /** Garment silhouette used to shape the avatar's torso. */
