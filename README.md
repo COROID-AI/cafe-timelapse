@@ -15,7 +15,8 @@ This must be a polished high end scene with SFX (period-appropriate music, the m
 
 This repository currently contains the runnable foundation: a Vite + TypeScript +
 Three.js project with the canonical era data contract, the per-era asset
-registry, and the shared runtime navigation rig.
+registry, the era-managed scene controller, and the shared runtime navigation
+rig with cross-fade era transitions.
 
 ### Getting started
 
@@ -26,13 +27,16 @@ npm run build      # type-check + produce the dist bundle
 npm run check:eras # QA gate: every era supplies every required category
 npm run check:navigation # QA gate: camera stays inside the interior collision bounds
 npm run check:transitions # QA gate: cross-fade / dolly / interruption safety
-npm run check      # check:eras + check:navigation + check:transitions + typecheck
+npm run check:scene # QA gate: every era's fragments mount/unmount correctly
+npm run check      # all QA gates + typecheck
 ```
 
 ### Project structure
 
-- `src/main.ts` — entrypoint: Three.js renderer, scene, camera, the Navigation
-  rig, the café shell placeholder geometry and the animation loop.
+- `src/main.ts` — entrypoint: boots the SceneManager for the scene, camera,
+  renderer and timeline snap contract, wires the timeline slider through the
+  TransitionController (cross-faded era switches), and drives the Navigation
+  rig, the café shell and the animation loop.
 - `src/data/EraData.ts` — the canonical `EraData` type covering every brief
   category: architecture (walls/floor/ceiling/trim), furniture & decor, coffee
   machines & brewing equipment, menu board & prices, music source (wireless
@@ -47,6 +51,14 @@ npm run check      # check:eras + check:navigation + check:transitions + typeche
   Three.js geometry.
 - `src/registry/eras/*.ts` — the per-era registrations (loaded by
   `src/registry/loadEras.ts`).
+- `src/systems/SceneManager.ts` — the era-managed scene controller. Owns the
+  persistent Three.js Scene, camera, renderer, OrbitControls and animation
+  loop integration (`update`/`render`/`resize`). Manages a per-era `Object3D`
+  group and `setActiveEra(year)` mounts the selected era's registered
+  fragments, unmounting and disposing the previous era's heavy resources
+  (geometries, materials, textures). Exposes `onBeforeTransition` /
+  `onAfterTransition` hooks for the cross-fade controller and applies the
+  per-era lighting environment (`src/systems/lighting.ts`).
 - `src/systems/Navigation.ts` — the shared camera rig: orbit (drag rotate),
   pan (right-drag / two-finger), zoom (scroll / pinch), a first-person "walk up
   close" mode (F key / button), arrow-key + WASD movement, smooth damping, and
@@ -64,6 +76,8 @@ npm run check      # check:eras + check:navigation + check:transitions + typeche
   then disposes the outgoing group through the SceneHost hook. Interruptions
   resolve cleanly (new era mid-transition retargets; the era being revealed
   snaps to completion). Call `update(dt)` each frame.
+- `src/systems/lighting.ts` — the per-era lighting config (background, ambient,
+  key/fill/rim lights, fog), grounded in each era's canonical record.
 - `src/scripts/checkEras.ts` — the `check:eras` QA gate: asserts every canonical
   era is registered and supplies all required fragment categories.
 - `src/scripts/checkNavigation.ts` — the `check:navigation` QA gate: headless
@@ -73,6 +87,9 @@ npm run check      # check:eras + check:navigation + check:transitions + typeche
   assertions that cross-fades animate with the configured duration/easing, the
   outgoing group is disposed only after the fade, the optional dolly lerps, and
   mid-transition interruptions retarget cleanly.
+- `src/scripts/checkScene.ts` — the `check:scene` QA gate: headlessly verifies
+  every era's fragment group mounts with the expected category children and
+  the timeline step contract matches the canonical `ERAS` timeline.
 
 ### Adding a new era
 
