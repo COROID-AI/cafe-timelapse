@@ -197,6 +197,17 @@ function buildHair(parts: Part[], hair: THREE.Material, kind: HairstyleKind): vo
       add(cap(1, 0.75), 0, HEAD_R * 0.45, 0);
       add(box(0.12, 0.04, 0.05), 0, HEAD_R * 0.55, HEAD_R * 0.85);
       break;
+    case 'side-swept': {
+      // 2000s asymmetric fringe sweeping across the forehead.
+      add(cap(1, 0.72), 0, HEAD_R * 0.4, 0);
+      const fringe = box(0.26, 0.05, 0.07);
+      fringe.rotateZ(-0.35);
+      add(fringe, 0.03, HEAD_R * 0.42, HEAD_R * 0.82);
+      const side = box(0.06, 0.18, 0.1);
+      side.rotateZ(-0.15);
+      add(side, HEAD_R * 0.85, 0, 0);
+      break;
+    }
     case 'bob':
       add(cap(1, 0.8), 0, HEAD_R * 0.4, 0);
       add(box(0.07, 0.16, 0.12), -HEAD_R * 0.92, -0.03, 0);
@@ -265,6 +276,25 @@ function buildHair(parts: Part[], hair: THREE.Material, kind: HairstyleKind): vo
       add(top, 0.03, HEAD_R * 0.85, 0);
       break;
     }
+    case 'spiky': {
+      // 2000s spiky crop: short cap with small upright spikes.
+      add(cap(1, 0.68), 0, HEAD_R * 0.38, 0);
+      for (const [sx, sz] of [
+        [-0.5, 0.5],
+        [0, 0.7],
+        [0.5, 0.5],
+        [-0.8, 0],
+        [0.8, 0],
+        [-0.4, -0.5],
+        [0.4, -0.5],
+      ]) {
+        const spike = cylinder(0.016, 0.008, 0.07, 6);
+        spike.rotateX(0.15 * sx + 0.2);
+        spike.rotateZ(-0.25 * sz);
+        add(spike, sx * HEAD_R * 0.75, HEAD_R * 0.68, sz * HEAD_R * 0.7);
+      }
+      break;
+    }
     default:
       add(cap(1, 0.8), 0, HEAD_R * 0.4, 0);
       break;
@@ -324,15 +354,35 @@ function buildHandAccessory(
     case 'walkman':
       add(box(0.09, 0.06, 0.03), 0, -0.52, 0.05);
       break;
+    case 'ipod': {
+      // Early iPod: slim white slab with the click wheel (silver accent ring).
+      add(box(0.075, 0.115, 0.014), 0, -0.54, 0.05);
+      const wheel = cylinder(0.026, 0.026, 0.016, 12);
+      add(wheel, 0, -0.515, 0.056);
+      break;
+    }
     case 'calculator':
       add(box(0.08, 0.05, 0.02), 0, -0.48, 0.06);
       break;
     case 'phone':
       add(box(0.05, 0.1, 0.012), 0, -0.55, 0.05);
       break;
-    case 'laptop':
-      add(box(0.26, 0.02, 0.18), 0, -0.46, 0.1);
+    case 'flip-phone': {
+      // 2000s clamshell flip phone: two folded halves joined by a hinge.
+      add(box(0.048, 0.09, 0.012), 0, -0.545, 0.05);
+      add(box(0.048, 0.09, 0.012), 0, -0.485, 0.044);
+      add(box(0.012, 0.02, 0.016), 0, -0.515, 0.047);
       break;
+    }
+    case 'laptop': {
+      // Open laptop: base keyboard slab with a tilted screen (2005 chunky
+      // laptops and later thin models share this silhouette).
+      add(box(0.26, 0.025, 0.2), 0, -0.455, 0.1);
+      const screen = box(0.26, 0.18, 0.018);
+      screen.rotateX(-0.35);
+      add(screen, 0, -0.4, 0.06);
+      break;
+    }
     case 'wristband':
       add(box(0.06, 0.03, 0.06), 0, -0.42, 0.03);
       break;
@@ -484,6 +534,17 @@ export class CharacterAvatar {
       const shoe = box(0.1, 0.05, 0.15);
       shoe.translate(side * 0.07, 0.03, 0.05);
       staticParts.push({ geometry: shoe, material: shoes });
+    }
+
+    // Bootcut jeans flare at the ankle (2000s period leg silhouette).
+    if (this.config.legStyle === 'bootcut') {
+      const flareH = 0.07;
+      const flareY = this.posture === 'seated' ? 0.08 : flareH / 2 + 0.01;
+      for (const side of [-1, 1]) {
+        const flare = box(0.15, flareH, 0.15);
+        flare.translate(side * 0.07, flareY, 0.02);
+        staticParts.push({ geometry: flare, material: pants });
+      }
     }
 
     const torsoW = this.config.style === 'poncho' ? 0.44 : 0.34;

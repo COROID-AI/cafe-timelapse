@@ -128,6 +128,57 @@ function run(): void {
     'bouffant + cigarette patron builds its figure meshes',
   );
 
+  // 1c. New 2005 accessory/hair shapes render headlessly (side-swept bangs,
+  //     spiky hair, flip phones, iPods, open laptops, bootcut leg flare).
+  console.log('\n[2005 period accessory shapes]');
+  const flipPhoneConfig: PatronConfig = {
+    name: 'flip-phone-girl',
+    skin: '#C88B5A',
+    hair: { kind: 'side-swept', color: '#3A2418' },
+    shirt: '#D94F8F',
+    pants: '#3A4A8A',
+    shoes: '#2E2A26',
+    legStyle: 'bootcut',
+    accent: '#C9A227',
+    accessory: 'flip-phone',
+  };
+  const flipPhoneAvatar = new CharacterAvatar({ config: flipPhoneConfig, posture: 'seated' });
+  assert(
+    countMeshes(flipPhoneAvatar.root) >= 2,
+    'side-swept + flip-phone + bootcut patron builds its figure meshes',
+  );
+  const ipodConfig: PatronConfig = {
+    name: 'ipod-listen',
+    skin: '#C88B5A',
+    hair: { kind: 'bob', color: '#2A1E14' },
+    shirt: '#E8E4DC',
+    pants: '#1C1410',
+    shoes: '#101010',
+    accent: '#9AA0A6',
+    accessory: 'ipod',
+  };
+  const ipodAvatar = new CharacterAvatar({ config: ipodConfig, posture: 'seated' });
+  assert(
+    countMeshes(ipodAvatar.root) >= 2,
+    'iPod patron builds its figure meshes',
+  );
+  const spikyLaptopConfig: PatronConfig = {
+    name: 'spiky-skater',
+    skin: '#C88B5A',
+    hair: { kind: 'spiky', color: '#1A1A1A' },
+    shirt: '#3A3A3E',
+    pants: '#2E2A26',
+    shoes: '#101010',
+    legStyle: 'bootcut',
+    accent: '#C94F3D',
+    accessory: 'laptop',
+  };
+  const spikyLaptopAvatar = new CharacterAvatar({ config: spikyLaptopConfig, posture: 'seated' });
+  assert(
+    countMeshes(spikyLaptopAvatar.root) >= 2,
+    'spiky + open-laptop + bootcut patron builds its figure meshes',
+  );
+
   // 2. Parameterization: changing config changes materials/shape.
   console.log('\n[PatronConfig parameterization]');
   const dressConfig: PatronConfig = {
