@@ -44,6 +44,13 @@ export interface SceneManagerOptions {
   headroom?: number;
   /** Disable the persistent architecture shell layer when no registration exists. */
   disableFallback?: boolean;
+  /**
+   * When true the manager does not mount/unmount era groups itself. The app
+   * hands group mounting to the TransitionController (through a SceneHost) so
+   * `setActiveEra` only runs the transition hooks and per-era lighting; this
+   * keeps the manager and the controller from mounting duplicate era groups.
+   */
+  externalEraMounting?: boolean;
 }
 
 export interface SceneManagerHandle {
@@ -172,6 +179,7 @@ export function createSceneManager(options: SceneManagerOptions): SceneManagerHa
     initialEra = ERAS[0],
     headroom = 1.6,
     disableFallback = false,
+    externalEraMounting = false,
   } = options;
 
   // --- Persistent scene, camera, renderer --------------------------------
@@ -320,9 +328,13 @@ export function createSceneManager(options: SceneManagerOptions): SceneManagerHa
       }
       const previous = currentEra;
       transitionStart?.(era, previous);
-      unmountEra();
+      if (!externalEraMounting) {
+        unmountEra();
+      }
       currentEra = era;
-      mountEra(era);
+      if (!externalEraMounting) {
+        mountEra(era);
+      }
       applyLighting(ERA_LIGHTING[era]);
       transitionEnd?.(era);
     },

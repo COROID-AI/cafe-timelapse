@@ -17,6 +17,13 @@
  *  - 2005: an iPod dock playing an indie/acoustic-evocative generative bed,
  *    the whir and hiss of the superautomatic espresso machine, and warm
  *    halogen-lit room tone.
+ *  - 1965: a tabletop jukebox playing a Motown/folk-evocative generative bed,
+ *    the early electric drip urn hiss, and patron murmur.
+ *  - 2025: a smartphone + Bluetooth speaker (Sonos-style) playing a lo-fi /
+ *    modern-evocative generative bed, the steam-wand hiss of the multi-group
+ *    flat-white machine, and soft specialty-café murmur.
+ *  - 2055: a holographic emitter playing a spatial-audio-evocative generative
+ *    bed, the robotic bean-to-cup brew sounds, and bio-room tone.
  */
 export interface EraAudioLayer {
   /** Stable identifier for the layer (engine hook / debugging). */
@@ -202,11 +209,175 @@ export const ERA_AUDIO_2005: EraAudioConfig = {
   },
 };
 
+/** The 1965 mid-century / beatnik café audio bed. */
+export const ERA_AUDIO_1965: EraAudioConfig = {
+  era: 1965,
+  label: '1965 — jukebox Motown/folk bed, drip urn hiss, beatnik murmur',
+  layers: [
+    {
+      id: '1965-bed-motown',
+      label: 'Motown / beat-evocative generative bed',
+      kind: 'swing-bed',
+      gain: 0.5,
+      note: 'walking bass pulse, brushed backbeat, tambourine shimmer, soft electric piano chords',
+    },
+    {
+      id: '1965-bed-folk',
+      label: 'Folk / acoustic-evocative generative bed',
+      kind: 'swing-bed',
+      gain: 0.3,
+      note: 'fingerpicked acoustic guitar arpeggios and airy vocal pads for the beatnik corner',
+    },
+    {
+      id: '1965-jukebox',
+      label: 'Tabletop mini-jukebox character',
+      kind: 'radio-static',
+      gain: 0.35,
+      note: 'button clicks, selection thunk, 45rpm vinyl crackle and rumble',
+    },
+    {
+      id: '1965-urn-hiss',
+      label: 'Early electric drip urn hiss',
+      kind: 'machine-hiss',
+      gain: 0.25,
+      note: 'steady low hiss with a slow percolation plink and an occasional steam puff',
+    },
+    {
+      id: '1965-murmur',
+      label: 'Patron conversation murmur',
+      kind: 'murmur',
+      gain: 0.12,
+      note: 'low-passed speech-like granular noise, gentle swell',
+    },
+    {
+      id: '1965-room',
+      label: 'Room tone',
+      kind: 'ambient-room',
+      gain: 0.08,
+      note: 'warm mid-century room tone with distant street noise',
+    },
+  ],
+  meta: {
+    tempo: '104 bpm',
+    mode: 'generative-loop',
+    masterGain: '0.4',
+    source: 'jukebox',
+  },
+};
+
+/** The 2025 modern third-wave / specialty café audio bed. */
+export const ERA_AUDIO_2025: EraAudioConfig = {
+  era: 2025,
+  label: '2025 — lo-fi/modern bed from a BT speaker, steam-wand hiss, murmur',
+  layers: [
+    {
+      id: '2025-bed-lo-fi',
+      label: 'Lo-fi / chillhop-evocative generative bed',
+      kind: 'synth-bed',
+      gain: 0.45,
+      note: 'dusty vinyl crackle, soft Rhodes chords, mellow boom-bap beat at ~74 bpm',
+    },
+    {
+      id: '2025-bed-modern',
+      label: 'Modern-evocative generative pad',
+      kind: 'swing-bed',
+      gain: 0.3,
+      note: 'airy synthesiser wash, subtle side-chain pulse, warm low-passed bassline',
+    },
+    {
+      id: '2025-phone-bt-speaker',
+      label: 'Smartphone + Bluetooth speaker character',
+      kind: 'radio-static',
+      gain: 0.3,
+      note: 'soft Bluetooth connect chime, gentle speaker roll-off, faint room reflections',
+    },
+    {
+      id: '2025-steam-wand-hiss',
+      label: 'Multi-group flat-white machine steam-wand hiss',
+      kind: 'machine-hiss',
+      gain: 0.2,
+      note: 'brief steam wand hiss bursts, then a quiet pump whirr',
+    },
+    {
+      id: '2025-murmur',
+      label: 'Patron conversation murmur',
+      kind: 'murmur',
+      gain: 0.12,
+      note: 'low-passed speech-like granular noise, gentle swell',
+    },
+    {
+      id: '2025-room',
+      label: 'Room tone',
+      kind: 'ambient-room',
+      gain: 0.07,
+      note: 'soft specialty-café room tone with laptop keyboard clicks',
+    },
+  ],
+  meta: {
+    tempo: '74 bpm',
+    mode: 'generative-loop',
+    masterGain: '0.38',
+    source: 'bt-speaker',
+  },
+};
+
+/** The 2055 near-future speculative café audio bed. */
+export const ERA_AUDIO_2055: EraAudioConfig = {
+  era: 2055,
+  label: '2055 — spatial bed, holographic emitter, robotic brew, bio-room tone',
+  layers: [
+    {
+      id: '2055-bed-spatial',
+      label: 'Ambient / spatial-audio-evocative generative bed',
+      kind: 'synth-bed',
+      gain: 0.4,
+      note: 'airy evolving pads, slow panning shimmer, sub-bass pulse at ~72 bpm',
+    },
+    {
+      id: '2055-holo-emitter',
+      label: 'Holographic emitter character',
+      kind: 'murmur',
+      gain: 0.3,
+      note: 'soft chime pulses, a data hum, an occasional AR menu refresh blip',
+    },
+    {
+      id: '2055-robotic-brew',
+      label: 'Robotic bean-to-cup brew sounds',
+      kind: 'grinder-clatter',
+      gain: 0.28,
+      note: 'precise servo whirr, bean-grind crunch, gurgling pour, short steam puff',
+    },
+    {
+      id: '2055-murmur',
+      label: 'Patron conversation murmur',
+      kind: 'murmur',
+      gain: 0.1,
+      note: 'low-passed speech-like granular noise, gentle swell',
+    },
+    {
+      id: '2055-room',
+      label: 'Bio-room tone',
+      kind: 'ambient-room',
+      gain: 0.15,
+      note: 'hum of the vertical garden circulation and faint LED driver whine',
+    },
+  ],
+  meta: {
+    tempo: '72 bpm',
+    mode: 'generative-loop',
+    masterGain: '0.36',
+    source: 'holographic-emitter',
+  },
+};
+
 /** Registry of era audio configs by year (extend as later era tasks land). */
 export const ERA_AUDIO_CONFIGS: Record<number, EraAudioConfig> = {
   1945: ERA_AUDIO_1945,
+  1965: ERA_AUDIO_1965,
   1985: ERA_AUDIO_1985,
   2005: ERA_AUDIO_2005,
+  2025: ERA_AUDIO_2025,
+  2055: ERA_AUDIO_2055,
 };
 
 /** Return the audio config for an era (falls back to a silent bed). */

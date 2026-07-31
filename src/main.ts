@@ -1,7 +1,7 @@
 import './style.css';
 import * as THREE from 'three';
 import { ERAS, type EraYear } from './data/eras';
-import { registerAllEras, getEraRegistration } from './registry';
+import { registerAllEras } from './registry';
 import {
   createSceneManager,
   type SceneManagerHandle,
@@ -12,6 +12,7 @@ import { ROOM_BOUNDS } from './world/layout';
 import { EraGroupHost } from './systems/SceneHost';
 import { TransitionController } from './systems/TransitionController';
 import { ERA_LIGHTING } from './systems/lighting';
+import { AudioEngine } from './audio/AudioEngine';
 import {
   populate1965Surfaces,
   populate2025Surfaces,
@@ -22,28 +23,30 @@ import {
   TimelineSlider,
   ERA_CHANGE_EVENT,
 } from './ui/TimelineSlider';
+import { OnboardingScreen } from './ui/OnboardingScreen';
+import { Hud } from './ui/Hud';
 import { updateCharacterAnimations } from './world/characters';
 
 const app = document.querySelector<HTMLDivElement>('#app');
-const eraLabel = document.querySelector<HTMLParagraphElement>('#era-label');
-const modeLabel = document.querySelector<HTMLSpanElement>('#mode-label');
 const timelineWrap = document.querySelector<HTMLDivElement>('#timeline-wrap');
+const hudWrap = document.querySelector<HTMLDivElement>('#hud-wrap');
 
 if (!app) {
   throw new Error('#app container missing');
 }
 
 // --- Scene, camera, renderer, controls --------------------------------------
-// The SceneManager owns the persistent scene, camera, renderer and the
-// timeline snap contract. Its built-in OrbitControls and placeholder fallback
-// are disabled here: the Navigation rig owns camera control and the café shell
-// below provides the visible room, while the TransitionController owns era
-// mounting.
+// The SceneManager owns the persistent scene, camera and renderer. Its built-in
+// OrbitControls and placeholder fallback are disabled here: the Navigation rig
+// owns camera control, the café shell below provides the visible room, and the
+// TransitionController owns era mounting (externalEraMounting so the manager
+// never mounts a second copy of an era group).
 
 const manager: SceneManagerHandle = createSceneManager({
   container: app,
   initialEra: 1945,
   disableFallback: true,
+  externalEraMounting: true,
 });
 manager.controls.enabled = false;
 
@@ -144,13 +147,6 @@ const eraRoot = new THREE.Group();
 scene.add(eraRoot);
 const eraHost = new EraGroupHost(eraRoot, { cloneMaterials: true });
 
-function describeEra(era: EraYear): string {
-  const registration = getEraRegistration(era);
-  return registration
-    ? `Era ${era} — ${registration.fragments.length} scene fragments registered`
-    : `Era ${era} — not yet registered`;
-}
-
 const transition = new TransitionController({
   host: eraHost,
   camera,
@@ -159,11 +155,40 @@ const transition = new TransitionController({
   onTransitionStart: (era) => {
     applyEraLighting(era);
     dressShellForEra(era);
-    if (eraLabel) eraLabel.textContent = `Era ${era} — fading in…`;
+    audio.setEra(era);
   },
   onTransitionEnd: (era) => {
-    if (eraLabel) eraLabel.textContent = describeEra(era);
+    hud?.setEra(era);
     syncTimelineUI();
+  },
+});
+
+// --- Audio engine -------------------------------------------------------------
+// Generative per-era sound bed. The AudioContext is created lazily on the
+// onboarding click (user gesture → autoplay policy satisfied); each era swap
+// rebuilds the bed; every frame moves the Web Audio listener with the camera.
+
+const audio = new AudioEngine();
+
+// --- HUD ----------------------------------------------------------------------
+// Small overlay: active era label, mute toggle, walk-mode toggle and a
+// controls hint. The mode toggle mirrors the Navigation rig's F-key toggle.
+
+const hud = hudWrap ? new Hud({}) : null;
+if (hud && hudWrap) {
+  hudWrap.appendChild(hud.root);
+}
+
+// --- Onboarding ---------------------------------------------------------------
+// Loading gate: shows while the async era registry prepares, then reveals a
+// 'click to enter' button. The click unlocks Web Audio (autoplay policy) and
+// starts the scene.
+
+const onboarding = new OnboardingScreen({
+  container: app,
+  onEnter: () => {
+    audio.unlock();
+    navigation.focus();
   },
 });
 
@@ -172,24 +197,27 @@ const transition = new TransitionController({
 // close mode (F key / button), arrow-key + WASD support, smooth damping, and
 // collision clamping to the café shell.
 
-const modeButton = document.querySelector<HTMLButtonElement>('#mode-toggle');
-
 const navigation = new Navigation(camera, renderer.domElement, {
   bounds: ROOM_BOUNDS,
   collisionMargin: 0.25,
   initialTarget: new THREE.Vector3(0, 1.4, 0),
   initialRadius: 6.5,
   onModeChange: (mode: NavigationMode) => {
-    if (modeLabel) modeLabel.textContent = mode === 'orbit' ? 'Orbit' : 'Walk';
-    if (modeButton) {
-      modeButton.textContent = mode === 'orbit' ? 'Walk up close (F)' : 'Orbit (F)';
-    }
+    hud?.setMode(mode);
   },
 });
 
-modeButton?.addEventListener('click', () => {
-  navigation.toggleMode();
-  navigation.focus();
+hud?.root.addEventListener('click', (event) => {
+  const target = event.target as HTMLElement | null;
+  if (!target) return;
+  if (target.closest('.hud__mute')) {
+    const muted = audio.toggleMute();
+    hud.setMuted(muted);
+  }
+  if (target.closest('.hud__button--mode')) {
+    navigation.toggleMode();
+    navigation.focus();
+  }
 });
 
 // --- Timeline slider ----------------------------------------------------------
@@ -208,6 +236,11 @@ if (timelineSlider) {
   timelineSlider.root.addEventListener(ERA_CHANGE_EVENT, ((event: Event) => {
     const era = (event as CustomEvent<EraYear>).detail;
     if (!era) return;
+    // The SceneManager is the canonical era driver: with externalEraMounting
+    // it records the switch and runs its transition hooks (HUD / slider sync)
+    // without mounting a second era group, then the TransitionController
+    // performs the actual cross-fade through the SceneHost.
+    manager.setActiveEra(era);
     transition.goTo(era);
   }) as EventListener);
 }
@@ -219,18 +252,18 @@ function syncTimelineUI(): void {
 
 // --- SceneManager transition hooks ----------------------------------------------
 // When eras are switched through the manager directly (e.g. programmatic
-// `setActiveEra` calls), these hooks keep the label in sync with the swap.
+// `setActiveEra` calls), these hooks keep the HUD / slider in sync with the
+// swap. Audio follows the same path through the TransitionController (which is
+// the only era-mounting entry used by the timeline).
 
 manager.onBeforeTransition((next, previous) => {
-  if (eraLabel) {
-    eraLabel.textContent = previous
-      ? `Transitioning ${previous} → ${next}…`
-      : `Mounting ${next}…`;
+  if (hud) {
+    hud.setEra(previous ?? next);
   }
 });
 
 manager.onAfterTransition((era) => {
-  if (eraLabel) eraLabel.textContent = describeEra(era);
+  hud?.setEra(era);
   // Reflect external era changes (e.g. programmatic `setActiveEra`) back into
   // the slider without re-emitting eraChange.
   timelineSlider?.setEra(era);
@@ -249,6 +282,9 @@ function animate(now: number): void {
 
   // Shared character idle loop: breathing, head turns, occasional sips.
   updateCharacterAnimations(scene, dt, now / 1000);
+
+  // Audio spatialization: keep the Web Audio listener with the camera.
+  audio.update(dt, camera);
 
   // 2055 bioluminescent pulse: subtle rim-light intensity breathing.
   const config = transition.activeEra ? ERA_LIGHTING[transition.activeEra] : undefined;
@@ -273,9 +309,15 @@ async function init(): Promise<void> {
     scene.remove(manager.activeEraGroup);
   }
 
+  // First era: mount + light + dress the shell, then start the loop. Audio is
+  // only applied once the user clicks to enter (unlock), but the target era is
+  // remembered so the correct bed starts on the first gesture.
   transition.goTo(ERAS[0]);
   navigation.focus();
   syncTimelineUI();
+  hud?.setEra(ERAS[0]);
+
+  onboarding.showReady();
   requestAnimationFrame(animate);
 }
 

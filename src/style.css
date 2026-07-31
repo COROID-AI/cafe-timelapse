@@ -20,59 +20,162 @@ body {
   display: block;
 }
 
-#ui {
+/* ---------------------------------------------------------------------------
+ * HUD — small in-scene overlay: active era label, mute toggle, walk-mode
+ * toggle and a controls hint. Sits bottom-left, pointer-events auto only on
+ * its own buttons so the scene keeps full navigation everywhere else.
+ * ------------------------------------------------------------------------- */
+
+#hud-wrap {
   position: fixed;
-  top: 12px;
   left: 12px;
+  bottom: 12px;
   z-index: 10;
-  color: #f2ead8;
-  font-family: system-ui, -apple-system, sans-serif;
   pointer-events: none;
   user-select: none;
 }
 
-#ui h1 {
+.hud {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(24, 24, 32, 0.82);
+  border: 1px solid rgba(242, 234, 216, 0.2);
+  color: #f2ead8;
+  font-family: system-ui, -apple-system, sans-serif;
+  backdrop-filter: blur(6px);
+}
+
+.hud__block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hud__caption {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.hud__era {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.02em;
 }
 
-#ui p {
-  margin: 4px 0 0;
-  font-size: 12px;
-  opacity: 0.75;
+.hud__actions {
+  display: flex;
+  gap: 8px;
 }
 
-#ui p.hint {
-  margin-top: 8px;
-  max-width: 420px;
-  line-height: 1.6;
-  opacity: 0.9;
-}
-
-#mode-toggle {
+.hud__button {
   pointer-events: auto;
   cursor: pointer;
-  margin-left: 2px;
-  padding: 3px 8px;
-  border: 1px solid rgba(242, 234, 216, 0.45);
+  padding: 5px 10px;
+  border: 1px solid rgba(242, 234, 216, 0.35);
   border-radius: 6px;
-  background: rgba(27, 27, 34, 0.55);
+  background: rgba(27, 27, 34, 0.6);
   color: #f2ead8;
   font: inherit;
   font-size: 12px;
   line-height: 1.4;
 }
 
-#mode-toggle:hover {
+.hud__button:hover {
   border-color: #f2ead8;
   background: rgba(242, 234, 216, 0.12);
 }
 
-#mode-toggle:focus-visible {
+.hud__button:focus-visible {
   outline: 2px solid #f2ead8;
   outline-offset: 2px;
+}
+
+.hud__hint {
+  margin: 2px 0 0;
+  font-size: 12px;
+  opacity: 0.75;
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------------------
+ * Onboarding — full-screen loading / 'click to enter' gate.
+ * ------------------------------------------------------------------------- */
+
+.onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  background: radial-gradient(ellipse at 50% 40%, #24242e 0%, #101014 70%);
+  color: #f2ead8;
+  font-family: system-ui, -apple-system, sans-serif;
+  user-select: none;
+}
+
+.onboarding__overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  padding: 32px;
+}
+
+.onboarding__title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.onboarding__subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.onboarding__status {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.onboarding__enter {
+  margin-top: 10px;
+  padding: 12px 28px;
+  border: 1px solid rgba(217, 160, 91, 0.6);
+  border-radius: 10px;
+  background: rgba(217, 160, 91, 0.14);
+  color: #f2ead8;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.onboarding__enter:hover {
+  border-color: #d9a05b;
+  background: rgba(217, 160, 91, 0.28);
+  transform: scale(1.03);
+}
+
+.onboarding__enter:focus-visible {
+  outline: 2px solid #d9a05b;
+  outline-offset: 4px;
+}
+
+.onboarding.is-hidden {
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
 /* ---------------------------------------------------------------------------

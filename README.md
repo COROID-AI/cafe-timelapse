@@ -30,6 +30,7 @@ npm run check:transitions # QA gate: cross-fade / dolly / interruption safety
 npm run check:scene # QA gate: every era's fragments mount/unmount correctly
 npm run check:timeline # QA gate: timeline slider stops, drag/keyboard, ARIA, eraChange
 npm run check:shell # QA gate: persistent café shell + spatial contract + slots
+npm run check:integration # QA gate: AudioEngine unlock/era-swap/spatialization, onboarding, HUD
 npm run check      # all QA gates + typecheck
 ```
 
@@ -38,7 +39,8 @@ npm run check      # all QA gates + typecheck
 - `src/main.ts` — entrypoint: boots the SceneManager for the scene, camera,
   renderer and timeline snap contract, wires the timeline slider through the
   TransitionController (cross-faded era switches), and drives the Navigation
-  rig, the café shell and the animation loop.
+  rig, the café shell, the AudioEngine (per-era sound bed + spatialization),
+  the onboarding 'click to enter' gate and the animation loop.
 - `src/data/EraData.ts` — the canonical `EraData` type covering every brief
   category: architecture (walls/floor/ceiling/trim), furniture & decor, coffee
   machines & brewing equipment, menu board & prices, music source (wireless
@@ -92,6 +94,16 @@ npm run check      # all QA gates + typecheck
   then disposes the outgoing group through the SceneHost hook. Interruptions
   resolve cleanly (new era mid-transition retargets; the era being revealed
   snaps to completion). Call `update(dt)` each frame.
+- `src/audio/AudioEngine.ts` — the generative per-era sound bed: creates its
+  AudioContext lazily on the onboarding click (autoplay policy), swaps the bed
+  in lockstep with the era transition, spatializes the Web Audio listener with
+  the camera each frame, and exposes a master mute for the HUD. No audio files
+  are bundled — every voice is synthesized from the era config layers.
+- `src/ui/OnboardingScreen.ts` — the loading / 'click to enter' gate: shows
+  while the async era registry prepares, then reveals the enter button. The
+  click both dismisses the overlay and unlocks Web Audio.
+- `src/ui/Hud.ts` — the small in-scene overlay: active era label, mute toggle,
+  walk-mode toggle and a controls hint.
 - `src/systems/lighting.ts` — the per-era lighting config (background, ambient,
   key/fill/rim lights, fog), grounded in each era's canonical record.
 - `src/ui/TimelineSlider.ts` — the top timeline control bar: six labeled stops
@@ -119,6 +131,12 @@ npm run check      # all QA gates + typecheck
 - `src/scripts/checkScene.ts` — the `check:scene` QA gate: headlessly verifies
   every era's fragment group mounts with the expected category children and
   the timeline step contract matches the canonical `ERAS` timeline.
+- `src/scripts/checkIntegration.ts` — the `check:integration` QA gate: headless
+  assertions that every era resolves an audio config, the AudioEngine unlocks
+  on a user gesture / swaps beds / spatializes / disposes cleanly (with a Web
+  Audio stub), the onboarding screen drives the enter click to audio unlock,
+  the HUD updates era/mute/mode, and the TransitionController leaves exactly
+  one era group mounted.
 
 ### Adding a new era
 
