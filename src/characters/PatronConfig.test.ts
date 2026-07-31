@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_SKIN_TONE,
   SEATING_ANCHORS,
-  type PatronConfig,
+  type StructuredPatronConfig,
 } from './PatronConfig.js';
 import { PATRONS_1945 } from './patrons1945.js';
 import { ERA_YEARS } from '../data/EraData.js';
@@ -15,8 +15,8 @@ import { ERA_YEARS } from '../data/EraData.js';
 // Contract helpers
 // ---------------------------------------------------------------------------
 
-/** A minimal-but-valid PatronConfig for shape assertions. */
-function sampleConfig(): PatronConfig {
+/** A minimal-but-valid StructuredPatronConfig for shape assertions. */
+function sampleConfig(): StructuredPatronConfig {
   return {
     id: 'test',
     era: 1945,
@@ -95,7 +95,12 @@ describe('1945 patron population', () => {
   });
 
   it('uses 1945-era hairstyles (victory rolls, finger waves, slicked back, pompadour)', () => {
-    const periodStyles = ['victoryRolls', 'fingerWaves', 'slickedBack', 'pompadour'];
+    const periodStyles = [
+      'victoryRolls',
+      'fingerWaves',
+      'slickedBack',
+      'pompadour',
+    ];
     for (const p of PATRONS_1945) {
       expect(periodStyles).toContain(p.hair.style);
     }
@@ -109,7 +114,7 @@ describe('1945 patron population', () => {
   it('patrons hold period newspapers (gadgets)', () => {
     const newspapers = PATRONS_1945.filter((p) => p.gadget.type === 'newspaper');
     expect(newspapers.length).toBeGreaterThan(0);
-    // All gadgets are period-appropriate types.
+
     for (const p of PATRONS_1945) {
       expect(['newspaper', 'pocketWatch']).toContain(p.gadget.type);
     }

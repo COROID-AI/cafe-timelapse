@@ -18,7 +18,7 @@
  * and registers the `patrons` scene-fragment factory for era 1945.
  */
 import { characterRoster } from './CharacterRoster.js';
-import type { PatronConfig } from './PatronConfig.js';
+import type { StructuredPatronConfig } from './PatronConfig.js';
 
 // ---------------------------------------------------------------------------
 // Period palette (1945 utility-CC41 era — muted, rationed-fabric tones).
@@ -46,7 +46,7 @@ const WATCH_BRASS = 0xb5883a; // brass pocket-watch case
  * Patron 1 — a gentleman in a charcoal utility suit, brown fedora, slicked-back
  * hair, reading the newspaper. Seated at table A.
  */
-const PATRON_1: PatronConfig = {
+const PATRON_1: StructuredPatronConfig = {
   id: 'gent-charcoal-suit',
   era: 1945,
   outfit: { type: 'suit', color: SUIT_CHARCOAL, accent: SHIRT_CREAM },
@@ -62,7 +62,7 @@ const PATRON_1: PatronConfig = {
  * Patron 2 — a lady in a floral red day dress, victory rolls, no hat, reading
  * the newspaper. Seated at table B.
  */
-const PATRON_2: PatronConfig = {
+const PATRON_2: StructuredPatronConfig = {
   id: 'lady-floral-dress',
   era: 1945,
   outfit: { type: 'dayDress', color: DRESS_FLORAL_RED, accent: SHIRT_CREAM },
@@ -78,7 +78,7 @@ const PATRON_2: PatronConfig = {
  * Patron 3 — a gentleman in a brown tweed suit, charcoal fedora, pompadour,
  * checking a brass pocket watch. Seated at table C.
  */
-const PATRON_3: PatronConfig = {
+const PATRON_3: StructuredPatronConfig = {
   id: 'gent-tweed-suit',
   era: 1945,
   outfit: { type: 'suit', color: SUIT_BROWN, accent: SHIRT_SAGE },
@@ -94,7 +94,7 @@ const PATRON_3: PatronConfig = {
  * Patron 4 — a lady in a navy day dress, finger waves, no hat, reading the
  * newspaper. Seated at table A across from patron 1.
  */
-const PATRON_4: PatronConfig = {
+const PATRON_4: StructuredPatronConfig = {
   id: 'lady-navy-dress',
   era: 1945,
   outfit: { type: 'dayDress', color: DRESS_NAVY, accent: SHIRT_CREAM },
@@ -107,7 +107,7 @@ const PATRON_4: PatronConfig = {
 };
 
 /** All four 1945 patrons, in a stable order. */
-export const PATRONS_1945: readonly PatronConfig[] = [
+export const PATRONS_1945: readonly StructuredPatronConfig[] = [
   PATRON_1,
   PATRON_2,
   PATRON_3,
