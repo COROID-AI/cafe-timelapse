@@ -1,0 +1,342 @@
+:root {
+  --bg: #120c08;
+  --panel: rgba(24, 18, 14, 0.82);
+  --panel-border: rgba(255, 214, 160, 0.22);
+  --text: #f2e3c0;
+  --text-dim: #c9b48d;
+  --accent: #e8a04c;
+  --accent-strong: #ffb45e;
+  --danger: #e05555;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.app {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at 50% 30%, #241a10 0%, #120c08 70%);
+}
+
+/* ---- Header / timeline ---- */
+.app-header {
+  position: relative;
+  z-index: 20;
+  padding: 10px 16px 8px;
+  background: linear-gradient(180deg, rgba(18, 12, 8, 0.92), rgba(18, 12, 8, 0.55));
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.app-title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.timeline-labels {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.timeline-era {
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text-dim);
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, transform 0.18s;
+}
+
+.timeline-era:hover {
+  background: rgba(232, 160, 76, 0.18);
+  color: var(--text);
+}
+
+.timeline-era.is-active {
+  background: var(--accent);
+  border-color: var(--accent-strong);
+  color: #1c1206;
+  font-weight: 700;
+}
+
+.timeline-era:focus-visible,
+.btn:focus-visible,
+.audio-toggle:focus-visible,
+.timeline-slider:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
+.timeline-slider {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ---- Scene ---- */
+.app-main {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.scene-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- HUD ---- */
+.era-info {
+  position: absolute;
+  left: 16px;
+  bottom: 96px;
+  z-index: 15;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.era-title {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.era-year {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--accent-strong);
+  letter-spacing: 0.03em;
+}
+
+.era-tagline {
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+
+.era-progress {
+  margin-top: 6px;
+  max-width: 340px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.era-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  border-radius: 999px;
+  transform-origin: left center;
+  transition: transform 0.05s linear;
+  will-change: transform;
+}
+
+.era-progress-text {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.hud-controls {
+  position: absolute;
+  right: 16px;
+  bottom: 20px;
+  z-index: 15;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.btn {
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  color: var(--text);
+  padding: 7px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.18s, transform 0.12s;
+}
+
+.btn:hover {
+  background: rgba(232, 160, 76, 0.2);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent-strong);
+  color: #1c1206;
+  font-weight: 700;
+}
+
+.controls-hint {
+  position: absolute;
+  left: 16px;
+  bottom: 20px;
+  z-index: 15;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.controls-hint p {
+  margin: 2px 0;
+}
+
+.controls-hint strong {
+  color: var(--text);
+}
+
+/* ---- Loading / error / fallback ---- */
+.loading-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 12, 8, 0.7);
+  backdrop-filter: blur(2px);
+  /* Status overlay: never block interaction with the scene controls. */
+  pointer-events: none;
+}
+
+.loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 30px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  color: var(--text);
+}
+
+.loading-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(232, 160, 76, 0.25);
+  border-top-color: var(--accent-strong);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-overlay,
+.webgl-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  text-align: center;
+  background: var(--bg);
+  padding: 24px;
+}
+
+.error-overlay h2,
+.webgl-fallback h2 {
+  margin: 0;
+  color: var(--danger);
+}
+
+.error-overlay p,
+.webgl-fallback p {
+  max-width: 520px;
+  color: var(--text-dim);
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+  }
+}
+
+/* ---- Narrow displays ---- */
+@media (max-width: 640px) {
+  .app-title {
+    font-size: 0.9rem;
+  }
+
+  .era-info {
+    left: 12px;
+    bottom: 128px;
+  }
+
+  .era-year {
+    font-size: 1.9rem;
+  }
+
+  .hud-controls {
+    right: 12px;
+    bottom: 16px;
+    gap: 6px;
+  }
+
+  .controls-hint {
+    left: 12px;
+    bottom: 16px;
+    font-size: 0.68rem;
+    max-width: 180px;
+  }
+}
