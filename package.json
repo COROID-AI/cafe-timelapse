@@ -1,0 +1,40 @@
+{
+  "name": "cafe-time-period-timelapse",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "check:eras": "tsx src/scripts/checkEras.ts",
+    "check:navigation": "tsx src/scripts/checkNavigation.ts",
+    "check:transitions": "tsx src/scripts/checkTransitions.ts",
+    "check:scene": "tsx src/scripts/checkScene.ts",
+    "check:assets": "tsx src/scripts/checkAssets.ts",
+    "check:timeline": "tsx src/scripts/checkTimeline.ts",
+    "check:shell": "tsx src/scripts/checkShell.ts",
+    "check:1965": "tsx src/scripts/check1965.ts",
+    "check:1985": "tsx src/scripts/check1985.ts",
+    "check:2005": "tsx src/scripts/check2005.ts",
+    "check:2025": "tsx src/scripts/check2025.ts",
+    "check:2055": "tsx src/scripts/check2055.ts",
+    "check:characters": "tsx src/scripts/checkCharacters.ts",
+    "check:integration": "tsx src/scripts/checkIntegration.ts",
+    "check:stress": "tsx src/scripts/checkStress.ts",
+    "check:performance": "tsx src/scripts/checkPerformance.ts",
+    "check": "npm run check:eras && npm run check:navigation && npm run check:transitions && npm run check:scene && npm run check:assets && npm run check:timeline && npm run check:shell && npm run check:1965 && npm run check:1985 && npm run check:2005 && npm run check:2025 && npm run check:2055 && npm run check:characters && npm run check:integration && npm run check:stress && npm run check:performance && npm run typecheck"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "@types/three": "^0.185.2",
+    "happy-dom": "^20.11.1",
+    "tsx": "^4.23.1",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.6"
+  }
+}
