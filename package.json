@@ -1,0 +1,11 @@
+{
+  "name": "cafe-time-period-timelapse",
+  "version": "1.0.0",
+  "description": "A 3D café interior timelapse scene spanning 1945 to 2055",
+  "scripts": {
+    "dev": "npx serve src -l 8080",
+    "start": "npx serve src -l 8080"
+  },
+  "keywords": ["three.js", "café", "timelapse", "3d"],
+  "license": "MIT"
+}
