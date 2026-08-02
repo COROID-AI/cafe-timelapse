@@ -8,6 +8,12 @@ import type { Era } from '../types';
  * floor (standing), so placement can reuse the exact chair seat positions
  * shared with the furniture module. Outfits vary per era so the crowd reads
  * differently across the timelapse.
+ *
+ * Visibility notes: chairs closest to the front of the café (largest world z,
+ * facing the room/camera) are filled first so seated guests read clearly from
+ * the default overview; the second guest at a table is turned toward the first
+ * (conversation pose) so both figures stay visible instead of hiding behind a
+ * chair back.
  */
 
 interface PatronOutfit {
@@ -20,34 +26,34 @@ interface PatronOutfit {
 
 const ERA_OUTFITS: Record<Era['id'], PatronOutfit[]> = {
   e1945: [
-    { torso: '#4a3b2a', legs: '#3a2f24', skin: '#d9a47a', hair: '#2f2418', accent: '#8a5a3a' },
-    { torso: '#6e5a45', legs: '#3a2f24', skin: '#c98d6a', hair: '#5a3a2a', accent: '#b3773f' },
-    { torso: '#3f5f6e', legs: '#2f3a40', skin: '#d9a47a', hair: '#3a3a3a', accent: '#e8d8b8' },
+    { torso: '#6b5038', legs: '#4a3a2a', skin: '#e2ac80', hair: '#3a2a18', accent: '#c98a4e' },
+    { torso: '#8a6a4a', legs: '#5a4630', skin: '#d9a47a', hair: '#6b4a30', accent: '#d8a05a' },
+    { torso: '#5a7a6e', legs: '#3f5a52', skin: '#e2ac80', hair: '#4a4a4a', accent: '#f0e0c0' },
   ],
   e1965: [
-    { torso: '#2f3f5f', legs: '#232f47', skin: '#d9a47a', hair: '#1f1f1f', accent: '#c9a227' },
-    { torso: '#8a3a3a', legs: '#5f2a2a', skin: '#c98d6a', hair: '#5a3a2a', accent: '#e3d5b4' },
-    { torso: '#3f5f4a', legs: '#2f4737', skin: '#e0b08a', hair: '#3a2a1a', accent: '#f2e9d2' },
+    { torso: '#3f5f9e', legs: '#2f3f6e', skin: '#e2ac80', hair: '#2f2f2f', accent: '#ffd24d' },
+    { torso: '#c75b4a', legs: '#8a3f33', skin: '#d9a47a', hair: '#6b4a30', accent: '#f2e5c8' },
+    { torso: '#5a8a5f', legs: '#3f6b44', skin: '#eab88f', hair: '#4a3220', accent: '#f8f0d8' },
   ],
   e1985: [
-    { torso: '#7a2f6e', legs: '#2a2140', skin: '#d9a47a', hair: '#1a1a2e', accent: '#ff3da6' },
-    { torso: '#1f5f8a', legs: '#2a3a4a', skin: '#c98d6a', hair: '#3a3a3a', accent: '#29d9ff' },
-    { torso: '#3a3a3a', legs: '#1f1f1f', skin: '#d9a47a', hair: '#8a5a2a', accent: '#ffd02e' },
+    { torso: '#b34d9e', legs: '#3f3060', skin: '#e2ac80', hair: '#2a2a3f', accent: '#ff5fd0' },
+    { torso: '#2f8fd0', legs: '#3f5a7a', skin: '#d9a47a', hair: '#4a4a4a', accent: '#40e0ff' },
+    { torso: '#e8e8e8', legs: '#8a8a8a', skin: '#e2ac80', hair: '#c8863a', accent: '#ffd02e' },
   ],
   e2005: [
-    { torso: '#5f3f7a', legs: '#2f2f4a', skin: '#d9a47a', hair: '#2a2a2a', accent: '#e3e3e3' },
-    { torso: '#3f7f9e', legs: '#2f4a5f', skin: '#c98d6a', hair: '#5a3a1f', accent: '#8a5a2b' },
-    { torso: '#6e8a3f', legs: '#3f4a2f', skin: '#e0b08a', hair: '#1f1f1f', accent: '#f5f5f5' },
+    { torso: '#8a5fc0', legs: '#4a3f7a', skin: '#e2ac80', hair: '#3f3f3f', accent: '#f2f2f2' },
+    { torso: '#5fa8d0', legs: '#3f6b8a', skin: '#d9a47a', hair: '#7a5a30', accent: '#c98a4e' },
+    { torso: '#a0c05f', legs: '#5f7a3f', skin: '#eab88f', hair: '#2f2f2f', accent: '#ffffff' },
   ],
   e2025: [
-    { torso: '#2f2f2f', legs: '#1f1f1f', skin: '#d9a47a', hair: '#1f1f1f', accent: '#c2b29a' },
-    { torso: '#c2b29a', legs: '#8a7a63', skin: '#c98d6a', hair: '#4a3320', accent: '#3f7d5c' },
-    { torso: '#3f5f8a', legs: '#2f3f5f', skin: '#e0b08a', hair: '#2a2a2a', accent: '#f1ead9' },
+    { torso: '#e8e2d4', legs: '#8a8070', skin: '#e2ac80', hair: '#4a3f33', accent: '#5f9e7a' },
+    { torso: '#4a7fd0', legs: '#2f4a7a', skin: '#d9a47a', hair: '#3a2f24', accent: '#f2e5c8' },
+    { torso: '#d98a4a', legs: '#8a5a2f', skin: '#eab88f', hair: '#2f2f2f', accent: '#4a7fd0' },
   ],
   e2055: [
-    { torso: '#dfe9ff', legs: '#b8c8e8', skin: '#cfe0f5', hair: '#8fb6e8', accent: '#8fd8ff' },
-    { torso: '#8a7acf', legs: '#5f55a0', skin: '#d9cfe8', hair: '#b8a8e8', accent: '#7aa2ff' },
-    { torso: '#3a4a6e', legs: '#2a3852', skin: '#d9e8f5', hair: '#c86bff', accent: '#6fb6ff' },
+    { torso: '#e8f0ff', legs: '#b8c8e8', skin: '#d8e4f5', hair: '#8fb6e8', accent: '#8fd8ff' },
+    { torso: '#9a8ae8', legs: '#6a5fb0', skin: '#e0d8f0', hair: '#c0b0f0', accent: '#8fa8ff' },
+    { torso: '#5a7ac0', legs: '#3f5585', skin: '#e0e8f5', hair: '#d8a0ff', accent: '#7fb8ff' },
   ],
 };
 
@@ -156,26 +162,39 @@ const COUNTER_STOOLS: Array<{ x: number; z: number }> = [
   { x: -1.9, z: -3.9 },
 ];
 
+/** Guests per table, seated on chairs that face the room first. */
+const TABLE_PATRONS = [2, 2, 2, 2];
+
 /**
- * Build the era's patron group: seated guests at tables, counter stools, and
- * the bench, plus one standing guest near the door. Placement reuses the
- * exact chair seat positions from furniture.ts so patrons sit on the chairs.
+ * Build the era's patron group: seated guests at tables, counter stools, the
+ * bench, a barista behind the counter, and standing guests near the door and
+ * the front window. Table chairs closest to the front (largest world z) are
+ * filled first so guests are visible from the default overview; the partner
+ * chair is turned toward the first guest so both figures stay readable.
  */
 export function buildPatrons(era: Era): THREE.Group {
   const g = new THREE.Group();
   g.name = `Patrons:${era.id}`;
 
-  // Guests per table (seated on the era's chairs)
-  const tablePatrons = [2, 2, 1, 0];
   let variant = 0;
+
+  // Seated guests at the tables
   TABLE_POSITIONS.forEach((t, ti) => {
     const seats = chairSeatPositions(era, t.x, t.z, t.ry);
-    const count = Math.min(tablePatrons[ti] ?? 0, seats.length);
+    // Front-facing chairs (closest to the camera side) first.
+    const ordered = [...seats].sort((a, b) => b.z - a.z);
+    const count = Math.min(TABLE_PATRONS[ti] ?? 0, ordered.length);
     for (let i = 0; i < count; i++) {
-      const seat = seats[i];
+      const seat = ordered[i];
       const patron = buildSeatedPatron(era, variant);
       patron.position.set(seat.x, seat.y, seat.z);
-      patron.rotation.y = seat.ry;
+      if (i === 0) {
+        patron.rotation.y = seat.ry;
+      } else {
+        // Turn toward the first guest (conversation pose) so both patrons
+        // face the room instead of hiding behind a chair back.
+        patron.rotation.y = Math.atan2(ordered[0].x - seat.x, ordered[0].z - seat.z);
+      }
       g.add(patron);
       variant++;
     }
@@ -196,6 +215,28 @@ export function buildPatrons(era: Era): THREE.Group {
   bench.rotation.y = Math.PI / 2;
   g.add(bench);
   variant++;
+
+  // Barista behind the counter (torso/head rise above the counter top).
+  const barista = buildStandingPatron(era, variant);
+  barista.position.set(-1.4, 0, -5.15);
+  barista.rotation.y = 0; // face +z toward the counter
+  g.add(barista);
+  variant++;
+
+  // Standing guests near the front, facing into the room (toward the default
+  // camera) so the crowd is clearly visible from the overview. Kept clear of
+  // the table discs and chair arcs.
+  const frontSpots = [
+    { x: -3.2, z: 4.9, ry: 0 },
+    { x: 3.4, z: 3.9, ry: -0.35 },
+  ];
+  for (const spot of frontSpots) {
+    const patron = buildStandingPatron(era, variant);
+    patron.position.set(spot.x, 0, spot.z);
+    patron.rotation.y = spot.ry;
+    g.add(patron);
+    variant++;
+  }
 
   // Standing guest near the door on the right wall (facing into the room).
   // Kept clear of the ajar door (inner edge swings to ~x 4.29, z -1.1).

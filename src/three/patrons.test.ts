@@ -25,9 +25,10 @@ describe('café patrons', () => {
     for (const era of ERAS) {
       const patrons = buildPatrons(era);
       expect(patrons.name).toBe(`Patrons:${era.id}`);
-      // every era has seated table guests, counter/bench guests, and one standing guest
-      expect(countPatronFigureGroups(patrons)).toBeGreaterThanOrEqual(7);
-      expect(countPatronMeshes(patrons)).toBeGreaterThanOrEqual(7 * 4);
+      // every era has seated table guests, counter/bench guests, a barista,
+      // and several standing guests — a clearly visible crowd
+      expect(countPatronFigureGroups(patrons)).toBeGreaterThanOrEqual(13);
+      expect(countPatronMeshes(patrons)).toBeGreaterThanOrEqual(13 * 4);
     }
   });
 
@@ -42,7 +43,7 @@ describe('café patrons', () => {
     }
   });
 
-  it('every seated patron sits above the floor; one standing guest rests on it', () => {
+  it('every seated patron sits above the floor; standing guests rest on it', () => {
     for (const era of ERAS) {
       const patrons = buildPatrons(era);
       let seated = 0;
@@ -57,8 +58,23 @@ describe('café patrons', () => {
           }
         }
       });
-      expect(seated).toBeGreaterThanOrEqual(7);
-      expect(standing).toBe(1);
+      expect(seated).toBeGreaterThanOrEqual(11);
+      expect(standing).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('fills the front-facing chair at each table so guests read from the overview', () => {
+    for (const era of ERAS) {
+      const patrons = buildPatrons(era);
+      let frontGuests = 0;
+      patrons.traverse((obj) => {
+        if (obj.name !== 'Patron') return;
+        const g = obj as THREE.Group;
+        // Seated table guests at the front half of the room (z >= 2).
+        if (g.position.y >= 0.4 && g.position.z >= 2) frontGuests++;
+      });
+      // Tables at z 2.2/2.9/5.2/5.6 each seat their front guest.
+      expect(frontGuests).toBeGreaterThanOrEqual(4);
     }
   });
 
