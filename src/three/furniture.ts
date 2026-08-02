@@ -10,6 +10,46 @@ export const TABLE_POSITIONS: Array<{ x: number; z: number; ry: number }> = [
   { x: 2.6, z: 5.6, ry: -0.5 },
 ];
 
+/** Chair seat offsets (local coords) around a table; shared with patron placement. */
+export interface ChairSlot {
+  x: number;
+  z: number;
+  /** Angle around the table (radians), matching buildTableSet. */
+  angle: number;
+}
+
+export function chairOffsets(era: Era): ChairSlot[] {
+  const count = era.furniture.chairStyle.includes('levitating') ? 4 : 3;
+  return Array.from({ length: count }, (_, i) => {
+    const a = (i / count) * Math.PI * 2;
+    return { x: Math.sin(a) * 1.02, z: Math.cos(a) * 1.02, angle: a };
+  });
+}
+
+/** World-space chair seat positions (and facing) for a table, for patron placement. */
+export function chairSeatPositions(
+  era: Era,
+  x: number,
+  z: number,
+  rotationY = 0,
+): Array<{ x: number; y: number; z: number; ry: number }> {
+  const cos = Math.cos(rotationY);
+  const sin = Math.sin(rotationY);
+  const seatY = era.furniture.chairStyle.includes('levitating')
+    ? 0.64
+    : era.furniture.chairStyle.includes('armchair') || era.furniture.chairStyle.includes('tubular')
+      ? 0.49
+      : era.furniture.chairStyle.includes('plastic') || era.furniture.chairStyle.includes('plywood')
+        ? 0.485
+        : 0.465;
+  return chairOffsets(era).map((o) => ({
+    x: x + o.x * cos + o.z * sin,
+    y: seatY,
+    z: z - o.x * sin + o.z * cos,
+    ry: rotationY - o.angle,
+  }));
+}
+
 export interface FurnitureGroup {
   group: THREE.Group;
 }

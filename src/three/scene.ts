@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { buildCounter, buildTableSet, buildBench, TABLE_POSITIONS } from './furniture';
 import { buildRoomShell } from './room';
 import { buildDecor } from './decor';
+import { buildPatrons } from './patrons';
 import { createLighting, createFog, applyLighting } from './lighting';
 import { lerpPalettes } from './transition';
 import { ERA_MAP } from '../data/eras';
@@ -16,6 +17,8 @@ export interface CafeSceneObjects {
   room: THREE.Group;
   /** Per-era fixed furniture (discrete swap). */
   furnitures: Map<EraId, THREE.Group>;
+  /** Per-era patron groups (discrete swap). */
+  patrons: Map<EraId, THREE.Group>;
   lighting: ReturnType<typeof createLighting>;
   fog: THREE.FogExp2;
   /** Update continuous colors for a blended palette. */
@@ -95,6 +98,16 @@ export function buildCafeScene(eraId: EraId): CafeSceneObjects {
     decors.set(e.id, decor);
   }
 
+  // Era patron groups; patrons give the café its lived-in feel and dress
+  // differently per decade. Only one era's patrons are visible at a time.
+  const patrons = new Map<EraId, THREE.Group>();
+  for (const e of Object.values(ERA_MAP)) {
+    const patronGroup = buildPatrons(e);
+    patronGroup.visible = e.id === eraId;
+    group.add(patronGroup);
+    patrons.set(e.id, patronGroup);
+  }
+
   const lighting = createLighting(colors);
   group.add(lighting.ambient, lighting.key, lighting.point, lighting.rim);
   const fog = createFog(colors);
@@ -115,6 +128,9 @@ export function buildCafeScene(eraId: EraId): CafeSceneObjects {
     for (const [id, f] of furnitures) {
       f.visible = id === eraIdNext;
     }
+    for (const [id, p] of patrons) {
+      p.visible = id === eraIdNext;
+    }
   };
 
   return {
@@ -122,6 +138,7 @@ export function buildCafeScene(eraId: EraId): CafeSceneObjects {
     decors,
     room,
     furnitures,
+    patrons,
     lighting,
     fog,
     updateColors,
