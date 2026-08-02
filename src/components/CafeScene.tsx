@@ -38,22 +38,6 @@ export function CafeScene() {
     scene.fog = sceneRef.current.fog;
   }
 
-  // TEMP DEBUG: runtime patron diagnostics
-  if (typeof window !== 'undefined') {
-    const s = sceneRef.current;
-    let patronFigures = 0;
-    let patronMeshes = 0;
-    s.group.traverse((o) => {
-      if ((o as THREE.Object3D).name === 'Patron') patronFigures++;
-      if ((o as THREE.Mesh).isMesh) patronMeshes++;
-    });
-    // eslint-disable-next-line no-console
-    console.log(
-      `[DEBUG] era=${s.currentEra} currentEraVisible=${s.patrons.get(s.currentEra)?.visible} ` +
-        `patronFigures=${patronFigures} totalMeshes=${patronMeshes} camera=${cam.position.x.toFixed(2)},${cam.position.y.toFixed(2)},${cam.position.z.toFixed(2)}`,
-    );
-  }
-
   // Camera rig once (operates on the R3F camera directly)
   if (!rigRef.current) {
     rigRef.current = createCameraRig(gl.domElement, era, cam);
@@ -132,6 +116,12 @@ export function CafeScene() {
     } else if (t.settled && sceneObj.currentEra !== t.toEra) {
       sceneObj.showEra(t.toEra);
       lastDecorSwap.current = t.toEra;
+      // Settled/idle switches (reduced-motion snap, resume after pause) also
+      // need the continuous colors — room materials, lighting, fog density —
+      // applied so the rendered state matches the active era. The cross-fade
+      // path above only runs while `fading`, so apply the target palette here.
+      const toPalette = ERA_MAP[t.toEra].palette;
+      sceneObj.updateColors(lerpPalettes(toPalette, toPalette, 1));
     }
 
     rig.update(dt);

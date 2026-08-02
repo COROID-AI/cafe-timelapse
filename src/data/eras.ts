@@ -42,7 +42,7 @@ export const ERAS: Era[] = [
     keyLight: { x: -4, y: 5.4, z: 2 },
     pointLight: { x: 1.6, y: 1.9, z: -1.1 },
     presets: {
-      overview: { x: 0, y: 4.6, z: 11.2 },
+      overview: { x: 0, y: 3.2, z: 11.2 },
       counter: { x: 2.2, y: 1.65, z: -1.7 },
       table: { x: -1.7, y: 1.35, z: 3.2 },
     },
@@ -87,7 +87,7 @@ export const ERAS: Era[] = [
     keyLight: { x: -4, y: 5.4, z: 2 },
     pointLight: { x: 1.6, y: 1.9, z: -1.1 },
     presets: {
-      overview: { x: 0, y: 4.6, z: 11.2 },
+      overview: { x: 0, y: 3.2, z: 11.2 },
       counter: { x: 2.2, y: 1.65, z: -1.7 },
       table: { x: -1.7, y: 1.35, z: 3.2 },
     },
@@ -132,7 +132,7 @@ export const ERAS: Era[] = [
     keyLight: { x: -4, y: 5.4, z: 2 },
     pointLight: { x: 1.6, y: 1.9, z: -1.1 },
     presets: {
-      overview: { x: 0, y: 4.6, z: 11.2 },
+      overview: { x: 0, y: 3.2, z: 11.2 },
       counter: { x: 2.2, y: 1.65, z: -1.7 },
       table: { x: -1.7, y: 1.35, z: 3.2 },
     },
@@ -177,7 +177,7 @@ export const ERAS: Era[] = [
     keyLight: { x: -4, y: 5.4, z: 2 },
     pointLight: { x: 1.6, y: 1.9, z: -1.1 },
     presets: {
-      overview: { x: 0, y: 4.6, z: 11.2 },
+      overview: { x: 0, y: 3.2, z: 11.2 },
       counter: { x: 2.2, y: 1.65, z: -1.7 },
       table: { x: -1.7, y: 1.35, z: 3.2 },
     },
@@ -222,7 +222,7 @@ export const ERAS: Era[] = [
     keyLight: { x: -4, y: 5.4, z: 2 },
     pointLight: { x: 1.6, y: 1.9, z: -1.1 },
     presets: {
-      overview: { x: 0, y: 4.6, z: 11.2 },
+      overview: { x: 0, y: 3.2, z: 11.2 },
       counter: { x: 2.2, y: 1.65, z: -1.7 },
       table: { x: -1.7, y: 1.35, z: 3.2 },
     },
@@ -267,7 +267,7 @@ export const ERAS: Era[] = [
     keyLight: { x: -4, y: 5.4, z: 2 },
     pointLight: { x: 1.6, y: 1.9, z: -1.1 },
     presets: {
-      overview: { x: 0, y: 4.6, z: 11.2 },
+      overview: { x: 0, y: 3.2, z: 11.2 },
       counter: { x: 2.2, y: 1.65, z: -1.7 },
       table: { x: -1.7, y: 1.35, z: 3.2 },
     },

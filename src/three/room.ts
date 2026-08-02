@@ -97,7 +97,9 @@ export function buildRoomShell(
     g.add(cove);
   }
 
-  // Front window frames (openings toward the camera)
+  // Front window frames (openings toward the camera): a hollow frame with a
+  // transparent glass pane so the café interior (and its patrons) stays
+  // visible through the storefront instead of being hidden by a solid panel.
   const frameMat = role(matWood(colors.trim), 'trim');
   const glassMat = matGlass('#cfe8ff', 0.22);
   const frameW = 3.4;
@@ -105,8 +107,17 @@ export function buildRoomShell(
   const fx = 1.9;
   const fz = D / 2 - 0.05;
   const fy = 1.6;
-  g.add(box(frameW + 0.16, frameH + 0.16, 0.1, fx, fy, fz, frameMat));
+  const outerW = frameW + 0.16;
+  const outerH = frameH + 0.16;
+  const border = 0.1;
+  // frame border (top, bottom, left, right) around the glass opening
+  g.add(box(outerW, border, 0.1, fx, fy + outerH / 2 - border / 2, fz, frameMat));
+  g.add(box(outerW, border, 0.1, fx, fy - outerH / 2 + border / 2, fz, frameMat));
+  g.add(box(border, outerH, 0.1, fx - outerW / 2 + border / 2, fy, fz, frameMat));
+  g.add(box(border, outerH, 0.1, fx + outerW / 2 - border / 2, fy, fz, frameMat));
+  // glass pane inside the opening
   g.add(box(frameW, frameH, 0.04, fx, fy, fz - 0.02, glassMat));
+  // mullions
   g.add(box(0.06, frameH, 0.06, fx, fy, fz - 0.03, frameMat));
   g.add(box(frameW, 0.06, 0.06, fx, fy, fz - 0.03, frameMat));
 

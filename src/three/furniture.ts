@@ -6,8 +6,8 @@ import type { Era } from '../types';
 export const TABLE_POSITIONS: Array<{ x: number; z: number; ry: number }> = [
   { x: -2.2, z: 2.2, ry: 0.2 },
   { x: 1.6, z: 2.9, ry: -0.35 },
-  { x: -0.6, z: 5.2, ry: 0.5 },
-  { x: 2.6, z: 5.6, ry: -0.5 },
+  { x: -0.6, z: 4.5, ry: 0.5 },
+  { x: 2.6, z: 4.8, ry: -0.5 },
 ];
 
 /** Chair seat offsets (local coords) around a table; shared with patron placement. */

@@ -32,7 +32,15 @@ describe('patron visibility from default overview camera', () => {
     const blockers: THREE.Mesh[] = [];
     world.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
-      if (mesh.isMesh) blockers.push(mesh);
+      // Transparent glass (the storefront pane) is visually see-through and
+      // must not count as an occluder for patron visibility.
+      if (mesh.isMesh) {
+        const mat = mesh.material as THREE.MeshStandardMaterial | undefined;
+        if (mat && mat.transparent && mat.opacity !== undefined && mat.opacity < 0.5) {
+          return;
+        }
+        blockers.push(mesh);
+      }
     });
 
     const patrons = buildPatrons(ERA_MAP[eraId]);

@@ -13,7 +13,7 @@ function SceneCanvas() {
       shadows
       dpr={[1, 1.75]}
       gl={{ antialias: true, powerPreference: 'high-performance' }}
-      camera={{ fov: 55, near: 0.1, far: 80, position: [0, 4.6, 11.2] }}
+      camera={{ fov: 55, near: 0.1, far: 80, position: [0, 3.2, 11.2] }}
     >
       <Suspense fallback={null}>
         <CafeScene />
