@@ -38,6 +38,22 @@ export function CafeScene() {
     scene.fog = sceneRef.current.fog;
   }
 
+  // TEMP DEBUG: runtime patron diagnostics
+  if (typeof window !== 'undefined') {
+    const s = sceneRef.current;
+    let patronFigures = 0;
+    let patronMeshes = 0;
+    s.group.traverse((o) => {
+      if ((o as THREE.Object3D).name === 'Patron') patronFigures++;
+      if ((o as THREE.Mesh).isMesh) patronMeshes++;
+    });
+    // eslint-disable-next-line no-console
+    console.log(
+      `[DEBUG] era=${s.currentEra} currentEraVisible=${s.patrons.get(s.currentEra)?.visible} ` +
+        `patronFigures=${patronFigures} totalMeshes=${patronMeshes} camera=${cam.position.x.toFixed(2)},${cam.position.y.toFixed(2)},${cam.position.z.toFixed(2)}`,
+    );
+  }
+
   // Camera rig once (operates on the R3F camera directly)
   if (!rigRef.current) {
     rigRef.current = createCameraRig(gl.domElement, era, cam);
