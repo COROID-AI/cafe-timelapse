@@ -103,3 +103,176 @@ body {
     transition: none;
   }
 }
+
+/* --- Boot / loading overlay -------------------------------------------------- */
+
+/* Covers the viewport while the shell + all eight prop groups build. The
+   `.is-done` class (added by main.ts) fades it out over the reveal frame. */
+.boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(120% 100% at 50% 18%, #262130 0%, #14101b 58%, #0c0910 100%);
+  color: #ece6da;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.65s ease, visibility 0s linear 0.65s;
+}
+
+.boot-overlay.is-done {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.boot-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 32px 40px;
+  text-align: center;
+  user-select: none;
+}
+
+.boot-mark {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 2px;
+}
+
+.boot-mark svg {
+  width: 100%;
+  height: 100%;
+  stroke: #f2c88b;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  fill: none;
+  filter: drop-shadow(0 0 12px rgba(242, 200, 139, 0.35));
+}
+
+/* Three wisps of steam rising off the cup on a staggered loop. */
+.boot-steam {
+  position: absolute;
+  top: -7px;
+  width: 4px;
+  height: 15px;
+  border-radius: 999px;
+  background: linear-gradient(to top, rgba(242, 200, 139, 0), rgba(242, 200, 139, 0.75));
+  animation: boot-steam-rise 2.4s ease-in-out infinite;
+}
+
+.boot-steam--1 {
+  left: 38%;
+  animation-delay: 0s;
+}
+
+.boot-steam--2 {
+  left: 50%;
+  animation-delay: 0.55s;
+}
+
+.boot-steam--3 {
+  left: 62%;
+  animation-delay: 1.1s;
+}
+
+@keyframes boot-steam-rise {
+  0% {
+    transform: translateY(7px) scaleY(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-15px) scaleY(1.15);
+    opacity: 0;
+  }
+}
+
+.boot-title {
+  margin: 0;
+  font: 700 21px/1.25 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f5efe3;
+}
+
+.boot-sub {
+  margin: -8px 0 4px;
+  font: 600 11px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(236, 230, 218, 0.5);
+}
+
+.boot-track {
+  width: min(320px, 70vw);
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.boot-fill {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  background: linear-gradient(90deg, #c98a3d, #f2c88b, #ffe6bd);
+  box-shadow: 0 0 12px rgba(242, 200, 139, 0.55);
+  /* Fill grows via transform (no layout thrash); main.ts writes scaleX(). */
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.28s ease;
+}
+
+/* Sheen sweeping across the travelled portion of the bar. */
+.boot-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: boot-shimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes boot-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.boot-status {
+  margin: 0;
+  min-height: 1.5em;
+  font: 500 13px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0.02em;
+  color: rgba(236, 230, 218, 0.78);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-overlay,
+  .boot-fill {
+    transition: none;
+  }
+
+  .boot-steam,
+  .boot-fill::after {
+    animation: none;
+    opacity: 0.6;
+  }
+}
