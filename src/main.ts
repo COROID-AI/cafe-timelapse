@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CafeScene } from './cafe/CafeScene';
+import { EraTransitionController } from './cafe/EraTransitionController';
 import './style.css';
 
 /**
@@ -53,11 +54,23 @@ const cafeScene = new CafeScene({ scene, renderer, camera });
 // seam through every registered group; era content tasks plug in here.
 cafeScene.applyEra(2025);
 
+// --- Era transition morphing -------------------------------------------------
+
+/**
+ * Animated era-swap system. The timeline UI task drives it via
+ * `eraTransitions.transitionTo(year)` (plus `onProgress` for the morph
+ * indicator); the loop below feeds it the shared render-loop clock delta.
+ */
+const eraTransitions = new EraTransitionController(cafeScene, { renderer });
+
+const clock = new THREE.Clock();
+
 // --- Render loop & resize ----------------------------------------------------
 
 function animate() {
   requestAnimationFrame(animate);
 
+  eraTransitions.update(clock.getDelta());
   controls.update();
   renderer.render(scene, camera);
 }
