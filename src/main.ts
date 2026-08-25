@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { CafeScene } from './cafe/CafeScene';
 import { NavigationController } from './cafe/NavigationController';
 import { registerFurniturePropGroup } from './cafe/props/furniture';
+import { EraTransitionController } from './cafe/EraTransitionController';
 import './style.css';
 
 /**
@@ -49,6 +50,15 @@ registerFurniturePropGroup(cafeScene);
 // seam through every registered group; era content tasks plug in here.
 cafeScene.applyEra(2025);
 
+// --- Era transition morphing -------------------------------------------------
+
+/**
+ * Animated era-swap system. The timeline UI task drives it via
+ * `eraTransitions.transitionTo(year)` (plus `onProgress` for the morph
+ * indicator); the loop below feeds it the shared render-loop clock delta.
+ */
+const eraTransitions = new EraTransitionController(cafeScene, { renderer });
+
 // --- Dual navigation: damped orbit + free-fly inspect ------------------------
 
 // Reusable bounds buffer so the per-frame bounds query allocates nothing.
@@ -69,7 +79,12 @@ const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
 
-  navigation.update(clock.getDelta());
+  // One clock read per frame, shared by every per-frame system so each sees
+  // the same elapsed delta (orbit damping, fly smoothing, era morphing).
+  const delta = clock.getDelta();
+  navigation.update(delta);
+  eraTransitions.update(delta);
+
   renderer.render(scene, camera);
 }
 
