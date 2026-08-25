@@ -1,13 +1,15 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CafeScene } from './cafe/CafeScene';
 import './style.css';
 
 /**
  * Application shell for the Café Time Period Timelapse.
  *
- * This module owns only the render foundation:
- * renderer, scene, camera, controls, lights, ground plane, and the
- * render loop. All café content arrives in later tasks on top of this base.
+ * This module owns only the render foundation: renderer, scene, camera,
+ * controls and the render loop. Everything café-specific lives in CafeScene,
+ * which builds the permanent room shell, the lighting/mood rig, and hosts the
+ * era prop-group registry.
  */
 
 const canvas = document.getElementById('app') as HTMLCanvasElement;
@@ -24,74 +26,37 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x1a1a22);
+scene.background = new THREE.Color(0x15131a);
 
 const camera = new THREE.PerspectiveCamera(
   50,
   window.innerWidth / window.innerHeight,
-  0.1,
-  100,
+  0.05, // Near plane tight enough for close-up prop inspection.
+  120,
 );
-camera.position.set(6, 4, 8);
+camera.position.set(7.4, 4.8, 8.8);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 1, 0);
+controls.target.set(0, 1.2, 0);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.maxPolarAngle = Math.PI / 2 - 0.05;
-controls.minDistance = 2;
-controls.maxDistance = 30;
+controls.maxPolarAngle = Math.PI / 2 - 0.04;
+controls.minDistance = 0.55;
+controls.maxDistance = 26;
 controls.update();
 
-// --- Lighting rig -----------------------------------------------------------
+// --- Permanent café shell + lighting rig + prop-group registry --------------
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-scene.add(ambientLight);
+const cafeScene = new CafeScene({ scene, renderer, camera });
 
-const directionalLight = new THREE.DirectionalLight(0xfff2e0, 2.2);
-directionalLight.position.set(6, 10, 4);
-directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.set(2048, 2048);
-directionalLight.shadow.camera.near = 1;
-directionalLight.shadow.camera.far = 40;
-directionalLight.shadow.camera.left = -15;
-directionalLight.shadow.camera.right = 15;
-directionalLight.shadow.camera.top = 15;
-directionalLight.shadow.camera.bottom = -15;
-directionalLight.shadow.bias = -0.0005;
-scene.add(directionalLight);
-
-// --- Ground plane ------------------------------------------------------------
-
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(40, 40),
-  new THREE.MeshStandardMaterial({ color: 0x3a3630, roughness: 0.9 }),
-);
-ground.rotation.x = -Math.PI / 2;
-ground.receiveShadow = true;
-scene.add(ground);
-
-// --- Placeholder mesh --------------------------------------------------------
-// Proves the render loop, tone mapping, and shadows work. Replaced later by
-// actual café content.
-
-const placeholder = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshStandardMaterial({ color: 0xd98e4a, roughness: 0.35 }),
-);
-placeholder.position.set(0, 1, 0);
-placeholder.castShadow = true;
-placeholder.receiveShadow = true;
-scene.add(placeholder);
+// Initial era until the timeline slider task lands. Routes the neutral era
+// seam through every registered group; era content tasks plug in here.
+cafeScene.applyEra(2025);
 
 // --- Render loop & resize ----------------------------------------------------
 
 function animate() {
   requestAnimationFrame(animate);
-
-  const t = performance.now() / 1000;
-  placeholder.rotation.y = t * 0.4;
-  placeholder.position.y = 1 + Math.sin(t * 1.5) * 0.25;
 
   controls.update();
   renderer.render(scene, camera);

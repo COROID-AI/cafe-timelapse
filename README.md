@@ -35,9 +35,12 @@ npm install
 ### Project structure
 
 ```
-index.html          # HTML entrypoint mounting the full-viewport canvas
-src/main.ts         # App shell: renderer, scene, camera, controls, lights, loop
-src/style.css       # Full-viewport canvas styling
-public/             # Static assets served verbatim
-docs/               # Project documentation
+index.html                # HTML entrypoint mounting the full-viewport canvas
+src/main.ts               # App shell: renderer, scene, camera, controls, loop
+src/cafe/CafeScene.ts     # Room-shell orchestrator + era prop-group registry
+src/cafe/types.ts         # Shared EraYear/EraConfig/prop-group contracts
+src/cafe/eras/getEra.ts   # Neutral era lookup seam (era content plugs in here)
+src/style.css             # Full-viewport canvas styling
+public/                   # Static assets served verbatim
+docs/                     # Project documentation
 ```
