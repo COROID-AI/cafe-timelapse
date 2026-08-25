@@ -370,6 +370,15 @@ export class CafeScene {
     return this.currentConfig;
   }
 
+  /**
+   * Resolves a year through the configured era lookup WITHOUT applying it.
+   * The era-transition controller uses this to preview a target era's
+   * lighting mood before the animated swap commits via {@link applyEra}.
+   */
+  resolveEra(year: EraYear): EraConfig {
+    return this.resolveEraFn(year);
+  }
+
   /* ----- Mood hooks ----------------------------------------------------- */
 
   /**
