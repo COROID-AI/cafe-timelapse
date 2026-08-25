@@ -8,7 +8,19 @@ import type { EraConfig } from './types';
 export const era2005: EraConfig = {
   year: 2005,
   title: '2005 — stub',
-  furniture: {}, // TODO(era-2005): furniture & décor.
+  // Furniture & décor slice — authored by src/cafe/props/furniture/ task.
+  furniture: {
+    furniture: [
+      { id: 'tbl-combo', label: 'Dark wood & brushed steel combo tables', stylePeriod: 'noughties espresso bar', material: 'espresso veneer, brushed steel', quantity: 6 },
+      { id: 'chr-combo', label: 'Matching wood-and-steel chairs', material: 'espresso wood, steel frame', quantity: 13 },
+      { id: 'sofa-lounge', label: 'Lounge corner sofa', material: 'charcoal weave, steel legs', quantity: 1 },
+    ],
+    decor: [
+      { id: 'dec-frames', label: 'Wall-mounted flat framed prints', placement: 'wall' },
+    ],
+    flooring: 'dark-stained boards with graphite lounge rug',
+    colorPalette: ['#4a4642', '#7d6a55', '#3a3f45', '#9c7b52'],
+  }, // TODO(era-2005): richer furniture & décor notes welcome.
   brewingEquipment: {}, // TODO(era-2005): coffee machines & brewing equipment.
   menuBoard: {}, // TODO(era-2005): menu board items + period prices.
   posters: {}, // TODO(era-2005): wall posters & advertisements.

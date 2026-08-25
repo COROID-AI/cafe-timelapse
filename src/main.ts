@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CafeScene } from './cafe/CafeScene';
 import { NavigationController } from './cafe/NavigationController';
+import { registerFurniturePropGroup } from './cafe/props/furniture';
 import './style.css';
 
 /**
@@ -40,6 +41,9 @@ camera.position.set(7.4, 4.8, 8.8);
 // --- Permanent café shell + lighting rig + prop-group registry --------------
 
 const cafeScene = new CafeScene({ scene, renderer, camera });
+
+// Detail-category prop groups plug in here, one register call per category.
+registerFurniturePropGroup(cafeScene);
 
 // Initial era until further era-content tasks land. Routes the neutral era
 // seam through every registered group; era content tasks plug in here.

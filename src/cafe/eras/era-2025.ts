@@ -9,7 +9,19 @@ import type { EraConfig } from './types';
 export const era2025: EraConfig = {
   year: 2025,
   title: '2025 — stub',
-  furniture: {}, // TODO(era-2025): furniture & décor.
+  // Furniture & décor slice — authored by src/cafe/props/furniture/ task.
+  furniture: {
+    furniture: [
+      { id: 'tbl-light-oak', label: 'Minimalist light-oak tables', stylePeriod: 'contemporary minimal', material: 'oiled FSC oak', quantity: 6 },
+      { id: 'chr-shell', label: 'Ergonomic shell chairs', material: 'moulded recycled shell, oak legs', quantity: 14 },
+    ],
+    decor: [
+      { id: 'dec-hanging-plants', label: 'Hanging plants in macramé slings', placement: 'ceiling', color: '#5c8a4a' },
+      { id: 'dec-charging-spots', label: 'Wireless-charging spots inset in tabletops', placement: 'table surface', color: '#58e0c0' },
+    ],
+    flooring: 'light oak boards with natural-weave rug',
+    colorPalette: ['#9db08b', '#d8b98a', '#efeae2', '#26262a'],
+  }, // TODO(era-2025): richer furniture & décor notes welcome.
   brewingEquipment: {}, // TODO(era-2025): coffee machines & brewing equipment.
   menuBoard: {}, // TODO(era-2025): menu board items + period prices.
   posters: {}, // TODO(era-2025): wall posters & advertisements.
