@@ -14,3 +14,92 @@ body {
   height: 100vh;
   touch-action: none;
 }
+
+/* --- Navigation HUD (NavigationController) --------------------------------- */
+
+.nav-hint {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(92vw, 780px);
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(19, 16, 24, 0.74);
+  color: #ece6da;
+  font: 500 12px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.38);
+  pointer-events: none; /* clicks pass straight through to the canvas */
+  user-select: none;
+  white-space: nowrap;
+  transition: border-color 0.35s ease, background 0.35s ease;
+}
+
+.nav-hint__mode {
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f2c88b;
+  padding-right: 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.nav-hint--fly {
+  border-color: rgba(242, 200, 139, 0.4);
+}
+
+.nav-hint--fly .nav-hint__mode {
+  color: #ffd9a0;
+}
+
+.nav-hint__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-hint kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font: 600 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.04em;
+}
+
+.nav-hint__controls > span {
+  opacity: 0.85;
+  margin-right: 4px;
+}
+
+/* Depth-of-field-style vignette shown while a prop focus is engaged.
+   Opacity is driven per-frame by NavigationController. */
+.focus-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    120% 90% at 50% 50%,
+    transparent 46%,
+    rgba(6, 4, 10, 0.62) 100%
+  );
+  box-shadow: inset 0 0 140px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-hint {
+    transition: none;
+  }
+}

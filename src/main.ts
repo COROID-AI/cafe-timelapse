@@ -1,15 +1,16 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { CafeScene } from './cafe/CafeScene';
+import { NavigationController } from './cafe/NavigationController';
 import './style.css';
 
 /**
  * Application shell for the Café Time Period Timelapse.
  *
- * This module owns only the render foundation: renderer, scene, camera,
- * controls and the render loop. Everything café-specific lives in CafeScene,
- * which builds the permanent room shell, the lighting/mood rig, and hosts the
- * era prop-group registry.
+ * This module owns only the render foundation: renderer, scene, camera and
+ * the render loop. Everything café-specific lives in CafeScene, which builds
+ * the permanent room shell, the lighting/mood rig, and hosts the era
+ * prop-group registry. Camera behaviour (orbit + free-fly inspect) is fully
+ * delegated to the NavigationController.
  */
 
 const canvas = document.getElementById('app') as HTMLCanvasElement;
@@ -36,29 +37,35 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(7.4, 4.8, 8.8);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 1.2, 0);
-controls.enableDamping = true;
-controls.dampingFactor = 0.08;
-controls.maxPolarAngle = Math.PI / 2 - 0.04;
-controls.minDistance = 0.55;
-controls.maxDistance = 26;
-controls.update();
-
 // --- Permanent café shell + lighting rig + prop-group registry --------------
 
 const cafeScene = new CafeScene({ scene, renderer, camera });
 
-// Initial era until the timeline slider task lands. Routes the neutral era
+// Initial era until further era-content tasks land. Routes the neutral era
 // seam through every registered group; era content tasks plug in here.
 cafeScene.applyEra(2025);
 
+// --- Dual navigation: damped orbit + free-fly inspect ------------------------
+
+// Reusable bounds buffer so the per-frame bounds query allocates nothing.
+const shellBounds = new THREE.Box3();
+
+const navigation = new NavigationController({
+  camera,
+  domElement: canvas,
+  scene,
+  getBounds: () => cafeScene.getShellBounds(shellBounds),
+  resolveFocusFrame: (point) => cafeScene.getCloseUpFrame(point),
+});
+
 // --- Render loop & resize ----------------------------------------------------
+
+const clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
 
-  controls.update();
+  navigation.update(clock.getDelta());
   renderer.render(scene, camera);
 }
 
