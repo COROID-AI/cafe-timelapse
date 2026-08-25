@@ -3,6 +3,7 @@ import { CafeScene } from './cafe/CafeScene';
 import { NavigationController } from './cafe/NavigationController';
 import { registerFurniturePropGroup } from './cafe/props/furniture';
 import { EraTransitionController } from './cafe/EraTransitionController';
+import { TimelineSlider } from './ui/TimelineSlider';
 import './style.css';
 
 /**
@@ -58,6 +59,23 @@ cafeScene.applyEra(2025);
  * indicator); the loop below feeds it the shared render-loop clock delta.
  */
 const eraTransitions = new EraTransitionController(cafeScene, { renderer });
+
+// --- Top timeline control bar --------------------------------------------------
+
+/**
+ * Five-stop year selector (1945 · 1965 · 1985 · 2005 · 2025) rendered as a
+ * polished DOM overlay above the canvas. Typed selections drive the animated
+ * morph (`transitionTo` commits `CafeScene.applyEra` halfway through), while
+ * the slider subscribes to the controller's progress events itself to run its
+ * shimmer — main wiring stays one line per direction.
+ */
+const timelineSlider = new TimelineSlider({
+  initialYear: 2025, // matches the initial applyEra(2025) above
+  transitions: eraTransitions,
+});
+timelineSlider.onSelectYear((year) => {
+  eraTransitions.transitionTo(year);
+});
 
 // --- Dual navigation: damped orbit + free-fly inspect ------------------------
 
