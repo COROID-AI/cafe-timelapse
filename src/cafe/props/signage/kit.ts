@@ -11,6 +11,7 @@ import {
   torus,
 } from '../machines/kit/geometries';
 import { blackSteel, brass, glass, glow, metal } from '../machines/kit/materials';
+import { applyTextureQuality } from '../../rendering/textureQuality';
 
 /**
  * Shared part kit for the signage & lighting prop group.
@@ -102,7 +103,7 @@ export function makeSignTexture(options: SignFaceOptions): THREE.CanvasTexture |
 
   const texture = new THREE.CanvasTexture(ctx.canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
+  applyTextureQuality(texture);
   return texture;
 }
 

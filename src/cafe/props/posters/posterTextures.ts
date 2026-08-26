@@ -13,6 +13,7 @@
 
 import * as THREE from 'three';
 import type { PosterSpec } from './types';
+import { applyTextureQuality } from '../../rendering/textureQuality';
 
 /* ------------------------------------------------------------------------- */
 /* Deterministic randomness                                                   */
@@ -1191,7 +1192,7 @@ export function createPosterTexture(spec: PosterSpec): PaintedPoster | null {
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
+  applyTextureQuality(texture);
   texture.name = `poster-tex-${spec.id}`;
 
   return {

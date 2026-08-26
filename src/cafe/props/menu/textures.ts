@@ -15,6 +15,7 @@
 import * as THREE from 'three';
 import type { MenuEraPreset } from './presets';
 import type { RenderedMenuRow } from './types';
+import { applyTextureQuality } from '../../rendering/textureQuality';
 
 /* ------------------------------------------------------------------------- */
 /* Surface plumbing                                                          */
@@ -74,7 +75,7 @@ function createSurface(pxWidth: number, pxHeight: number): PaintSurface {
 function toTexture(surface: PaintSurface): THREE.CanvasTexture {
   const texture = new THREE.CanvasTexture(surface.canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
+  applyTextureQuality(texture);
   texture.needsUpdate = true;
   return texture;
 }

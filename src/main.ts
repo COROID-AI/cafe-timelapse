@@ -4,11 +4,12 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 
-import { CafeScene } from './cafe/CafeScene';
+import { CafeScene, SUN_SHADOW_MAP_SIZE } from './cafe/CafeScene';
 import { EraTransitionController } from './cafe/EraTransitionController';
 import { NavigationController } from './cafe/NavigationController';
 import type { EraConfig, EraLightingMood, EraYear } from './cafe/types';
 import { getEra as getShellEra } from './cafe/eras/getEra';
+import { configureTextureQuality } from './cafe/rendering/textureQuality';
 
 // All eight detail categories — one register call per category, no internals.
 import { registerFurniturePropGroup } from './cafe/props/furniture';
@@ -137,11 +138,36 @@ function resolveEra(year: EraYear): EraConfig {
 
 const canvas = document.getElementById('app') as HTMLCanvasElement;
 
+/**
+ * Transition render governor.
+ *
+ * Mid-morph the scene draws nearly twice its steady-state content (outgoing
+ * and incoming prop sets briefly coexist), which is exactly when the frame
+ * budget is tightest. While any morph plays we drop the drawing buffer to
+ * ~1 device pixel (no visible cost — the room is dissolving) and halve the
+ * sun's shadow map, then snap both back the moment the morph lands. This is
+ * what keeps transitions comfortably above ~20fps even on integrated GPUs.
+ */
+const BASE_PIXEL_RATIO_CAP = 2;
+const MORPH_PIXEL_RATIO_CAP = 1;
+/** Shadow-map texels/side while a morph plays (restored to 2048 afterwards). */
+const MORPH_SHADOW_MAP_SIZE = 1024;
+let morphRenderScaleActive = false;
+
+function targetPixelRatio(): number {
+  const capped = Math.min(window.devicePixelRatio || 1, BASE_PIXEL_RATIO_CAP);
+  return morphRenderScaleActive ? Math.min(capped, MORPH_PIXEL_RATIO_CAP) : capped;
+}
+
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true,
+  // The app owns the whole viewport; request the discrete GPU where dual-GPU
+  // systems would otherwise default to the integrated one.
+  powerPreference: 'high-performance',
 });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+configureTextureQuality(renderer);
+renderer.setPixelRatio(targetPixelRatio());
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 // r185 renamed the soft-kernel filter to PCFShadowMap; the legacy PCFSoft
@@ -194,15 +220,21 @@ function renderFrame(deltaTime: number): void {
   else renderer.render(scene, camera);
 }
 
+/** Re-applies the current pixel-ratio target to renderer + composer. */
+function applyRenderScale(): void {
+  const ratio = targetPixelRatio();
+  renderer.setPixelRatio(ratio);
+  if (composer) {
+    composer.setPixelRatio(ratio);
+    composer.setSize(window.innerWidth, window.innerHeight);
+  }
+}
+
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  if (composer) {
-    composer.setPixelRatio(renderer.getPixelRatio());
-    composer.setSize(window.innerWidth, window.innerHeight);
-  }
+  applyRenderScale();
 });
 
 /* ------------------------------------------------------------------------- */
@@ -397,6 +429,22 @@ async function main(): Promise<void> {
   });
   timelineSlider.onSelectYear((year) => {
     eraTransitions.transitionTo(year);
+  });
+
+  // Mid-morph relief valve (see "Transition render governor"): while any
+  // morph plays, drop drawing-buffer scale + shadow resolution; restore both
+  // exactly when the morph lands so steady-state fidelity is untouched.
+  eraTransitions.onProgress((event) => {
+    if (morphRenderScaleActive || event.progress >= 1) return;
+    morphRenderScaleActive = true;
+    cafeScene.setSunShadowMapSize(MORPH_SHADOW_MAP_SIZE);
+    applyRenderScale();
+  });
+  eraTransitions.onComplete(() => {
+    if (!morphRenderScaleActive) return;
+    morphRenderScaleActive = false;
+    cafeScene.setSunShadowMapSize(SUN_SHADOW_MAP_SIZE);
+    applyRenderScale();
   });
 
   loading.setProgress(1, 'Opening the doors');

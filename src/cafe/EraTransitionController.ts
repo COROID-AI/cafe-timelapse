@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { PROP_GROUP_KEYS } from './types';
 import type { CafeScene } from './CafeScene';
-import type { EraConfig, EraYear, PropGroupKey } from './types';
+import type { EraConfig, EraLightingMood, EraYear, PropGroupKey } from './types';
 
 /**
  * EraTransitionController — animates the swap between two {@link EraConfig}s.
@@ -597,6 +597,19 @@ export class EraTransitionController {
     state.materials.length = 0;
     state.meshes.length = 0;
 
+    /**
+     * One record per UNIQUE material instance per engagement.
+     *
+     * Prop kits deliberately share one material across many meshes, so a
+     * per-reference capture would mint duplicate records whose baselines
+     * race the fade-forcing below: the first reference records the authored
+     * `depthWrite`, every later duplicate records the already-forced `false`
+     * as its "baseline" — permanently poisoning restoration for that shared
+     * material (the sticky-prior mechanism then preserves the poisoned
+     * record across all future morphs).
+     */
+    const captured = new Set<THREE.Material>();
+
     group.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
       if (!mesh.isMesh) return;
@@ -611,10 +624,10 @@ export class EraTransitionController {
       const material = mesh.material;
       if (Array.isArray(material)) {
         for (let i = 0; i < material.length; i++) {
-          this.pushMaterialRecord(state, priorMaterials, material[i]);
+          this.pushMaterialRecord(state, priorMaterials, captured, material[i]);
         }
       } else {
-        this.pushMaterialRecord(state, priorMaterials, material);
+        this.pushMaterialRecord(state, priorMaterials, captured, material);
       }
     });
 
@@ -624,18 +637,21 @@ export class EraTransitionController {
   private pushMaterialRecord(
     state: GroupVisualState,
     prior: Map<THREE.Material, MaterialRecord>,
+    captured: Set<THREE.Material>,
     material: THREE.Material,
   ): void {
     const existing = prior.get(material);
-    if (existing && !state.materials.includes(existing)) {
+    if (existing && !captured.has(existing.material)) {
       state.materials.push(existing);
-    } else if (!existing) {
+      captured.add(existing.material);
+    } else if (!existing && !captured.has(material)) {
       state.materials.push({
         material,
         baseOpacity: material.opacity,
         baseTransparent: material.transparent,
         baseDepthWrite: material.depthWrite,
       });
+      captured.add(material);
     }
     // Fade environment: asserted for both fresh and surviving records (an era
     // updater may have restored the flags on persistent materials).
@@ -648,6 +664,13 @@ export class EraTransitionController {
     const target = this.activeToYear;
     if (target === null) return;
     this.cafeScene.applyEra(target);
+    // Prop-group updaters are CO-AUTHORS of the lighting rig (signage writes
+    // the scene lights directly per era). For every mood channel the era
+    // database leaves undefined, the just-routed updaters produced the era's
+    // true destination — reseed it here, or the mood lerp below would keep
+    // dragging those channels back to the departure-era values and the morph
+    // would visibly end in the old room's lighting ("popping lights").
+    this.reseedUndefinedMoodTargets(this.cafeScene.currentEra?.lighting);
 
     for (let i = 0; i < this.activePlans.length; i++) {
       const plan = this.activePlans[i];
@@ -663,6 +686,48 @@ export class EraTransitionController {
       plan.state.scaleFactor = MIN_SCALE_FACTOR;
       plan.opacityStart = 0;
       plan.scaleStart = MIN_SCALE_FACTOR;
+    }
+  }
+
+  /**
+   * Copies the live post-commit rig values into the interpolation targets
+   * for every channel `mood` does not explicitly define. Defined channels
+   * are left alone: `applyEra` already snapped them to the authored mood and
+   * the ongoing lerp agrees with that destination.
+   */
+  private reseedUndefinedMoodTargets(mood: EraLightingMood | undefined): void {
+    const to = this.toMood;
+    const live = this.cafeScene;
+
+    if (!mood || mood.ambientColor === undefined || mood.ambientIntensity === undefined) {
+      to.ambient.copy(live.ambientLight.color);
+      to.ambientIntensity = live.ambientLight.intensity;
+    }
+
+    if (
+      !mood ||
+      mood.hemisphereSkyColor === undefined ||
+      mood.hemisphereGroundColor === undefined ||
+      mood.hemisphereIntensity === undefined
+    ) {
+      to.hemisphereSky.copy(live.hemisphereLight.color);
+      to.hemisphereGround.copy(live.hemisphereLight.groundColor);
+      to.hemisphereIntensity = live.hemisphereLight.intensity;
+    }
+
+    if (!mood || mood.sunColor === undefined || mood.sunIntensity === undefined) {
+      to.sun.copy(live.sunLight.color);
+      to.sunIntensity = live.sunLight.intensity;
+    }
+
+    if (this.hasAccentLights && (!mood || mood.accentColor === undefined || mood.accentIntensity === undefined)) {
+      to.accent.copy(live.accentLights[0].color);
+      to.accentIntensity = live.accentLights[0].intensity;
+    }
+
+    if (this.fogRef && (!mood || mood.fogColor === undefined || mood.fogDensity === undefined)) {
+      to.fog.copy(this.fogRef.color);
+      to.fogDensity = this.fogRef.density;
     }
   }
 
@@ -700,7 +765,9 @@ export class EraTransitionController {
     this.committed = true;
     this.elapsed = 0;
 
-    // Pin the final mood exactly (kills residual float drift).
+    // Pin the final mood exactly (kills residual float drift). Undefined
+    // mood channels were reseeded from the updaters' own writes at commit,
+    // so this pin lands on the era's real destination, never the departure.
     this.writeInterpolatedMood(1);
     this.emitProgress(1);
 
